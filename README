@@ -1,0 +1,4 @@
+GXUI - A Go cross platform UI library.
+
+All code in this package is experimental and _will_ have frequent breaking
+changes.
