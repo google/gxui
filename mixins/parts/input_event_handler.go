@@ -5,7 +5,7 @@
 package parts
 
 import (
-	"gaze/gxui"
+	"gxui"
 )
 
 type InputEventHandlerOuter interface{}

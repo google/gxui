@@ -5,7 +5,7 @@
 package outer
 
 import (
-	"gaze/gxui"
+	"gxui"
 )
 
 type Draw interface {

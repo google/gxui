@@ -7,10 +7,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gaze/gxui"
-	"gaze/gxui/drivers/gl"
-	"gaze/gxui/math"
-	"gaze/gxui/themes/dark"
+	"gxui"
+	"gxui/drivers/gl"
+	"gxui/math"
+	"gxui/themes/dark"
 )
 
 var data = flag.String("data", "data", "path to data")

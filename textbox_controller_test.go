@@ -4,10 +4,10 @@
 
 package gxui
 
-import test "gaze/gxui/testing"
+import test "gxui/testing"
 import (
 	"fmt"
-	"gaze/gxui/assert"
+	"gxui/assert"
 	"testing"
 )
 

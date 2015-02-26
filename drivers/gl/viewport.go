@@ -6,10 +6,10 @@ package gl
 
 import (
 	"fmt"
-	"gaze/gxui"
-	"gaze/gxui/assert"
-	"gaze/gxui/drivers/gl/platform"
-	"gaze/gxui/math"
+	"gxui"
+	"gxui/assert"
+	"gxui/drivers/gl/platform"
+	"gxui/math"
 	"sync"
 	"unicode"
 

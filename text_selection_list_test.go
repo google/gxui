@@ -4,9 +4,9 @@
 
 package gxui
 
-import test "gaze/gxui/testing"
+import test "gxui/testing"
 import (
-	"gaze/gxui/interval"
+	"gxui/interval"
 	"testing"
 )
 

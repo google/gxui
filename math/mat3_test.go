@@ -4,7 +4,7 @@
 
 package math
 
-import test "gaze/gxui/testing"
+import test "gxui/testing"
 import "testing"
 
 func TestMat3InvertIdent(t *testing.T) {

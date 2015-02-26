@@ -5,8 +5,8 @@
 package dark
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/mixins"
+	"gxui"
+	"gxui/mixins"
 )
 
 func CreateImage(theme *Theme) gxui.Image {

@@ -5,9 +5,9 @@
 package dark
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/math"
-	"gaze/gxui/mixins"
+	"gxui"
+	"gxui/math"
+	"gxui/mixins"
 )
 
 type CodeEditor struct {

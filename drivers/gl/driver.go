@@ -6,8 +6,8 @@ package gl
 
 import (
 	"container/list"
-	"gaze/gxui"
-	"gaze/gxui/math"
+	"gxui"
+	"gxui/math"
 	"image"
 	"io/ioutil"
 	"path/filepath"

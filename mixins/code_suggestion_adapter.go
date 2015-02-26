@@ -5,7 +5,7 @@
 package mixins
 
 import (
-	"gaze/gxui"
+	"gxui"
 )
 
 type SuggestionAdapter struct {

@@ -5,7 +5,7 @@
 package interval
 
 import (
-	test "gaze/gxui/testing"
+	test "gxui/testing"
 	"math/rand"
 )
 import "testing"

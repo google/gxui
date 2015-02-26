@@ -6,8 +6,8 @@ package mixins
 
 import (
 	"fmt"
-	"gaze/gxui"
-	"gaze/gxui/assert"
+	"gxui"
+	"gxui/assert"
 )
 
 type TreeInternalNode struct {

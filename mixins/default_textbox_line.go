@@ -5,10 +5,10 @@
 package mixins
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/interval"
-	"gaze/gxui/math"
-	"gaze/gxui/mixins/base"
+	"gxui"
+	"gxui/interval"
+	"gxui/math"
+	"gxui/mixins/base"
 )
 
 type DefaultTextBoxLineOuter interface {

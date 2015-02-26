@@ -5,8 +5,8 @@
 package gxui
 
 import (
-	"gaze/gxui/interval"
-	"gaze/gxui/math"
+	"gxui/interval"
+	"gxui/math"
 	"sort"
 	"strings"
 	"unicode"

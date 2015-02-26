@@ -5,7 +5,7 @@
 package gl
 
 import (
-	"gaze/gxui/math"
+	"gxui/math"
 
 	"code.google.com/p/freetype-go/freetype/truetype"
 )

@@ -4,7 +4,7 @@
 
 package gxui
 
-import "gaze/gxui/math"
+import "gxui/math"
 
 type Parent interface {
 	Children() []Control

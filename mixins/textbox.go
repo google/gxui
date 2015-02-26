@@ -5,9 +5,9 @@
 package mixins
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/math"
-	"gaze/gxui/mixins/parts"
+	"gxui"
+	"gxui/math"
+	"gxui/mixins/parts"
 	"strings"
 )
 

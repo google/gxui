@@ -5,8 +5,8 @@
 package parts
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/mixins/outer"
+	"gxui"
+	"gxui/mixins/outer"
 )
 
 type PaintChildrenOuter interface {

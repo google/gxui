@@ -5,9 +5,9 @@
 package base
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/mixins/outer"
-	"gaze/gxui/mixins/parts"
+	"gxui"
+	"gxui/mixins/outer"
+	"gxui/mixins/parts"
 )
 
 type ContainerNoControlOuter interface {

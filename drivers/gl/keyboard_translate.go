@@ -5,8 +5,8 @@
 package gl
 
 import (
-	"gaze/gxui"
 	"github.com/go-gl/glfw3"
+	"gxui"
 )
 
 func translateKeyboardKey(in glfw3.Key) gxui.KeyboardKey {

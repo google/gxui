@@ -6,7 +6,7 @@ package gl
 
 import (
 	"fmt"
-	"gaze/gxui/assert"
+	"gxui/assert"
 	"runtime"
 	"strings"
 	"sync/atomic"

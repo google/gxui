@@ -5,7 +5,7 @@
 package parts
 
 import (
-	"gaze/gxui/mixins/outer"
+	"gxui/mixins/outer"
 )
 
 type VisibleOuter interface {

@@ -5,7 +5,7 @@
 package gl
 
 import (
-	"gaze/gxui/math"
+	"gxui/math"
 )
 
 // 16:16 fixed point ratio of DIPs to pixels

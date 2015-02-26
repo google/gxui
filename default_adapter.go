@@ -6,7 +6,7 @@ package gxui
 
 import (
 	"fmt"
-	"gaze/gxui/math"
+	"gxui/math"
 	"reflect"
 )
 

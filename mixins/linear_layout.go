@@ -5,9 +5,9 @@
 package mixins
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/mixins/base"
-	"gaze/gxui/mixins/parts"
+	"gxui"
+	"gxui/mixins/base"
+	"gxui/mixins/parts"
 )
 
 type LinearLayoutOuter interface {

@@ -5,8 +5,8 @@
 package gl
 
 import (
-	"gaze/gxui/math"
 	"github.com/go-gl/gl"
+	"gxui/math"
 	"sync"
 )
 

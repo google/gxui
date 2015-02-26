@@ -5,11 +5,11 @@
 package mixins
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/assert"
-	"gaze/gxui/math"
-	"gaze/gxui/mixins/base"
-	"gaze/gxui/mixins/parts"
+	"gxui"
+	"gxui/assert"
+	"gxui/math"
+	"gxui/mixins/base"
+	"gxui/mixins/parts"
 )
 
 type ListOuter interface {

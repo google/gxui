@@ -5,8 +5,8 @@
 package parts
 
 import (
-	"gaze/gxui/math"
-	"gaze/gxui/mixins/outer"
+	"gxui/math"
+	"gxui/mixins/outer"
 )
 
 type PaddableOuter interface {

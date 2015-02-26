@@ -6,8 +6,8 @@ package gxui
 
 import (
 	"bytes"
-	"gaze/gxui/assert"
-	"gaze/gxui/math"
+	"gxui/assert"
+	"gxui/math"
 	"unicode/utf8"
 )
 

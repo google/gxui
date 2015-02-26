@@ -5,9 +5,9 @@
 package parts
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/assert"
-	"gaze/gxui/mixins/outer"
+	"gxui"
+	"gxui/assert"
+	"gxui/mixins/outer"
 	"runtime"
 )
 

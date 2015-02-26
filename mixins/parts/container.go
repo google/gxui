@@ -5,10 +5,10 @@
 package parts
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/assert"
-	"gaze/gxui/math"
-	"gaze/gxui/mixins/outer"
+	"gxui"
+	"gxui/assert"
+	"gxui/math"
+	"gxui/mixins/outer"
 )
 
 type ContainerOuter interface {

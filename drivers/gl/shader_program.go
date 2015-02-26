@@ -5,7 +5,7 @@
 package gl
 
 import (
-	"gaze/gxui/assert"
+	"gxui/assert"
 
 	"github.com/go-gl/gl"
 )

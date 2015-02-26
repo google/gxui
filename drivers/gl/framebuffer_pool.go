@@ -7,7 +7,7 @@ package gl
 import (
 	"container/list"
 	"fmt"
-	"gaze/gxui/math"
+	"gxui/math"
 
 	"github.com/go-gl/gl"
 )

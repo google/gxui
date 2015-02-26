@@ -5,7 +5,7 @@
 package gxui
 
 import (
-	"gaze/gxui/math"
+	"gxui/math"
 )
 
 type TextBox interface {

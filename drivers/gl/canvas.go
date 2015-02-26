@@ -5,9 +5,9 @@
 package gl
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/assert"
-	"gaze/gxui/math"
+	"gxui"
+	"gxui/assert"
+	"gxui/math"
 
 	"github.com/go-gl/gl"
 )

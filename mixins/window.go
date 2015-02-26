@@ -5,10 +5,10 @@
 package mixins
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/math"
-	"gaze/gxui/mixins/outer"
-	"gaze/gxui/mixins/parts"
+	"gxui"
+	"gxui/math"
+	"gxui/mixins/outer"
+	"gxui/mixins/parts"
 )
 
 type WindowOuter interface {

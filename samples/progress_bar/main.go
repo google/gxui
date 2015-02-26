@@ -6,10 +6,10 @@ package main
 
 import (
 	"flag"
-	"gaze/gxui"
-	"gaze/gxui/drivers/gl"
-	"gaze/gxui/math"
-	"gaze/gxui/themes/dark"
+	"gxui"
+	"gxui/drivers/gl"
+	"gxui/math"
+	"gxui/themes/dark"
 	"time"
 )
 

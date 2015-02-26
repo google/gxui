@@ -4,7 +4,7 @@
 
 package gxui
 
-import test "gaze/gxui/testing"
+import test "gxui/testing"
 import "testing"
 
 func TestEventNoArgs(t *testing.T) {

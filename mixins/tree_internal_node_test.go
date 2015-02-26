@@ -4,10 +4,10 @@
 
 package mixins
 
-import test "gaze/gxui/testing"
+import test "gxui/testing"
 import (
-	"gaze/gxui"
-	"gaze/gxui/math"
+	"gxui"
+	"gxui/math"
 	"testing"
 )
 

@@ -5,9 +5,9 @@
 package parts
 
 import (
-	"gaze/gxui/assert"
-	"gaze/gxui/math"
-	"gaze/gxui/mixins/outer"
+	"gxui/assert"
+	"gxui/math"
+	"gxui/mixins/outer"
 )
 
 type LayoutableOuter interface {

@@ -4,7 +4,7 @@
 
 package interval
 
-import test "gaze/gxui/testing"
+import test "gxui/testing"
 
 import "testing"
 

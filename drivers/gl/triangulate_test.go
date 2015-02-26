@@ -4,9 +4,9 @@
 
 package gl
 
-import test "gaze/gxui/testing"
+import test "gxui/testing"
 import (
-	"gaze/gxui/math"
+	"gxui/math"
 	"testing"
 )
 

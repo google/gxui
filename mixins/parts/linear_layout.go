@@ -5,9 +5,9 @@
 package parts
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/math"
-	"gaze/gxui/mixins/outer"
+	"gxui"
+	"gxui/math"
+	"gxui/mixins/outer"
 )
 
 type LinearLayoutOuter interface {

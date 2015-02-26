@@ -6,9 +6,9 @@ package mixins
 
 import (
 	"fmt"
-	"gaze/gxui"
-	"gaze/gxui/interval"
-	"gaze/gxui/math"
+	"gxui"
+	"gxui/interval"
+	"gxui/math"
 	"strings"
 )
 

@@ -4,7 +4,7 @@
 
 package gxui
 
-import "gaze/gxui/interval"
+import "gxui/interval"
 
 type CodeSuggestion interface {
 	Name() string

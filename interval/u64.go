@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"gaze/gxui/assert"
+	"gxui/assert"
 	"strings"
 )
 

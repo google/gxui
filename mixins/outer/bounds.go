@@ -5,7 +5,7 @@
 package outer
 
 import (
-	"gaze/gxui/math"
+	"gxui/math"
 )
 
 type Bounds interface {

@@ -5,8 +5,8 @@
 package dark
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/mixins"
+	"gxui"
+	"gxui/mixins"
 )
 
 type Window struct {

@@ -5,9 +5,9 @@
 package mixins
 
 import (
-	"gaze/gxui"
-	"gaze/gxui/math"
-	"gaze/gxui/mixins/base"
+	"gxui"
+	"gxui/math"
+	"gxui/mixins/base"
 )
 
 type ScrollBarOuter interface {

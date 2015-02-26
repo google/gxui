@@ -5,7 +5,7 @@
 package dark
 
 import (
-	"gaze/gxui"
+	"gxui"
 )
 
 type Theme struct {

@@ -5,7 +5,7 @@
 package gl
 
 import (
-	"gaze/gxui/assert"
+	"gxui/assert"
 )
 
 type VertexBuffer struct {

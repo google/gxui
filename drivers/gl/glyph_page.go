@@ -5,7 +5,7 @@
 package gl
 
 import (
-	"gaze/gxui/math"
+	"gxui/math"
 	"image"
 	"image/png"
 	"os"
