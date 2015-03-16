@@ -109,6 +109,10 @@ func (t *TextBox) OnTextChanged(f func([]gxui.TextBoxEdit)) gxui.EventSubscripti
 	return t.controller.OnTextChanged(f)
 }
 
+func (t *TextBox) Runes() []rune {
+	return t.controller.TextRunes()
+}
+
 func (t *TextBox) Text() string {
 	return t.controller.Text()
 }

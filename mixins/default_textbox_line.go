@@ -107,7 +107,7 @@ func (t *DefaultTextBoxLine) PaintSelections(c gxui.Canvas) {
 		if s < e {
 			x := t.outer.MeasureRunes(ls, int(s)).W
 			m := t.outer.MeasureRunes(int(s), int(e))
-			top := math.Point{X: x, Y: 0}
+			top := math.Point{X: t.caretWidth + x, Y: 0}
 			bottom := top.Add(m.Point())
 			t.outer.PaintSelection(c, top, bottom)
 		}
@@ -129,13 +129,13 @@ func (t *DefaultTextBoxLine) RuneIndexAt(p math.Point) int {
 	font := t.textbox.font
 	controller := t.textbox.controller
 
-	w := p.X
+	x := p.X
 	line := controller.Line(t.lineIndex)
-	x := 0
-	for ; x < len(line) && w > font.Measure(line[:x+1]).W; x++ {
+	i := 0
+	for ; i < len(line) && x > font.Measure(line[:i+1]).W; i++ {
 	}
 
-	return controller.LineStart(t.lineIndex) + x
+	return controller.LineStart(t.lineIndex) + i
 }
 
 func (t *DefaultTextBoxLine) PositionAt(runeIndex int) math.Point {

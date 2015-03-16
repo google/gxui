@@ -14,6 +14,7 @@ type TextBox interface {
 	OnTextChanged(func([]TextBoxEdit)) EventSubscription
 	Padding() math.Spacing
 	SetPadding(math.Spacing)
+	Runes() []rune
 	Text() string
 	SetText(string)
 	Font() Font

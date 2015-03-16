@@ -101,7 +101,7 @@ func (t *CodeEditorLine) PaintBorders(c gxui.Canvas, info CodeEditorLinePaintInf
 // DefaultTextBoxLine overrides
 func (t *CodeEditorLine) Paint(c gxui.Canvas) {
 	font := t.ce.font
-	rect := t.Bounds().Size().Rect()
+	rect := t.Bounds().Size().Rect().OffsetX(t.caretWidth)
 	controller := t.ce.controller
 	runes := controller.LineRunes(t.lineIndex)
 	start := controller.LineStart(t.lineIndex)

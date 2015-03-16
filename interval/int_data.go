@@ -31,6 +31,10 @@ func (t IntData) Span() (start, end uint64) {
 	return uint64(t.start), uint64(t.end)
 }
 
+func (t IntData) Contains(v int) bool {
+	return v >= t.start && v < t.end
+}
+
 func (l IntDataList) Len() int {
 	return len(l)
 }
