@@ -6,8 +6,8 @@ package gxui
 
 import (
 	"bytes"
-	"gxui/assert"
-	"gxui/math"
+	"github.com/google/gxui/assert"
+	"github.com/google/gxui/math"
 	"unicode/utf8"
 )
 

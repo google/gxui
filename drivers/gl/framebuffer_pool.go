@@ -7,9 +7,9 @@ package gl
 import (
 	"container/list"
 	"fmt"
-	"gxui/math"
+	"github.com/google/gxui/math"
 
-	"github.com/go-gl/gl"
+	"github.com/go-gl-legacy/gl"
 )
 
 type Framebuffer struct {

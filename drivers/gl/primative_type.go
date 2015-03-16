@@ -6,8 +6,9 @@ package gl
 
 import (
 	"fmt"
-	"github.com/go-gl/gl"
 	"reflect"
+
+	"github.com/go-gl-legacy/gl"
 )
 
 type PrimitiveType int

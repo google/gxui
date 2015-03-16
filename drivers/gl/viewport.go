@@ -6,15 +6,15 @@ package gl
 
 import (
 	"fmt"
-	"gxui"
-	"gxui/assert"
-	"gxui/drivers/gl/platform"
-	"gxui/math"
 	"sync"
 	"unicode"
 
-	"github.com/go-gl/gl"
-	"github.com/go-gl/glfw3"
+	"github.com/go-gl-legacy/gl"
+	"github.com/go-gl/glfw/v3.1/glfw"
+	"github.com/google/gxui"
+	"github.com/google/gxui/assert"
+	"github.com/google/gxui/drivers/gl/platform"
+	"github.com/google/gxui/math"
 )
 
 const kClearColorR = 0.5
@@ -26,7 +26,7 @@ type Viewport struct {
 
 	driver                  *Driver
 	context                 *Context
-	window                  *glfw3.Window
+	window                  *glfw.Window
 	canvas                  *Canvas
 	sizeDips, sizePixels    math.Size
 	title                   string
@@ -58,9 +58,9 @@ type Viewport struct {
 func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 	v := &Viewport{}
 
-	glfw3.DefaultWindowHints()
-	glfw3.WindowHint(glfw3.Samples, 4)
-	wnd, err := glfw3.CreateWindow(width, height, title, nil, nil)
+	glfw.DefaultWindowHints()
+	glfw.WindowHint(glfw.Samples, 4)
+	wnd, err := glfw.CreateWindow(width, height, title, nil, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -76,17 +76,17 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 		y -= 3.0
 		return math.Point{X: int(x), Y: int(y)}
 	}
-	wnd.SetCloseCallback(func(*glfw3.Window) {
+	wnd.SetCloseCallback(func(*glfw.Window) {
 		v.onClose.Fire()
 		v.Close()
 	})
-	wnd.SetSizeCallback(func(_ *glfw3.Window, w, h int) {
+	wnd.SetSizeCallback(func(_ *glfw.Window, w, h int) {
 		v.Lock()
 		v.sizeDips = math.Size{W: w, H: h}
 		v.Unlock()
 		v.onResize.Fire()
 	})
-	wnd.SetFramebufferSizeCallback(func(_ *glfw3.Window, w, h int) {
+	wnd.SetFramebufferSizeCallback(func(_ *glfw.Window, w, h int) {
 		v.Lock()
 		v.sizePixels = math.Size{W: w, H: h}
 		v.Unlock()
@@ -94,7 +94,7 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 		gl.ClearColor(kClearColorR, kClearColorG, kClearColorB, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 	})
-	wnd.SetCursorPosCallback(func(w *glfw3.Window, x, y float64) {
+	wnd.SetCursorPosCallback(func(w *glfw.Window, x, y float64) {
 		p := cursorPoint(w.GetCursorPos())
 		v.Lock()
 		if v.pendingMouseMoveEvent == nil {
@@ -109,7 +109,7 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 		v.pendingMouseMoveEvent.Point = p
 		v.Unlock()
 	})
-	wnd.SetCursorEnterCallback(func(w *glfw3.Window, entered bool) {
+	wnd.SetCursorEnterCallback(func(w *glfw.Window, entered bool) {
 		p := cursorPoint(w.GetCursorPos())
 		ev := gxui.MouseEvent{
 			Point: p,
@@ -120,7 +120,7 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 			v.onMouseExit.Fire(ev)
 		}
 	})
-	wnd.SetScrollCallback(func(w *glfw3.Window, xoff, yoff float64) {
+	wnd.SetScrollCallback(func(w *glfw.Window, xoff, yoff float64) {
 		p := cursorPoint(w.GetCursorPos())
 		v.Lock()
 		if v.pendingMouseScrollEvent == nil {
@@ -144,41 +144,41 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 		v.scrollAccumY += yoff * platform.ScrollSpeed
 		v.Unlock()
 	})
-	wnd.SetMouseButtonCallback(func(w *glfw3.Window, button glfw3.MouseButton, action glfw3.Action, mod glfw3.ModifierKey) {
+	wnd.SetMouseButtonCallback(func(w *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
 		p := cursorPoint(w.GetCursorPos())
 		ev := gxui.MouseEvent{
 			Point:    p,
 			Modifier: translateKeyboardModifier(mod),
 		}
 		switch button {
-		case glfw3.MouseButtonLeft:
+		case glfw.MouseButtonLeft:
 			ev.Button = gxui.MouseButtonLeft
-		case glfw3.MouseButtonMiddle:
+		case glfw.MouseButtonMiddle:
 			ev.Button = gxui.MouseButtonMiddle
-		case glfw3.MouseButtonRight:
+		case glfw.MouseButtonRight:
 			ev.Button = gxui.MouseButtonRight
 		}
-		if action == glfw3.Press {
+		if action == glfw.Press {
 			v.onMouseDown.Fire(ev)
 		} else {
 			v.onMouseUp.Fire(ev)
 		}
 	})
-	wnd.SetKeyCallback(func(w *glfw3.Window, key glfw3.Key, scancode int, action glfw3.Action, mods glfw3.ModifierKey) {
+	wnd.SetKeyCallback(func(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 		ev := gxui.KeyboardEvent{
 			Key:      translateKeyboardKey(key),
 			Modifier: translateKeyboardModifier(mods),
 		}
 		switch action {
-		case glfw3.Press:
+		case glfw.Press:
 			v.onKeyDown.Fire(ev)
-		case glfw3.Release:
+		case glfw.Release:
 			v.onKeyUp.Fire(ev)
-		case glfw3.Repeat:
+		case glfw.Repeat:
 			v.onKeyRepeat.Fire(ev)
 		}
 	})
-	wnd.SetCharModsCallback(func(w *glfw3.Window, char rune, mods glfw3.ModifierKey) {
+	wnd.SetCharModsCallback(func(w *glfw.Window, char rune, mods glfw.ModifierKey) {
 		if !unicode.IsControl(char) &&
 			!unicode.IsGraphic(char) &&
 			!unicode.IsLetter(char) &&
@@ -196,7 +196,7 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 		}
 		v.onKeyStroke.Fire(ev)
 	})
-	wnd.SetRefreshCallback(func(w *glfw3.Window) {
+	wnd.SetRefreshCallback(func(w *glfw.Window) {
 		if v.canvas != nil {
 			v.render()
 		}
@@ -269,7 +269,7 @@ func (v *Viewport) render() {
 		if ctx.Stats().FrameCount%60 == 0 {
 			print(ctx.Stats().String() + "\n")
 		}
-		glfw3.PollEvents()
+		glfw.PollEvents()
 		v.driver.flush()
 		v.driver.asyncDriver(v.render)
 	}

@@ -5,7 +5,7 @@
 package interval
 
 import (
-	test "gxui/testing"
+	test "github.com/google/gxui/testing"
 	"math/rand"
 )
 import "testing"

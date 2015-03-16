@@ -6,7 +6,7 @@ package gxui
 
 import (
 	"fmt"
-	"gxui/math"
+	"github.com/google/gxui/math"
 	"reflect"
 )
 

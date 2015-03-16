@@ -6,10 +6,10 @@ package gl
 
 import (
 	"fmt"
-	"gxui/assert"
+	"github.com/google/gxui/assert"
 	"reflect"
 
-	"github.com/go-gl/gl"
+	"github.com/go-gl-legacy/gl"
 )
 
 type IndexBuffer struct {

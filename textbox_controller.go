@@ -5,8 +5,8 @@
 package gxui
 
 import (
-	"gxui/interval"
-	"gxui/math"
+	"github.com/google/gxui/interval"
+	"github.com/google/gxui/math"
 	"sort"
 	"strings"
 	"unicode"

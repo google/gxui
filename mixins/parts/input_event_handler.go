@@ -5,7 +5,7 @@
 package parts
 
 import (
-	"gxui"
+	"github.com/google/gxui"
 )
 
 type InputEventHandlerOuter interface{}

@@ -4,7 +4,7 @@
 
 package interval
 
-import test "gxui/testing"
+import test "github.com/google/gxui/testing"
 
 import "testing"
 

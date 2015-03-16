@@ -6,14 +6,14 @@ package gl
 
 import (
 	"container/list"
-	"gxui"
-	"gxui/math"
 	"image"
 	"io/ioutil"
 	"path/filepath"
 	"runtime"
 
-	"github.com/go-gl/glfw3"
+	"github.com/go-gl/glfw/v3.1/glfw"
+	"github.com/google/gxui"
+	"github.com/google/gxui/math"
 )
 
 func init() {
@@ -35,10 +35,10 @@ func StartDriver(dataPath string, appThread AppThread) {
 		runtime.GOMAXPROCS(2)
 	}
 
-	if err := glfw3.Init(); err != nil {
+	if err := glfw.Init(); err != nil {
 		panic(err)
 	}
-	defer glfw3.Terminate()
+	defer glfw.Terminate()
 
 	driver := &Driver{
 		pendingDriver: make(chan func(), 256),
@@ -90,13 +90,13 @@ func (d *Driver) run() {
 				return // closed channel represents driver shutdown
 			}
 		default:
-			glfw3.WaitEvents()
+			glfw.WaitEvents()
 		}
 	}
 }
 
 func (d *Driver) wake() {
-	glfw3.PostEmptyEvent()
+	glfw.PostEmptyEvent()
 }
 
 func (d *Driver) EnableDebug(enabled bool) {

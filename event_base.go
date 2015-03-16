@@ -6,7 +6,7 @@ package gxui
 
 import (
 	"fmt"
-	"gxui/assert"
+	"github.com/google/gxui/assert"
 	"reflect"
 )
 

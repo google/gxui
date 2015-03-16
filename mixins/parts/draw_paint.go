@@ -5,9 +5,9 @@
 package parts
 
 import (
-	"gxui"
-	"gxui/assert"
-	"gxui/mixins/outer"
+	"github.com/google/gxui"
+	"github.com/google/gxui/assert"
+	"github.com/google/gxui/mixins/outer"
 	"runtime"
 )
 

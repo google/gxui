@@ -5,9 +5,9 @@
 package dark
 
 import (
-	"gxui"
-	"gxui/math"
-	"gxui/mixins"
+	"github.com/google/gxui"
+	"github.com/google/gxui/math"
+	"github.com/google/gxui/mixins"
 )
 
 type BubbleOverlay struct {

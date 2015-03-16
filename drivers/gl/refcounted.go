@@ -6,7 +6,7 @@ package gl
 
 import (
 	"fmt"
-	"gxui/assert"
+	"github.com/google/gxui/assert"
 	"runtime"
 	"strings"
 	"sync/atomic"

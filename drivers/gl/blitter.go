@@ -5,11 +5,11 @@
 package gl
 
 import (
-	"gxui"
-	"gxui/assert"
-	"gxui/math"
+	"github.com/google/gxui"
+	"github.com/google/gxui/assert"
+	"github.com/google/gxui/math"
 
-	"github.com/go-gl/gl"
+	"github.com/go-gl-legacy/gl"
 )
 
 const debugWireframePolygons = false

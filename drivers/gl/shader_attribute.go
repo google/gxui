@@ -5,7 +5,7 @@
 package gl
 
 import (
-	"github.com/go-gl/gl"
+	"github.com/go-gl-legacy/gl"
 )
 
 type ShaderAttribute struct {

@@ -7,10 +7,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gxui"
-	"gxui/drivers/gl"
-	"gxui/math"
-	"gxui/themes/dark"
+	"github.com/google/gxui"
+	"github.com/google/gxui/drivers/gl"
+	"github.com/google/gxui/math"
+	"github.com/google/gxui/themes/dark"
 )
 
 var data = flag.String("data", "data", "path to data")

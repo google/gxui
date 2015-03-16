@@ -4,7 +4,7 @@
 
 package gxui
 
-import "gxui/math"
+import "github.com/google/gxui/math"
 
 type Parent interface {
 	Children() []Control

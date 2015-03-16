@@ -5,7 +5,7 @@
 package gl
 
 import (
-	"gxui/math"
+	"github.com/google/gxui/math"
 	"image"
 	"image/png"
 	"os"

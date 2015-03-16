@@ -5,9 +5,9 @@
 package parts
 
 import (
-	"gxui/assert"
-	"gxui/math"
-	"gxui/mixins/outer"
+	"github.com/google/gxui/assert"
+	"github.com/google/gxui/math"
+	"github.com/google/gxui/mixins/outer"
 )
 
 type LayoutableOuter interface {

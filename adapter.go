@@ -5,7 +5,7 @@
 package gxui
 
 import (
-	"gxui/math"
+	"github.com/google/gxui/math"
 )
 
 const InvalidAdapterItemId AdapterItemId = 0xFFFFFFFFFFFFFFFF

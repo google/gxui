@@ -5,9 +5,9 @@
 package mixins
 
 import (
-	"gxui"
-	"gxui/math"
-	"gxui/mixins/base"
+	"github.com/google/gxui"
+	"github.com/google/gxui/math"
+	"github.com/google/gxui/mixins/base"
 	"strings"
 )
 

@@ -5,9 +5,9 @@
 package gl
 
 import (
-	"gxui/assert"
+	"github.com/google/gxui/assert"
 
-	"github.com/go-gl/gl"
+	"github.com/go-gl-legacy/gl"
 )
 
 type UniformBindings map[string]interface{}

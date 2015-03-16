@@ -5,7 +5,7 @@
 package gl
 
 import (
-	"gxui/math"
+	"github.com/google/gxui/math"
 )
 
 type glyphTable struct {

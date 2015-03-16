@@ -6,9 +6,9 @@ package mixins
 
 import (
 	"fmt"
-	"gxui"
-	"gxui/interval"
-	"gxui/math"
+	"github.com/google/gxui"
+	"github.com/google/gxui/interval"
+	"github.com/google/gxui/math"
 	"strings"
 )
 
@@ -86,7 +86,11 @@ func (t *CodeEditor) SetTabWidth(tabWidth int) {
 }
 
 func (t *CodeEditor) SpanAt(layerIdx, runeIdx int) *interval.IntData {
-	return t.layers[layerIdx].SpanAt(runeIdx)
+	if len(t.layers) >= layerIdx {
+		return t.layers[layerIdx].SpanAt(runeIdx)
+	} else {
+		return nil
+	}
 }
 
 func (t *CodeEditor) SpansAt(at int) []interval.IntData {

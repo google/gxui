@@ -5,9 +5,9 @@
 package gl
 
 import (
-	"gxui"
-	"gxui/assert"
-	"gxui/math"
+	"github.com/google/gxui"
+	"github.com/google/gxui/assert"
+	"github.com/google/gxui/math"
 	"unicode/utf8"
 
 	"code.google.com/p/freetype-go/freetype/truetype"

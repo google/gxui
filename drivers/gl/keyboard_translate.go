@@ -5,243 +5,244 @@
 package gl
 
 import (
-	"github.com/go-gl/glfw3"
-	"gxui"
+	"github.com/google/gxui"
+
+	"github.com/go-gl/glfw/v3.1/glfw"
 )
 
-func translateKeyboardKey(in glfw3.Key) gxui.KeyboardKey {
+func translateKeyboardKey(in glfw.Key) gxui.KeyboardKey {
 	switch in {
-	case glfw3.KeySpace:
+	case glfw.KeySpace:
 		return gxui.KeySpace
-	case glfw3.KeyApostrophe:
+	case glfw.KeyApostrophe:
 		return gxui.KeyApostrophe
-	case glfw3.KeyComma:
+	case glfw.KeyComma:
 		return gxui.KeyComma
-	case glfw3.KeyMinus:
+	case glfw.KeyMinus:
 		return gxui.KeyMinus
-	case glfw3.KeyPeriod:
+	case glfw.KeyPeriod:
 		return gxui.KeyPeriod
-	case glfw3.KeySlash:
+	case glfw.KeySlash:
 		return gxui.KeySlash
-	case glfw3.Key0:
+	case glfw.Key0:
 		return gxui.Key0
-	case glfw3.Key1:
+	case glfw.Key1:
 		return gxui.Key1
-	case glfw3.Key2:
+	case glfw.Key2:
 		return gxui.Key2
-	case glfw3.Key3:
+	case glfw.Key3:
 		return gxui.Key3
-	case glfw3.Key4:
+	case glfw.Key4:
 		return gxui.Key4
-	case glfw3.Key5:
+	case glfw.Key5:
 		return gxui.Key5
-	case glfw3.Key6:
+	case glfw.Key6:
 		return gxui.Key6
-	case glfw3.Key7:
+	case glfw.Key7:
 		return gxui.Key7
-	case glfw3.Key8:
+	case glfw.Key8:
 		return gxui.Key8
-	case glfw3.Key9:
+	case glfw.Key9:
 		return gxui.Key9
-	case glfw3.KeySemicolon:
+	case glfw.KeySemicolon:
 		return gxui.KeySemicolon
-	case glfw3.KeyEqual:
+	case glfw.KeyEqual:
 		return gxui.KeyEqual
-	case glfw3.KeyA:
+	case glfw.KeyA:
 		return gxui.KeyA
-	case glfw3.KeyB:
+	case glfw.KeyB:
 		return gxui.KeyB
-	case glfw3.KeyC:
+	case glfw.KeyC:
 		return gxui.KeyC
-	case glfw3.KeyD:
+	case glfw.KeyD:
 		return gxui.KeyD
-	case glfw3.KeyE:
+	case glfw.KeyE:
 		return gxui.KeyE
-	case glfw3.KeyF:
+	case glfw.KeyF:
 		return gxui.KeyF
-	case glfw3.KeyG:
+	case glfw.KeyG:
 		return gxui.KeyG
-	case glfw3.KeyH:
+	case glfw.KeyH:
 		return gxui.KeyH
-	case glfw3.KeyI:
+	case glfw.KeyI:
 		return gxui.KeyI
-	case glfw3.KeyJ:
+	case glfw.KeyJ:
 		return gxui.KeyJ
-	case glfw3.KeyK:
+	case glfw.KeyK:
 		return gxui.KeyK
-	case glfw3.KeyL:
+	case glfw.KeyL:
 		return gxui.KeyL
-	case glfw3.KeyM:
+	case glfw.KeyM:
 		return gxui.KeyM
-	case glfw3.KeyN:
+	case glfw.KeyN:
 		return gxui.KeyN
-	case glfw3.KeyO:
+	case glfw.KeyO:
 		return gxui.KeyO
-	case glfw3.KeyP:
+	case glfw.KeyP:
 		return gxui.KeyP
-	case glfw3.KeyQ:
+	case glfw.KeyQ:
 		return gxui.KeyQ
-	case glfw3.KeyR:
+	case glfw.KeyR:
 		return gxui.KeyR
-	case glfw3.KeyS:
+	case glfw.KeyS:
 		return gxui.KeyS
-	case glfw3.KeyT:
+	case glfw.KeyT:
 		return gxui.KeyT
-	case glfw3.KeyU:
+	case glfw.KeyU:
 		return gxui.KeyU
-	case glfw3.KeyV:
+	case glfw.KeyV:
 		return gxui.KeyV
-	case glfw3.KeyW:
+	case glfw.KeyW:
 		return gxui.KeyW
-	case glfw3.KeyX:
+	case glfw.KeyX:
 		return gxui.KeyX
-	case glfw3.KeyY:
+	case glfw.KeyY:
 		return gxui.KeyY
-	case glfw3.KeyZ:
+	case glfw.KeyZ:
 		return gxui.KeyZ
-	case glfw3.KeyLeftBracket:
+	case glfw.KeyLeftBracket:
 		return gxui.KeyLeftBracket
-	case glfw3.KeyBackslash:
+	case glfw.KeyBackslash:
 		return gxui.KeyBackslash
-	case glfw3.KeyRightBracket:
+	case glfw.KeyRightBracket:
 		return gxui.KeyRightBracket
-	case glfw3.KeyGraveAccent:
+	case glfw.KeyGraveAccent:
 		return gxui.KeyGraveAccent
-	case glfw3.KeyWorld1:
+	case glfw.KeyWorld1:
 		return gxui.KeyWorld1
-	case glfw3.KeyWorld2:
+	case glfw.KeyWorld2:
 		return gxui.KeyWorld2
-	case glfw3.KeyEscape:
+	case glfw.KeyEscape:
 		return gxui.KeyEscape
-	case glfw3.KeyEnter:
+	case glfw.KeyEnter:
 		return gxui.KeyEnter
-	case glfw3.KeyTab:
+	case glfw.KeyTab:
 		return gxui.KeyTab
-	case glfw3.KeyBackspace:
+	case glfw.KeyBackspace:
 		return gxui.KeyBackspace
-	case glfw3.KeyInsert:
+	case glfw.KeyInsert:
 		return gxui.KeyInsert
-	case glfw3.KeyDelete:
+	case glfw.KeyDelete:
 		return gxui.KeyDelete
-	case glfw3.KeyRight:
+	case glfw.KeyRight:
 		return gxui.KeyRight
-	case glfw3.KeyLeft:
+	case glfw.KeyLeft:
 		return gxui.KeyLeft
-	case glfw3.KeyDown:
+	case glfw.KeyDown:
 		return gxui.KeyDown
-	case glfw3.KeyUp:
+	case glfw.KeyUp:
 		return gxui.KeyUp
-	case glfw3.KeyPageUp:
+	case glfw.KeyPageUp:
 		return gxui.KeyPageUp
-	case glfw3.KeyPageDown:
+	case glfw.KeyPageDown:
 		return gxui.KeyPageDown
-	case glfw3.KeyHome:
+	case glfw.KeyHome:
 		return gxui.KeyHome
-	case glfw3.KeyEnd:
+	case glfw.KeyEnd:
 		return gxui.KeyEnd
-	case glfw3.KeyCapsLock:
+	case glfw.KeyCapsLock:
 		return gxui.KeyCapsLock
-	case glfw3.KeyScrollLock:
+	case glfw.KeyScrollLock:
 		return gxui.KeyScrollLock
-	case glfw3.KeyNumLock:
+	case glfw.KeyNumLock:
 		return gxui.KeyNumLock
-	case glfw3.KeyPrintScreen:
+	case glfw.KeyPrintScreen:
 		return gxui.KeyPrintScreen
-	case glfw3.KeyPause:
+	case glfw.KeyPause:
 		return gxui.KeyPause
-	case glfw3.KeyF1:
+	case glfw.KeyF1:
 		return gxui.KeyF1
-	case glfw3.KeyF2:
+	case glfw.KeyF2:
 		return gxui.KeyF2
-	case glfw3.KeyF3:
+	case glfw.KeyF3:
 		return gxui.KeyF3
-	case glfw3.KeyF4:
+	case glfw.KeyF4:
 		return gxui.KeyF4
-	case glfw3.KeyF5:
+	case glfw.KeyF5:
 		return gxui.KeyF5
-	case glfw3.KeyF6:
+	case glfw.KeyF6:
 		return gxui.KeyF6
-	case glfw3.KeyF7:
+	case glfw.KeyF7:
 		return gxui.KeyF7
-	case glfw3.KeyF8:
+	case glfw.KeyF8:
 		return gxui.KeyF8
-	case glfw3.KeyF9:
+	case glfw.KeyF9:
 		return gxui.KeyF9
-	case glfw3.KeyF10:
+	case glfw.KeyF10:
 		return gxui.KeyF10
-	case glfw3.KeyF11:
+	case glfw.KeyF11:
 		return gxui.KeyF11
-	case glfw3.KeyF12:
+	case glfw.KeyF12:
 		return gxui.KeyF12
-	case glfw3.KeyKP0:
+	case glfw.KeyKP0:
 		return gxui.KeyKp0
-	case glfw3.KeyKP1:
+	case glfw.KeyKP1:
 		return gxui.KeyKp1
-	case glfw3.KeyKP2:
+	case glfw.KeyKP2:
 		return gxui.KeyKp2
-	case glfw3.KeyKP3:
+	case glfw.KeyKP3:
 		return gxui.KeyKp3
-	case glfw3.KeyKP4:
+	case glfw.KeyKP4:
 		return gxui.KeyKp4
-	case glfw3.KeyKP5:
+	case glfw.KeyKP5:
 		return gxui.KeyKp5
-	case glfw3.KeyKP6:
+	case glfw.KeyKP6:
 		return gxui.KeyKp6
-	case glfw3.KeyKP7:
+	case glfw.KeyKP7:
 		return gxui.KeyKp7
-	case glfw3.KeyKP8:
+	case glfw.KeyKP8:
 		return gxui.KeyKp8
-	case glfw3.KeyKP9:
+	case glfw.KeyKP9:
 		return gxui.KeyKp9
-	case glfw3.KeyKPDecimal:
+	case glfw.KeyKPDecimal:
 		return gxui.KeyKpDecimal
-	case glfw3.KeyKPDivide:
+	case glfw.KeyKPDivide:
 		return gxui.KeyKpDivide
-	case glfw3.KeyKPMultiply:
+	case glfw.KeyKPMultiply:
 		return gxui.KeyKpMultiply
-	case glfw3.KeyKPSubtract:
+	case glfw.KeyKPSubtract:
 		return gxui.KeyKpSubtract
-	case glfw3.KeyKPAdd:
+	case glfw.KeyKPAdd:
 		return gxui.KeyKpAdd
-	case glfw3.KeyKPEnter:
+	case glfw.KeyKPEnter:
 		return gxui.KeyKpEnter
-	case glfw3.KeyKPEqual:
+	case glfw.KeyKPEqual:
 		return gxui.KeyKpEqual
-	case glfw3.KeyLeftShift:
+	case glfw.KeyLeftShift:
 		return gxui.KeyLeftShift
-	case glfw3.KeyLeftControl:
+	case glfw.KeyLeftControl:
 		return gxui.KeyLeftControl
-	case glfw3.KeyLeftAlt:
+	case glfw.KeyLeftAlt:
 		return gxui.KeyLeftAlt
-	case glfw3.KeyLeftSuper:
+	case glfw.KeyLeftSuper:
 		return gxui.KeyLeftSuper
-	case glfw3.KeyRightShift:
+	case glfw.KeyRightShift:
 		return gxui.KeyRightShift
-	case glfw3.KeyRightControl:
+	case glfw.KeyRightControl:
 		return gxui.KeyRightControl
-	case glfw3.KeyRightAlt:
+	case glfw.KeyRightAlt:
 		return gxui.KeyRightAlt
-	case glfw3.KeyRightSuper:
+	case glfw.KeyRightSuper:
 		return gxui.KeyRightSuper
-	case glfw3.KeyMenu:
+	case glfw.KeyMenu:
 		return gxui.KeyMenu
 	default:
 		return gxui.KeyUnknown
 	}
 }
 
-func translateKeyboardModifier(in glfw3.ModifierKey) gxui.KeyboardModifier {
+func translateKeyboardModifier(in glfw.ModifierKey) gxui.KeyboardModifier {
 	out := gxui.ModNone
-	if in&glfw3.ModShift != 0 {
+	if in&glfw.ModShift != 0 {
 		out |= gxui.ModShift
 	}
-	if in&glfw3.ModControl != 0 {
+	if in&glfw.ModControl != 0 {
 		out |= gxui.ModControl
 	}
-	if in&glfw3.ModAlt != 0 {
+	if in&glfw.ModAlt != 0 {
 		out |= gxui.ModAlt
 	}
-	if in&glfw3.ModSuper != 0 {
+	if in&glfw.ModSuper != 0 {
 		out |= gxui.ModSuper
 	}
 	return out

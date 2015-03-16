@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"gxui/assert"
+	"github.com/google/gxui/assert"
 	"strings"
 )
 

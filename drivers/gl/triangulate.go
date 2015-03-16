@@ -7,7 +7,7 @@ package gl
 import (
 	"container/list"
 	"fmt"
-	"gxui/math"
+	"github.com/google/gxui/math"
 )
 
 const debugTriangulate = false

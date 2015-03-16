@@ -5,10 +5,10 @@
 package base
 
 import (
-	"gxui"
-	"gxui/math"
-	"gxui/mixins/outer"
-	"gxui/mixins/parts"
+	"github.com/google/gxui"
+	"github.com/google/gxui/math"
+	"github.com/google/gxui/mixins/outer"
+	"github.com/google/gxui/mixins/parts"
 )
 
 type ControlOuter interface {

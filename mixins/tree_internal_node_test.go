@@ -4,10 +4,10 @@
 
 package mixins
 
-import test "gxui/testing"
+import test "github.com/google/gxui/testing"
 import (
-	"gxui"
-	"gxui/math"
+	"github.com/google/gxui"
+	"github.com/google/gxui/math"
 	"testing"
 )
 

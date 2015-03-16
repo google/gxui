@@ -5,8 +5,8 @@
 package mixins
 
 import (
-	"gxui"
-	"gxui/math"
+	"github.com/google/gxui"
+	"github.com/google/gxui/math"
 )
 
 type CreateExpandButton func(theme gxui.Theme, node *TreeInternalNode) gxui.Button

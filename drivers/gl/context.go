@@ -5,9 +5,10 @@
 package gl
 
 import (
-	"github.com/go-gl/gl"
-	"gxui/math"
+	"github.com/google/gxui/math"
 	"sync"
+
+	"github.com/go-gl-legacy/gl"
 )
 
 type SamplerSource interface {

@@ -4,10 +4,10 @@
 
 package gxui
 
-import test "gxui/testing"
+import test "github.com/google/gxui/testing"
 import (
 	"fmt"
-	"gxui/assert"
+	"github.com/google/gxui/assert"
 	"testing"
 )
 

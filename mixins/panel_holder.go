@@ -5,10 +5,10 @@
 package mixins
 
 import (
-	"gxui"
-	"gxui/assert"
-	"gxui/math"
-	"gxui/mixins/base"
+	"github.com/google/gxui"
+	"github.com/google/gxui/assert"
+	"github.com/google/gxui/math"
+	"github.com/google/gxui/mixins/base"
 )
 
 type PanelTab interface {
