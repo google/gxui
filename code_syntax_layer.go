@@ -19,7 +19,7 @@ type CodeSyntaxLayer struct {
 
 func CreateCodeSyntaxLayer() *CodeSyntaxLayer { return &CodeSyntaxLayer{} }
 
-func (l *CodeSyntaxLayer) ClearSpans() {
+func (l *CodeSyntaxLayer) Clear() {
 	l.spans = interval.IntDataList{}
 }
 
@@ -45,6 +45,15 @@ func (l *CodeSyntaxLayer) UpdateSpans(runeCount int, edits []TextBoxEdit) {
 			l.spans[j] = interval.CreateIntData(start, end, s.Data())
 		}
 	}
+}
+
+func (l *CodeSyntaxLayer) Add(start, count int) {
+	l.AddData(start, count, nil)
+}
+
+func (l *CodeSyntaxLayer) AddData(start, count int, data interface{}) {
+	span := interval.CreateIntData(start, start+count, data)
+	interval.Replace(&l.spans, span)
 }
 
 func (l *CodeSyntaxLayer) AddSpan(span interval.IntData) {
@@ -106,4 +115,24 @@ func (l *CodeSyntaxLayer) Data() interface{} {
 
 func (l *CodeSyntaxLayer) SetData(data interface{}) {
 	l.data = data
+}
+
+type CodeSyntaxLayers []*CodeSyntaxLayer
+
+func (l *CodeSyntaxLayers) Get(idx int) *CodeSyntaxLayer {
+	if len(*l) <= idx {
+		old := *l
+		*l = make(CodeSyntaxLayers, idx+1)
+		copy(*l, old)
+	}
+	layer := (*l)[idx]
+	if layer == nil {
+		layer = &CodeSyntaxLayer{}
+		(*l)[idx] = layer
+	}
+	return layer
+}
+
+func (l *CodeSyntaxLayers) Clear() {
+	*l = CodeSyntaxLayers{}
 }

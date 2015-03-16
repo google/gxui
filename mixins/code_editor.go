@@ -7,7 +7,6 @@ package mixins
 import (
 	"fmt"
 	"github.com/google/gxui"
-	"github.com/google/gxui/interval"
 	"github.com/google/gxui/math"
 	"strings"
 )
@@ -20,7 +19,7 @@ type CodeEditorOuter interface {
 type CodeEditor struct {
 	TextBox
 	outer              CodeEditorOuter
-	layers             []gxui.CodeSyntaxLayer
+	layers             gxui.CodeSyntaxLayers
 	suggestionAdapter  *SuggestionAdapter
 	suggestionList     gxui.List
 	suggestionProvider gxui.CodeSuggestionProvider
@@ -63,18 +62,13 @@ func (t *CodeEditor) CreateSuggestionList() gxui.List {
 	return l
 }
 
-func (t *CodeEditor) SetSyntaxLayer(idx int, layer gxui.CodeSyntaxLayer) {
-	if len(t.layers) <= idx {
-		layers := make([]gxui.CodeSyntaxLayer, idx+1)
-		copy(layers[:], t.layers[:])
-		t.layers = layers
-	}
-	t.layers[idx] = layer
-	t.onRedrawLines.Fire()
+func (t *CodeEditor) SyntaxLayers() gxui.CodeSyntaxLayers {
+	return t.layers
 }
 
-func (t *CodeEditor) ClearSyntaxLayers() {
-	t.layers = t.layers[:0]
+func (t *CodeEditor) SetSyntaxLayers(layers gxui.CodeSyntaxLayers) {
+	t.layers = layers
+	t.onRedrawLines.Fire()
 }
 
 func (t *CodeEditor) TabWidth() int {
@@ -83,24 +77,6 @@ func (t *CodeEditor) TabWidth() int {
 
 func (t *CodeEditor) SetTabWidth(tabWidth int) {
 	t.tabWidth = tabWidth
-}
-
-func (t *CodeEditor) SpanAt(layerIdx, runeIdx int) *interval.IntData {
-	if len(t.layers) >= layerIdx {
-		return t.layers[layerIdx].SpanAt(runeIdx)
-	} else {
-		return nil
-	}
-}
-
-func (t *CodeEditor) SpansAt(at int) []interval.IntData {
-	spans := []interval.IntData{}
-	for _, layer := range t.layers {
-		if s := layer.SpanAt(at); s != nil {
-			spans = append(spans, *s)
-		}
-	}
-	return spans
 }
 
 func (t *CodeEditor) SuggestionProvider() gxui.CodeSuggestionProvider {

@@ -4,8 +4,6 @@
 
 package gxui
 
-import "github.com/google/gxui/interval"
-
 type CodeSuggestion interface {
 	Name() string
 	Code() string
@@ -17,12 +15,10 @@ type CodeSuggestionProvider interface {
 
 type CodeEditor interface {
 	TextBox
-	SetSyntaxLayer(index int, layer CodeSyntaxLayer)
-	ClearSyntaxLayers()
+	SyntaxLayers() CodeSyntaxLayers
+	SetSyntaxLayers(CodeSyntaxLayers)
 	TabWidth() int
 	SetTabWidth(int)
-	SpanAt(layerIdx, runeIdx int) *interval.IntData
-	SpansAt(runeIdx int) []interval.IntData
 	SuggestionProvider() CodeSuggestionProvider
 	SetSuggestionProvider(CodeSuggestionProvider)
 	ShowSuggestionList()
