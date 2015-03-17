@@ -5,8 +5,9 @@
 package mixins
 
 import (
+	"fmt"
+
 	"github.com/google/gxui"
-	"github.com/google/gxui/assert"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/mixins/base"
 )
@@ -133,7 +134,10 @@ func (p *PanelHolder) AddPanel(panel gxui.Control, name string) {
 }
 
 func (p *PanelHolder) AddPanelAt(panel gxui.Control, name string, index int) {
-	assert.True(index >= 0 && index <= p.PanelCount(), "Index %d is out of bounds. Panel count: %d", index, p.PanelCount())
+	if index < 0 || index > p.PanelCount() {
+		panic(fmt.Errorf("Index %d is out of bounds. Acceptable range: [%d - %d]",
+			index, 0, p.PanelCount()))
+	}
 	tab := p.outer.CreatePanelTab()
 	tab.SetText(name)
 	mds := tab.OnMouseDown(func(ev gxui.MouseEvent) {
@@ -157,7 +161,9 @@ func (p *PanelHolder) AddPanelAt(panel gxui.Control, name string, index int) {
 
 func (p *PanelHolder) RemovePanel(panel gxui.Control) {
 	index := p.PanelIndex(panel)
-	assert.False(index < -1, "PanelHolder does not contain panel")
+	if index < 0 {
+		panic("PanelHolder does not contain panel")
+	}
 
 	entry := p.entries[index]
 	entry.MouseDownSubscription.Unlisten()
@@ -174,7 +180,10 @@ func (p *PanelHolder) RemovePanel(panel gxui.Control) {
 }
 
 func (p *PanelHolder) Select(index int) {
-	assert.True(index < p.PanelCount(), "Index %d is out of bounds. Panel count: %d", index, p.PanelCount())
+	if index < 0 || index >= p.PanelCount() {
+		panic(fmt.Errorf("Index %d is out of bounds. Acceptable range: [%d - %d]",
+			index, 0, p.PanelCount()-1))
+	}
 
 	if p.selected.Panel != nil {
 		p.selected.Tab.SetActive(false)

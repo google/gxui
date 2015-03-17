@@ -5,7 +5,7 @@
 package gl
 
 import (
-	"github.com/google/gxui/assert"
+	"fmt"
 	"reflect"
 
 	"github.com/go-gl-legacy/gl"
@@ -27,10 +27,13 @@ func CreateVertexStream(name string, ty ShaderDataType, data interface{}) *Verte
 	dataVal := reflect.ValueOf(data)
 	dataLen := dataVal.Len()
 
-	assert.True(dataLen%ty.VectorElementCount() == 0,
-		"Incorrect multiple of elements. Got: %d, Requires multiple of %d",
-		dataLen, ty.VectorElementCount())
-	assert.True(ty.VectorElementType().IsArrayOfType(data), "Data is not of the specified type")
+	if dataLen%ty.VectorElementCount() != 0 {
+		panic(fmt.Errorf("Incorrect multiple of elements. Got: %d, Requires multiple of %d",
+			dataLen, ty.VectorElementCount()))
+	}
+	if !ty.VectorElementType().IsArrayOfType(data) {
+		panic("Data is not of the specified type")
+	}
 
 	vs := &VertexStream{
 		name:  name,

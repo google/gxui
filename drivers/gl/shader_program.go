@@ -5,7 +5,7 @@
 package gl
 
 import (
-	"github.com/google/gxui/assert"
+	"fmt"
 
 	"github.com/go-gl-legacy/gl"
 )
@@ -87,8 +87,13 @@ func (s *ShaderProgram) Bind(ctx *Context, vb *VertexBuffer, uniforms UniformBin
 	s.Program.Use()
 	for _, a := range s.Attributes {
 		vs, found := vb.Streams[a.Name]
-		assert.True(found, "VertexBuffer missing required stream '%s'", a.Name)
-		assert.Equals(a.Type, vs.Type(), "Attribute %s type", a.Name)
+		if !found {
+			panic(fmt.Errorf("VertexBuffer missing required stream '%s'", a.Name))
+		}
+		if a.Type != vs.Type() {
+			panic(fmt.Errorf("Attribute '%s' type '%s' does not match stream type '%s'",
+				a.Name, a.Type, vs.Type()))
+		}
 		elementCount := a.Type.VectorElementCount()
 		elementTy := a.Type.VectorElementType()
 		ctx.GetOrCreateVertexStreamContext(vs).Bind()
@@ -98,7 +103,9 @@ func (s *ShaderProgram) Bind(ctx *Context, vb *VertexBuffer, uniforms UniformBin
 	}
 	for _, u := range s.Uniforms {
 		v, found := uniforms[u.Name]
-		assert.True(found, "Uniforms missing '%s'", u.Name)
+		if !found {
+			panic(fmt.Errorf("Uniforms missing '%s'", u.Name))
+		}
 		u.Bind(ctx, v)
 	}
 }

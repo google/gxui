@@ -7,7 +7,6 @@ package mixins
 import (
 	"fmt"
 	"github.com/google/gxui"
-	"github.com/google/gxui/assert"
 )
 
 type TreeInternalNode struct {
@@ -41,9 +40,11 @@ func (n *TreeInternalNode) findById(id gxui.AdapterItemId, baseIdx, d int) (pare
 	if relIdx < 0 {
 		panic(fmt.Errorf("Node does not contain id %d", id))
 	}
-	assert.True(relIdx < len(n.children),
-		"TreeAdapterNode.ItemIndex(%v) returned out of bounds index %v. Count = %v",
-		id, relIdx, len(n.children))
+	if relIdx < 0 || relIdx >= len(n.children) {
+		panic(fmt.Errorf(
+			"%T.ItemIndex(%v) returned out of bounds index %v. Acceptable range: [%d - %d]",
+			n.adapterNode, id, relIdx, 0, len(n.children)-1))
+	}
 
 	absIdx = baseIdx + 1 // +1 for n
 
@@ -96,7 +97,9 @@ func (n *TreeInternalNode) Expand() bool {
 	}
 	n.isExpanded = true
 	n.childCount = n.adapterNode.Count()
-	assert.True(n.childCount >= 0, "%T.Count() returned a negative value %d", n.adapterNode, n.childCount)
+	if n.childCount < 0 {
+		panic(fmt.Errorf("%T.Count() returned a negative value %d", n.adapterNode, n.childCount))
+	}
 	n.children = make([]*TreeInternalNode, n.childCount)
 	for i := range n.children {
 		n.children[i] = &TreeInternalNode{

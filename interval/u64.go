@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/google/gxui/assert"
 	"strings"
 )
 
@@ -24,7 +23,9 @@ func CreateU64(first, count uint64) U64 {
 }
 
 func CreateU64Inc(first, last uint64) U64 {
-	assert.False(last < first, "Attempting to set last before first! [0x%.16x-0x%.16x]", first, last)
+	if last < first {
+		panic(fmt.Errorf("Attempting to set last before first! [0x%.16x-0x%.16x]", first, last))
+	}
 	return U64{first, 1 + last - first}
 }
 

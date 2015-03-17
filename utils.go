@@ -6,9 +6,10 @@ package gxui
 
 import (
 	"bytes"
-	"github.com/google/gxui/assert"
-	"github.com/google/gxui/math"
+	"fmt"
 	"unicode/utf8"
+
+	"github.com/google/gxui/math"
 )
 
 type ParentPoint struct {
@@ -40,8 +41,8 @@ func (l ControlPointList) Find(c Control) (math.Point, bool) {
 func ValidateHierarchy(p Parent) {
 	for _, c := range p.Children() {
 		if p != c.Parent() {
-			assert.Assert("Child's parent is not as expected.\nChild: %s\nExpected parent: %s",
-				Path(c), Path(p))
+			panic(fmt.Errorf("Child's parent is not as expected.\nChild: %s\nExpected parent: %s",
+				Path(c), Path(p)))
 		}
 		if cp, ok := c.(Parent); ok {
 			ValidateHierarchy(cp)
@@ -115,7 +116,9 @@ func WindowToChild(coord math.Point, to Control) math.Point {
 	for {
 		coord = coord.Sub(c.Bounds().Min)
 		p := c.Parent()
-		assert.NotNil(p, "Control parent")
+		if p == nil {
+			panic("Control's parent was nil")
+		}
 		if _, ok := p.(Window); ok {
 			return coord
 		}
@@ -128,7 +131,9 @@ func ChildToParent(coord math.Point, from Control, to Parent) math.Point {
 	for {
 		coord = coord.Add(c.Bounds().Min)
 		p := c.Parent()
-		assert.NotNil(p, "Control detached: %s", Path(c))
+		if p == nil {
+			panic(fmt.Errorf("Control detached: %s", Path(c)))
+		}
 		if p == to {
 			return coord
 		}
@@ -142,7 +147,9 @@ func ParentToChild(coord math.Point, from Parent, to Control) math.Point {
 
 func TransformCoordinate(coord math.Point, from, to Control) math.Point {
 	ancestor := CommonAncestor(from, to)
-	assert.NotNil(ancestor, "Common ancestor of %s and %s", Path(from), Path(to))
+	if ancestor == nil {
+		panic(fmt.Errorf("No common ancestor between %s and %s", Path(from), Path(to)))
+	}
 
 	coord = ChildToParent(coord, from, ancestor)
 	coord = ParentToChild(coord, ancestor, to)
@@ -167,7 +174,9 @@ func FindControl(root Control, test func(Control) bool) Control {
 func WindowContaining(c Control) Window {
 	for {
 		p := c.Parent()
-		assert.NotNil(p, "Control parent")
+		if p == nil {
+			panic("Control's parent was nil")
+		}
 		if window, ok := p.(Window); ok {
 			return window
 		}

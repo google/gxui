@@ -4,11 +4,7 @@
 
 package gl
 
-import (
-	"github.com/google/gxui/assert"
-
-	"github.com/go-gl-legacy/gl"
-)
+import "github.com/go-gl-legacy/gl"
 
 type Shape struct {
 	refCounted
@@ -18,7 +14,9 @@ type Shape struct {
 }
 
 func CreateShape(vb *VertexBuffer, ib *IndexBuffer, drawMode DrawMode) *Shape {
-	assert.NotNil(vb, "VertexBuffer")
+	if vb == nil {
+		panic("VertexBuffer cannot be nil")
+	}
 
 	s := &Shape{
 		vb:       vb,

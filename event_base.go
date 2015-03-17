@@ -6,7 +6,6 @@ package gxui
 
 import (
 	"fmt"
-	"github.com/google/gxui/assert"
 	"reflect"
 )
 
@@ -73,29 +72,37 @@ func (e *EventBase) String() string {
 func (e *EventBase) VerifySignature(argTys []reflect.Type, isVariadic bool) {
 	paramTypes := e.paramTypes
 	if isVariadic {
-		assert.True(len(paramTypes)-1 <= len(argTys),
-			"argument count mismatch. Expected: %v, Got: %v", len(paramTypes), len(argTys))
+		if len(argTys) < len(paramTypes)-1 {
+			panic(fmt.Errorf("%v.Fire(%v) Too few arguments. Must have at least %v, but got %v",
+				e.String(), argTys, len(paramTypes), len(argTys)))
+		}
 		for i, argTy := range argTys {
 			varIdx := len(paramTypes) - 1
 			if i >= varIdx {
 				paramTy := paramTypes[varIdx].Elem()
-				assert.True(argTy.AssignableTo(paramTy),
-					"%v.Fire(%v) Variadic argument %v for was of the wrong type. Got: %v, Expected: %v",
-					e.String(), argTys, i-varIdx, argTy, paramTy)
+				if !argTy.AssignableTo(paramTy) {
+					panic(fmt.Errorf("%v.Fire(%v) Variadic argument %v for was of the wrong type. Got: %v, Expected: %v",
+						e.String(), argTys, i-varIdx, argTy, paramTy))
+				}
 			} else {
 				paramTy := paramTypes[i]
-				assert.True(argTy.AssignableTo(paramTy),
-					"%v.Fire(%v) Argument %v for was of the wrong type. Got: %v, Expected: %v",
-					e.String(), argTys, i, argTy, paramTy)
+				if !argTy.AssignableTo(paramTy) {
+					panic(fmt.Errorf("%v.Fire(%v) Argument %v for was of the wrong type. Got: %v, Expected: %v",
+						e.String(), argTys, i, argTy, paramTy))
+				}
 			}
 		}
 	} else {
-		assert.Equals(len(paramTypes), len(argTys), "argument count")
+		if len(paramTypes) != len(argTys) {
+			panic(fmt.Errorf("%v.Fire(%v) Argument count mismatch. Expected %d, got %d",
+				e.String(), argTys, len(paramTypes), len(argTys)))
+		}
 		for i, argTy := range argTys {
 			paramTy := paramTypes[i]
-			assert.True(argTy.AssignableTo(paramTy),
-				"%v.Fire(%v) Argument %v for was of the wrong type. Got: %v, Expected: %v",
-				e.String(), argTys, i, argTy, paramTy)
+			if !argTy.AssignableTo(paramTy) {
+				panic(fmt.Errorf("%v.Fire(%v) Argument %v for was of the wrong type. Got: %v, Expected: %v",
+					e.String(), argTys, i, argTy, paramTy))
+			}
 		}
 	}
 }
@@ -142,12 +149,15 @@ func (e *EventBase) Listen(listener interface{}) EventSubscription {
 		}
 	}
 
-	assert.False(function.IsNil(), "Listener function is nil")
+	if function.IsNil() {
+		panic("Listener function is nil")
+	}
 
 	for i, listenerTy := range paramTypes {
-		assert.True(listenerTy.AssignableTo(e.paramTypes[i]),
-			"%v.Listen(%v) Listener parameter %v for was of the wrong type. Got: %v, Expected: %v",
-			e.String(), i, listenerTy, e.paramTypes[i])
+		if !listenerTy.AssignableTo(e.paramTypes[i]) {
+			panic(fmt.Errorf("%v.Listen(%v) Listener parameter %v for was of the wrong type. Got: %v, Expected: %v",
+				e.String(), i, listenerTy, e.paramTypes[i]))
+		}
 	}
 
 	id := e.nextId

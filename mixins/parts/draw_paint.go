@@ -5,10 +5,11 @@
 package parts
 
 import (
-	"github.com/google/gxui"
-	"github.com/google/gxui/assert"
-	"github.com/google/gxui/mixins/outer"
+	"fmt"
 	"runtime"
+
+	"github.com/google/gxui"
+	"github.com/google/gxui/mixins/outer"
 )
 
 const debugVerifyDetachOnGC = false
@@ -29,7 +30,9 @@ type DrawPaint struct {
 }
 
 func verifyDetach(o DrawPaintOuter) {
-	assert.False(o.Attached(), "%T garbage collected while still attached", o)
+	if o.Attached() {
+		panic(fmt.Errorf("%T garbage collected while still attached", o))
+	}
 }
 
 func (d *DrawPaint) Init(outer DrawPaintOuter, theme gxui.Theme) {
@@ -57,7 +60,9 @@ func (d *DrawPaint) Redraw() {
 }
 
 func (d *DrawPaint) Draw() gxui.Canvas {
-	assert.True(d.outer.Attached(), "Attempting to draw a non-attached control")
+	if !d.outer.Attached() {
+		panic("Attempting to draw a non-attached control")
+	}
 
 	s := d.outer.Bounds().Size()
 	if s.Area() == 0 {

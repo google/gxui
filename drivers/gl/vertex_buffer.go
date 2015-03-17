@@ -4,9 +4,7 @@
 
 package gl
 
-import (
-	"github.com/google/gxui/assert"
-)
+import "fmt"
 
 type VertexBuffer struct {
 	refCounted
@@ -23,7 +21,10 @@ func CreateVertexBuffer(streams ...*VertexStream) *VertexBuffer {
 		if i == 0 {
 			vb.VertexCount = s.VertexCount()
 		} else {
-			assert.Equals(vb.VertexCount, s.VertexCount(), "Vertex count for %s", s.Name())
+			if vb.VertexCount != s.VertexCount() {
+				panic(fmt.Errorf("Inconsistent vertex count in vertex buffer. %s has %d vertices, %s has %d",
+					streams[i-1].Name(), streams[i-1].VertexCount(), s.Name(), s.VertexCount()))
+			}
 		}
 		vb.Streams[s.Name()] = s
 	}

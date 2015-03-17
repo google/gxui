@@ -5,11 +5,11 @@
 package gl
 
 import (
-	"github.com/google/gxui"
-	"github.com/google/gxui/assert"
-	"github.com/google/gxui/math"
+	"fmt"
 
 	"github.com/go-gl-legacy/gl"
+	"github.com/google/gxui"
+	"github.com/google/gxui/math"
 )
 
 type DrawStateStack []DrawState
@@ -42,8 +42,9 @@ type Canvas struct {
 }
 
 func CreateCanvas(sizeDips math.Size) *Canvas {
-	assert.True(sizeDips.W > 0, "Canvas width must be positive. Got: %d", sizeDips.W)
-	assert.True(sizeDips.H > 0, "Canvas height must be positive. Got: %d", sizeDips.H)
+	if sizeDips.W <= 0 || sizeDips.H < 0 {
+		panic(fmt.Errorf("Canvas width and height must be positive. Size: %d", sizeDips))
+	}
 	c := &Canvas{
 		sizeDips: sizeDips,
 	}
@@ -64,7 +65,9 @@ func (c *Canvas) draw(ctx *Context, dss *DrawStateStack) {
 
 func (c *Canvas) appendOp(name string, op CanvasOp) {
 	c.AssertAlive(name)
-	assert.False(c.built, "%s() called after Complete()", name)
+	if c.built {
+		panic(fmt.Errorf("%s() called after Complete()", name))
+	}
 	c.ops = append(c.ops, op)
 }
 
@@ -79,8 +82,12 @@ func (c *Canvas) Size() math.Size {
 }
 
 func (c *Canvas) Complete() {
-	assert.False(c.built, "Complete() called twice")
-	assert.Equals(0, c.buildingPushCount, "Push count")
+	if c.built {
+		panic("Complete() called twice")
+	}
+	if c.buildingPushCount != 0 {
+		panic(fmt.Errorf("Push() count was %d when calling Complete", c.buildingPushCount))
+	}
 	c.built = true
 }
 
@@ -122,7 +129,9 @@ func (c *Canvas) Clear(color gxui.Color) {
 }
 
 func (c *Canvas) DrawCanvas(canvas gxui.Canvas, offsetDips math.Point) {
-	assert.NotNil(canvas, "canvas")
+	if canvas == nil {
+		panic("Canvas cannot be nil")
+	}
 	childCanvas := canvas.(*Canvas)
 	c.appendOp("DrawCanvas", func(ctx *Context, dss *DrawStateStack) {
 		offsetPixels := ctx.PointDipsToPixels(offsetDips)
@@ -137,14 +146,18 @@ func (c *Canvas) DrawCanvas(canvas gxui.Canvas, offsetDips math.Point) {
 }
 
 func (c *Canvas) DrawText(f gxui.Font, s string, col gxui.Color, r math.Rect, h gxui.HorizontalAlignment, v gxui.VerticalAlignment) {
-	assert.NotNil(f, "font")
+	if f == nil {
+		panic("Font cannot be nil")
+	}
 	c.appendOp("DrawText", func(ctx *Context, dss *DrawStateStack) {
 		f.(*Font).Draw(ctx, s, col, r, h, v, dss.Head())
 	})
 }
 
 func (c *Canvas) DrawRunes(f gxui.Font, r []rune, col gxui.Color, p []math.Point, o math.Point) {
-	assert.NotNil(f, "font")
+	if f == nil {
+		panic("Font cannot be nil")
+	}
 	runes := append([]rune{}, r...)
 	points := append([]math.Point{}, p...)
 	c.appendOp("DrawRunes", func(ctx *Context, dss *DrawStateStack) {
@@ -208,7 +221,10 @@ func (c *Canvas) DrawRoundedRect(r math.Rect, tl, tr, bl, br float32, pen gxui.P
 }
 
 func (c *Canvas) DrawTexture(t gxui.Texture, r math.Rect) {
-	assert.NotNil(t, "texture")
+	if t == nil {
+		panic("Texture cannot be nil")
+	}
+
 	c.appendOp("DrawTexture", func(ctx *Context, dss *DrawStateStack) {
 		tc := ctx.GetOrCreateTextureContext(t.(*Texture))
 		ctx.Blitter.Blit(ctx, tc, tc.SizePixels().Rect(), ctx.RectDipsToPixels(r), dss.Head())

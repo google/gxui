@@ -5,10 +5,11 @@
 package gl
 
 import (
-	"github.com/google/gxui"
-	"github.com/google/gxui/assert"
-	"github.com/google/gxui/math"
+	"fmt"
 	"unicode/utf8"
+
+	"github.com/google/gxui"
+	"github.com/google/gxui/math"
 
 	"code.google.com/p/freetype-go/freetype/truetype"
 )
@@ -142,7 +143,10 @@ func (f *Font) Draw(ctx *Context, str string, col gxui.Color, alignRectDips math
 }
 
 func (f *Font) DrawRunes(ctx *Context, runes []rune, col gxui.Color, points []math.Point, origin math.Point, ds *DrawState) {
-	assert.Equals(len(runes), len(points), "Points")
+	if len(runes) != len(points) {
+		panic(fmt.Errorf("There must be the same number of runes to points. Got %d runes and %d points",
+			len(runes), len(points)))
+	}
 	resolution := ctx.Resolution()
 	table := f.glyphTable(resolution)
 

@@ -12,7 +12,6 @@ import (
 	"github.com/go-gl-legacy/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/google/gxui"
-	"github.com/google/gxui/assert"
 	"github.com/google/gxui/drivers/gl/platform"
 	"github.com/google/gxui/math"
 )
@@ -65,7 +64,9 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 		panic(err)
 	}
 	wnd.MakeContextCurrent()
-	assert.True(gl.Init() == gl.GLenum(0), "Failed to initialize gl")
+	if gl.Init() != gl.GLenum(0) {
+		panic("Failed to initialize gl")
+	}
 
 	v.context = CreateContext()
 
@@ -239,8 +240,9 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 // Driver methods
 // These methods are all called on the driver thread
 func (v *Viewport) render() {
-	assert.False(v.destroyed, "Attempting to render a destroyed Viewport")
-	assert.NotNil(v.canvas, "canvas")
+	if v.destroyed {
+		panic("Attempting to render a destroyed Viewport")
+	}
 
 	v.window.MakeContextCurrent()
 
@@ -252,7 +254,9 @@ func (v *Viewport) render() {
 	}}
 
 	v.canvas.draw(ctx, &dss)
-	assert.Equals(1, len(dss), "DrawStateStack count")
+	if len(dss) != 1 {
+		panic("DrawStateStack count was not 1 after calling Canvas.Draw")
+	}
 
 	ctx.Apply(dss.Head())
 	ctx.Blitter.Commit(ctx)
@@ -285,7 +289,9 @@ func (v *Viewport) drawFrameUpdate(ctx *Context) {
 // gxui.Viewport compliance
 // These methods are all called on the application thread
 func (v *Viewport) SetCanvas(canvas gxui.Canvas) {
-	assert.False(v.destroyed, "Attempting to set the canvas on a destroyed Viewport")
+	if v.destroyed {
+		panic("Attempting to set the canvas on a destroyed Viewport")
+	}
 	v.redrawCount++
 	cnt := v.redrawCount
 	c := canvas.(*Canvas)

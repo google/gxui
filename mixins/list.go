@@ -5,8 +5,9 @@
 package mixins
 
 import (
+	"fmt"
+
 	"github.com/google/gxui"
-	"github.com/google/gxui/assert"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/mixins/base"
 	"github.com/google/gxui/mixins/parts"
@@ -122,8 +123,10 @@ func (l *List) LayoutChildren() {
 
 		item, found := l.items[id]
 		if found {
-			assert.False(item.Mark == mark, "Adapter returned duplicate id (%v) for indices %v and %v",
-				id, item.Index, idx)
+			if item.Mark == mark {
+				panic(fmt.Errorf("Adapter returned duplicate id (%v) for indices %v and %v",
+					id, item.Index, idx))
+			}
 		} else {
 			item.Control = l.adapter.Create(l.theme, idx)
 			item.OnClickSubscription = item.Control.OnClick(func(ev gxui.MouseEvent) {

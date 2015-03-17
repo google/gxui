@@ -6,7 +6,6 @@ package parts
 
 import (
 	"github.com/google/gxui"
-	"github.com/google/gxui/assert"
 	"github.com/google/gxui/mixins/outer"
 )
 
@@ -30,7 +29,9 @@ func (a *Attachable) Attached() bool {
 }
 
 func (a *Attachable) Attach() {
-	assert.False(a.attached, "Control already attached")
+	if a.attached {
+		panic("Control already attached")
+	}
 	a.attached = true
 	a.outer.Relayout()
 	if a.onAttach != nil {
@@ -39,7 +40,9 @@ func (a *Attachable) Attach() {
 }
 
 func (a *Attachable) Detach() {
-	assert.True(a.attached, "Control already detached")
+	if !a.attached {
+		panic("Control already detached")
+	}
 	a.attached = false
 	if a.onDetach != nil {
 		a.onDetach.Fire()

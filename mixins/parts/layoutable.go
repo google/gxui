@@ -5,7 +5,8 @@
 package parts
 
 import (
-	"github.com/google/gxui/assert"
+	"fmt"
+
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/mixins/outer"
 )
@@ -42,8 +43,12 @@ func (l *Layoutable) Bounds() math.Rect {
 }
 
 func (l *Layoutable) Layout(rect math.Rect) {
-	assert.False(rect.W() < 0, "Layout() called with a negative width. Rect: %v", rect)
-	assert.False(rect.H() < 0, "Layout() called with a negative height. Rect: %v", rect)
+	if rect.W() < 0 {
+		panic(fmt.Errorf("Layout() called with a negative width. Rect: %v", rect))
+	}
+	if rect.H() < 0 {
+		panic(fmt.Errorf("Layout() called with a negative height. Rect: %v", rect))
+	}
 
 	boundsChanged := l.rect != rect
 	l.rect = rect

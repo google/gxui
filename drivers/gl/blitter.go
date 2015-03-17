@@ -6,7 +6,6 @@ package gl
 
 import (
 	"github.com/google/gxui"
-	"github.com/google/gxui/assert"
 	"github.com/google/gxui/math"
 
 	"github.com/go-gl-legacy/gl"
@@ -119,7 +118,6 @@ func (b *Blitter) Destroy(ctx *Context) {
 
 func (b *Blitter) Blit(ctx *Context, ss SamplerSource, srcRect, dstRect math.Rect, ds *DrawState) {
 	b.CommitGlyphs(ctx)
-	assert.NotNil(ctx, "context")
 
 	dstRect = dstRect.Offset(ds.OriginPixels)
 	sw, sh := ss.SizePixels().WH()
@@ -162,7 +160,6 @@ func (b *Blitter) Blit(ctx *Context, ss SamplerSource, srcRect, dstRect math.Rec
 }
 
 func (b *Blitter) BlitGlyph(ctx *Context, ss SamplerSource, c gxui.Color, srcRect, dstRect math.Rect, ds *DrawState) {
-	assert.NotNil(ctx, "context")
 	dstRect = dstRect.Offset(ds.OriginPixels)
 
 	if b.glyphBatch.GlyphPage != ss {

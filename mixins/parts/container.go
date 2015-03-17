@@ -5,8 +5,9 @@
 package parts
 
 import (
+	"fmt"
+
 	"github.com/google/gxui"
-	"github.com/google/gxui/assert"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/mixins/outer"
 )
@@ -76,9 +77,13 @@ func (c *Container) AddChild(child gxui.Control) {
 }
 
 func (c *Container) AddChildAt(index int, child gxui.Control) {
-	assert.NotNil(child, "Child")
-	assert.Nil(child.Parent(), "Child.Parent")
-	assert.True(index >= 0 && index <= len(c.children), "Index %d is out of bounds. Children count: %d", index, len(c.children))
+	if child.Parent() != nil {
+		panic("Child already has a parent")
+	}
+	if index < 0 || index > len(c.children) {
+		panic(fmt.Errorf("Index %d is out of bounds. Acceptable range: [%d - %d]",
+			index, 0, len(c.children)))
+	}
 
 	c.children = append(c.children, nil)
 	copy(c.children[index+1:], c.children[index:])

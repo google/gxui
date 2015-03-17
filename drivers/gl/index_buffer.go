@@ -6,7 +6,6 @@ package gl
 
 import (
 	"fmt"
-	"github.com/google/gxui/assert"
 	"reflect"
 
 	"github.com/go-gl-legacy/gl"
@@ -27,7 +26,9 @@ type IndexBufferContext struct {
 func CreateIndexBuffer(ty PrimitiveType, data interface{}) *IndexBuffer {
 	switch ty {
 	case UBYTE, USHORT, UINT:
-		assert.True(ty.IsArrayOfType(data), "Index data is not of the specified type")
+		if !ty.IsArrayOfType(data) {
+			panic(fmt.Errorf("Index data is not of type %v", ty))
+		}
 	default:
 		panic(fmt.Errorf("Index type must be either UBYTE, USHORT or UINT. Got: %v", ty))
 	}

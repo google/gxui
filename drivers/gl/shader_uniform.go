@@ -6,11 +6,10 @@ package gl
 
 import (
 	"fmt"
-	"github.com/google/gxui"
-	"github.com/google/gxui/assert"
-	"github.com/google/gxui/math"
 
 	"github.com/go-gl-legacy/gl"
+	"github.com/google/gxui"
+	"github.com/google/gxui/math"
 )
 
 type ShaderUniform struct {
@@ -69,7 +68,9 @@ func (u *ShaderUniform) Bind(context *Context, v interface{}) {
 		case math.Vec2:
 			u.Location.Uniform2fv(1, []float32{v.X, v.Y})
 		case []float32:
-			assert.True(len(v)%2 == 0, "Uniform '%s' of type vec2 should be an float32 array with a multiple of two length", u.Name)
+			if len(v)%2 != 0 {
+				panic(fmt.Errorf("Uniform '%s' of type vec2 should be an float32 array with a multiple of two length", u.Name))
+			}
 			u.Location.Uniform2fv(len(v)/2, v)
 		}
 	case FLOAT_VEC3:
@@ -77,7 +78,9 @@ func (u *ShaderUniform) Bind(context *Context, v interface{}) {
 		case math.Vec3:
 			u.Location.Uniform3fv(1, []float32{v.X, v.Y, v.Z})
 		case []float32:
-			assert.True(len(v)%3 == 0, "Uniform '%s' of type vec3 should be an float32 array with a multiple of three length", u.Name)
+			if len(v)%3 != 0 {
+				panic(fmt.Errorf("Uniform '%s' of type vec3 should be an float32 array with a multiple of three length", u.Name))
+			}
 			u.Location.Uniform3fv(len(v)/3, v)
 		}
 	case FLOAT_VEC4:
@@ -87,7 +90,9 @@ func (u *ShaderUniform) Bind(context *Context, v interface{}) {
 		case gxui.Color:
 			u.Location.Uniform4fv(1, []float32{v.R, v.G, v.B, v.A})
 		case []float32:
-			assert.True(len(v)%4 == 0, "Uniform '%s' of type vec4 should be an float32 array with a multiple of four length", u.Name)
+			if len(v)%4 != 0 {
+				panic(fmt.Errorf("Uniform '%s' of type vec4 should be an float32 array with a multiple of four length", u.Name))
+			}
 			u.Location.Uniform4fv(len(v)/4, v)
 		}
 	case SAMPLER_2D:

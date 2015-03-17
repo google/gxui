@@ -6,7 +6,6 @@ package gl
 
 import (
 	"fmt"
-	"github.com/google/gxui/assert"
 	"runtime"
 	"strings"
 	"sync/atomic"
@@ -26,8 +25,8 @@ type refCounted struct {
 
 func verifyRefCountIsZero(r *refCounted) {
 	if r.refCount != 0 {
-		assert.Assert("RefCounted object was garbage collected with a reference count of %d.\n%s",
-			r.refCount, strings.Join(r.history, "\n"))
+		panic(fmt.Errorf("RefCounted object was garbage collected with a reference count of %d.\n%s",
+			r.refCount, strings.Join(r.history, "\n")))
 	}
 }
 
