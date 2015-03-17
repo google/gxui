@@ -16,8 +16,8 @@ import (
 	gomath "math"
 )
 
-var data = flag.String("data", "data", "path to data")
-var file = flag.String("file", "file", "path to file")
+var data = flag.String("data", "", "path to data")
+var file = flag.String("file", "", "path to file")
 var width = flag.Int("width", 0, "width of the image")
 var height = flag.Int("height", 0, "height of the image")
 var imageType = flag.String("type", "rgba", "The type of the image (rgba or depth)")

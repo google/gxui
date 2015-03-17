@@ -7,13 +7,14 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/themes/dark"
 )
 
-var data = flag.String("data", "data", "path to data")
+var data = flag.String("data", "", "path to data")
 
 func vertexAt(p gxui.Polygon, at math.Point) int {
 	for i, v := range p {

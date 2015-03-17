@@ -6,14 +6,15 @@ package main
 
 import (
 	"flag"
+	"time"
+
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/themes/dark"
-	"time"
 )
 
-var data = flag.String("data", "data", "path to data")
+var data = flag.String("data", "", "path to data")
 
 func appMain(driver gxui.Driver) {
 	theme := dark.CreateTheme(driver)
@@ -35,12 +36,13 @@ func appMain(driver gxui.Driver) {
 	window.OnClose(driver.Terminate)
 
 	progress := 0
+	pause := time.Millisecond * 500
 	var timer *time.Timer
-	timer = time.AfterFunc(time.Millisecond*500, func() {
+	timer = time.AfterFunc(pause, func() {
 		driver.Events() <- func() {
 			progress = (progress + 3) % progressBar.Target()
 			progressBar.SetProgress(progress)
-			timer.Reset(time.Millisecond * 500)
+			timer.Reset(pause)
 		}
 	})
 
