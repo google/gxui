@@ -12,7 +12,7 @@ This is not an official Google product (experimental or otherwise), it is just c
 
 Contributing
 ---
-GXUI was written by a couple of Googlers as an experiement, but with help of the open-source community GXUI could mature into something far more interesting.
+GXUI was written by a couple of Googlers as an experiment, but with help of the open-source community GXUI could mature into something far more interesting.
 
 Contributions, however small are extremely welcome but will require the author to have signed the [Google Individual Contributor License Agreement](https://developers.google.com/open-source/cla/individual?csw=1).
 
