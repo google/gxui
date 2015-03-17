@@ -6,13 +6,14 @@ package main
 
 import (
 	"flag"
+
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/themes/dark"
 )
 
-var data = flag.String("data", "data", "path to data")
+var data = flag.String("data", "", "path to data")
 
 func buildStar(theme gxui.Theme, center math.Point, radius, rotation float32, points int) gxui.Image {
 	p := make(gxui.Polygon, points*2)
