@@ -25,7 +25,7 @@ var imageType = flag.String("type", "rgba", "The type of the image (rgba or dept
 func appMain(driver gxui.Driver) {
 	theme := dark.CreateTheme(driver)
 	img := theme.CreateImage()
-	window := theme.CreateWindow(800, 600, "Polygon")
+	window := theme.CreateWindow(800, 600, "Image viewer")
 	window.AddChild(img)
 
 	raw, _ := ioutil.ReadFile(*file)
