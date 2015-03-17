@@ -22,9 +22,8 @@ func compile(source string, ty gl.GLenum) gl.Shader {
 	s := gl.CreateShader(ty)
 	s.Source(source)
 	s.Compile()
-	err := s.GetInfoLog()
-	if err != "" {
-		panic(err)
+	if s.Get(gl.COMPILE_STATUS) != gl.TRUE {
+		panic(s.GetInfoLog())
 	}
 	return s
 }
@@ -39,9 +38,8 @@ func CreateShaderProgram(ctx *Context, vsSource, fsSource string) *ShaderProgram
 	program.Link()
 	program.Validate()
 
-	err := program.GetInfoLog()
-	if err != "" {
-		panic(err)
+	if program.Get(gl.LINK_STATUS) != gl.TRUE {
+		panic(program.GetInfoLog())
 	}
 
 	program.Use()
