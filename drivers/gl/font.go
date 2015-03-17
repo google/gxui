@@ -31,10 +31,10 @@ type Font struct {
 	quads            []Quad // Reused each call to Draw()
 }
 
-func CreateFont(name string, data []byte, size int) *Font {
+func CreateFont(name string, data []byte, size int) (*Font, error) {
 	ttf, err := truetype.Parse(data)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	scale := int32(size << 6)
@@ -55,7 +55,7 @@ func CreateFont(name string, data []byte, size int) *Font {
 		resolutions:      make(map[Resolution]*glyphTable),
 		glyphs:           make(map[rune]*glyph),
 		quads:            []Quad{},
-	}
+	}, nil
 }
 
 func (f *Font) glyph(r rune) *glyph {

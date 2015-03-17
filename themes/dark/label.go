@@ -12,7 +12,7 @@ import (
 
 func CreateLabel(theme *Theme) gxui.Label {
 	l := &mixins.Label{}
-	l.Init(l, theme, theme.DefaultFont, theme.LabelStyle.FontColor)
+	l.Init(l, theme, theme.defaultFont, theme.LabelStyle.FontColor)
 	l.SetMargin(math.Spacing{L: 3, T: 3, R: 3, B: 3})
 	return l
 }

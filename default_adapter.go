@@ -34,7 +34,7 @@ func CreateDefaultAdapter() *DefaultAdapter {
 
 func (a *DefaultAdapter) SetItemSizeAsLargest(theme Theme) {
 	s := math.Size{}
-	font := theme.DefaultLabelFont()
+	font := theme.DefaultFont()
 	for i := 0; i < a.Count(); i++ {
 		e := a.data.Index(i).Interface()
 		switch t := e.(type) {

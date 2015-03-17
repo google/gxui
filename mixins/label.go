@@ -28,6 +28,9 @@ type Label struct {
 }
 
 func (l *Label) Init(outer LabelOuter, theme gxui.Theme, font gxui.Font, color gxui.Color) {
+	if font == nil {
+		panic("Cannot create a label with a nil font")
+	}
 	l.Control.Init(outer, theme)
 	l.outer = outer
 	l.font = font

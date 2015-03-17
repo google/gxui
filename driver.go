@@ -15,8 +15,8 @@ type Driver interface {
 	Terminate()
 	SetClipboard(str string)
 	GetClipboard() (string, error)
+	LoadFont(name string, size int) (Font, error)
 	CreateViewport(width, height int, name string) Viewport
 	CreateCanvas(math.Size) Canvas
-	CreateFont(name string, size int) Font
 	CreateTexture(img image.Image, pixelsPerDip float32) Texture
 }

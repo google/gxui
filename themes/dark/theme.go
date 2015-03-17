@@ -5,12 +5,16 @@
 package dark
 
 import (
+	"fmt"
+
 	"github.com/google/gxui"
 )
 
+const defaultFontName = "Arial.ttf"
+
 type Theme struct {
 	driver      gxui.Driver
-	DefaultFont gxui.Font
+	defaultFont gxui.Font
 
 	WindowBackground gxui.Color
 
@@ -40,8 +44,12 @@ type Theme struct {
 }
 
 func CreateTheme(driver gxui.Driver) gxui.Theme {
-	defaultFont := driver.CreateFont("SourceCodePro-Regular.ttf", 12)
-	defaultFont.LoadGlyphs(32, 126)
+	defaultFont, err := driver.LoadFont(defaultFontName, 12)
+	if err == nil {
+		defaultFont.LoadGlyphs(32, 126)
+	} else {
+		fmt.Printf("Warning: Failed to load default font - %v\n", err)
+	}
 
 	scrollBarRailDefaultBg := gxui.Black
 	scrollBarRailDefaultBg.A = 0.7
@@ -54,7 +62,7 @@ func CreateTheme(driver gxui.Driver) gxui.Theme {
 
 	return &Theme{
 		driver:      driver,
-		DefaultFont: defaultFont,
+		defaultFont: defaultFont,
 
 		WindowBackground: gxui.Black,
 
@@ -90,8 +98,12 @@ func (t *Theme) Driver() gxui.Driver {
 	return t.driver
 }
 
-func (t *Theme) DefaultLabelFont() gxui.Font {
-	return t.DefaultFont
+func (t *Theme) DefaultFont() gxui.Font {
+	return t.defaultFont
+}
+
+func (t *Theme) SetDefaultFont(f gxui.Font) {
+	t.defaultFont = f
 }
 
 func (t *Theme) CreateBubbleOverlay() gxui.BubbleOverlay {

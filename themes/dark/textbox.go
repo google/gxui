@@ -17,7 +17,7 @@ type TextBox struct {
 
 func CreateTextBox(theme *Theme) gxui.TextBox {
 	t := &TextBox{}
-	t.Init(t, theme.driver, theme, theme.DefaultFont)
+	t.Init(t, theme.driver, theme, theme.defaultFont)
 	t.SetTextColor(theme.TextBoxDefaultStyle.FontColor)
 	t.SetMargin(math.Spacing{L: 3, T: 3, R: 3, B: 3})
 	t.SetPadding(math.Spacing{L: 3, T: 3, R: 3, B: 3})

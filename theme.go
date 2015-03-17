@@ -6,7 +6,8 @@ package gxui
 
 type Theme interface {
 	Driver() Driver
-	DefaultLabelFont() Font
+	DefaultFont() Font
+	SetDefaultFont(Font)
 	CreateBubbleOverlay() BubbleOverlay
 	CreateButton() Button
 	CreateCodeEditor() CodeEditor
