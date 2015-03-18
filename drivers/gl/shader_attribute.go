@@ -4,22 +4,23 @@
 
 package gl
 
-import (
-	"github.com/go-gl-legacy/gl"
-)
+import "github.com/go-gl/gl/v3.2-core/gl"
 
-type ShaderAttribute struct {
-	Name     string
-	Size     int
-	Type     ShaderDataType
-	Location gl.AttribLocation
+type shaderAttribute struct {
+	name     string
+	size     int
+	ty       ShaderDataType
+	location uint32
 }
 
-func CreateShaderAttribute(name string, size int, ty ShaderDataType, location gl.AttribLocation) ShaderAttribute {
-	return ShaderAttribute{
-		Name:     name,
-		Size:     size,
-		Type:     ty,
-		Location: location,
-	}
+func (a shaderAttribute) EnableArray() {
+	gl.EnableVertexAttribArray(a.location)
+}
+
+func (a shaderAttribute) DisableArray() {
+	gl.DisableVertexAttribArray(a.location)
+}
+
+func (a shaderAttribute) AttribPointer(size int32, ty uint32, normalized bool, stride int32, data interface{}) {
+	gl.VertexAttribPointer(a.location, size, ty, normalized, stride, gl.Ptr(data))
 }

@@ -9,44 +9,52 @@ import (
 	"fmt"
 	"github.com/google/gxui/math"
 
-	"github.com/go-gl-legacy/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
 type Framebuffer struct {
-	Dimensions  math.Size
-	Framebuffer gl.Framebuffer
-	Texture     gl.Texture
+	dimensions  math.Size
+	framebuffer uint32
+	texture     uint32
 }
 
 func CreateFramebuffer(dimensions math.Size) *Framebuffer {
+	var framebuffer uint32
+	gl.GenFramebuffers(1, &framebuffer)
+
+	var texture uint32
+	gl.GenTextures(1, &texture)
+
 	f := &Framebuffer{
-		Dimensions:  dimensions,
-		Framebuffer: gl.GenFramebuffer(),
-		Texture:     gl.GenTexture(),
+		dimensions:  dimensions,
+		framebuffer: framebuffer,
+		texture:     texture,
 	}
 
-	f.Texture.Bind(gl.TEXTURE_2D)
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, dimensions.W, dimensions.H, 0, gl.RGBA, gl.UNSIGNED_BYTE, nil)
+	gl.BindTexture(gl.TEXTURE_2D, texture)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(dimensions.W), int32(dimensions.H), 0, gl.RGBA, gl.UNSIGNED_BYTE, nil)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	f.Framebuffer.Bind()
-	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, f.Texture, 0)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, framebuffer)
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, f.texture, 0)
 	status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER)
 	if status != gl.FRAMEBUFFER_COMPLETE {
 		panic(fmt.Errorf("CheckFramebufferStatus returned 0x%.4x for size %+v", status, dimensions))
 	}
-	f.Texture.Unbind(gl.TEXTURE_2D)
+	gl.BindTexture(gl.TEXTURE_2D, 0)
 
 	return f
 }
 
 func (f Framebuffer) SizeBytes() int {
-	return f.Dimensions.W * f.Dimensions.H * 4
+	return f.dimensions.W * f.dimensions.H * 4
 }
 
 func (f Framebuffer) Delete() {
-	f.Framebuffer.Delete()
-	f.Texture.Delete()
+	gl.DeleteFramebuffers(1, &f.framebuffer)
+	gl.DeleteTextures(1, &f.texture)
+	f.framebuffer = 0
+	f.texture = 0
 }
 
 type FramebufferPool struct {
@@ -69,7 +77,7 @@ func CreateFramebufferPool(targetBytesAllocated int, stats *Stats) *FramebufferP
 func (p *FramebufferPool) Acquire(dimensions math.Size) *Framebuffer {
 	for e := p.free.Front(); e != nil; e = e.Next() {
 		f := e.Value.(*Framebuffer)
-		if f.Dimensions == dimensions {
+		if f.dimensions == dimensions {
 			p.free.Remove(e)
 			p.used.PushFront(f)
 			p.updateStats()

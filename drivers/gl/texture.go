@@ -8,7 +8,7 @@ import (
 	"github.com/google/gxui/math"
 	"image"
 
-	"github.com/go-gl-legacy/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
 type Texture struct {
@@ -50,7 +50,7 @@ func (t *Texture) SetFlipY(flipY bool) {
 }
 
 func (t *Texture) CreateContext() TextureContext {
-	var fmt gl.GLenum
+	var fmt uint32
 	var data interface{}
 	var pma bool
 
@@ -72,17 +72,18 @@ func (t *Texture) CreateContext() TextureContext {
 		panic("Unsupported image type")
 	}
 
-	glTex := gl.GenTexture()
-	glTex.Bind(gl.TEXTURE_2D)
+	var texture uint32
+	gl.GenTextures(1, &texture)
+	gl.BindTexture(gl.TEXTURE_2D, texture)
 	w, h := t.SizePixels().WH()
-	gl.TexImage2D(gl.TEXTURE_2D, 0, int(fmt), w, h, 0, fmt, gl.UNSIGNED_BYTE, data)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, int32(fmt), int32(w), int32(h), 0, fmt, gl.UNSIGNED_BYTE, gl.Ptr(data))
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	glTex.Unbind(gl.TEXTURE_2D)
+	gl.BindTexture(gl.TEXTURE_2D, 0)
 	CheckError()
 
 	return TextureContext{
-		texture:    glTex,
+		texture:    texture,
 		sizePixels: t.Size(),
 		flipY:      t.flipY,
 		pma:        pma,
@@ -90,13 +91,13 @@ func (t *Texture) CreateContext() TextureContext {
 }
 
 type TextureContext struct {
-	texture    gl.Texture
+	texture    uint32
 	sizePixels math.Size
 	flipY      bool
 	pma        bool
 }
 
-func (c TextureContext) Texture() gl.Texture {
+func (c TextureContext) Texture() uint32 {
 	return c.texture
 }
 
@@ -113,5 +114,5 @@ func (c TextureContext) PremultipliedAlpha() bool {
 }
 
 func (c *TextureContext) Destroy() {
-	c.texture.Delete()
+	gl.DeleteTextures(1, &c.texture)
 }

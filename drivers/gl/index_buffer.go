@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/go-gl-legacy/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
 type IndexBuffer struct {
@@ -18,7 +18,7 @@ type IndexBuffer struct {
 }
 
 type IndexBufferContext struct {
-	buffer gl.Buffer
+	buffer uint32
 	ty     PrimitiveType
 	length int
 }
@@ -53,11 +53,12 @@ func (b IndexBuffer) CreateContext() IndexBufferContext {
 	length := dataVal.Len()
 	size := length * b.ty.SizeInBytes()
 
-	buffer := gl.GenBuffer()
-	buffer.Bind(gl.ELEMENT_ARRAY_BUFFER)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, size, b.data, gl.STATIC_DRAW)
+	var buffer uint32
+	gl.GenBuffers(1, &buffer)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, size, gl.Ptr(b.data), gl.STATIC_DRAW)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 	CheckError()
-	buffer.Unbind(gl.ELEMENT_ARRAY_BUFFER)
 
 	return IndexBufferContext{
 		buffer: buffer,
@@ -67,13 +68,13 @@ func (b IndexBuffer) CreateContext() IndexBufferContext {
 }
 
 func (c *IndexBufferContext) Destroy() {
-	c.buffer.Delete()
-	c.buffer = gl.Buffer(0)
+	gl.DeleteBuffers(1, &c.buffer)
+	c.buffer = 0
 }
 
 func (c IndexBufferContext) Render(drawMode DrawMode) {
-	c.buffer.Bind(gl.ELEMENT_ARRAY_BUFFER)
-	gl.DrawElements(gl.GLenum(drawMode), c.length, gl.GLenum(c.ty), nil)
-	c.buffer.Unbind(gl.ELEMENT_ARRAY_BUFFER)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, c.buffer)
+	gl.DrawElements(uint32(drawMode), int32(c.length), uint32(c.ty), nil)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 	CheckError()
 }

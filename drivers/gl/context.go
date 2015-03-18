@@ -8,11 +8,11 @@ import (
 	"github.com/google/gxui/math"
 	"sync"
 
-	"github.com/go-gl-legacy/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
 type SamplerSource interface {
-	Texture() gl.Texture
+	Texture() uint32
 	SizePixels() math.Size
 	FlipY() bool
 	PremultipliedAlpha() bool
@@ -148,7 +148,7 @@ func (c *Context) Apply(ds *DrawState) {
 		c.clip = r
 		vs := c.sizePixels
 		rs := r.Size()
-		gl.Scissor(r.Min.X, vs.H-r.Max.Y, rs.W, rs.H)
+		gl.Scissor(int32(r.Min.X), int32(vs.H)-int32(r.Max.Y), int32(rs.W), int32(rs.H))
 	}
 }
 

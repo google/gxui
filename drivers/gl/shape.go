@@ -4,7 +4,7 @@
 
 package gl
 
-import "github.com/go-gl-legacy/gl"
+import "github.com/go-gl/gl/v3.2-core/gl"
 
 type Shape struct {
 	refCounted
@@ -64,8 +64,8 @@ func (s Shape) Draw(ctx *Context, shader *ShaderProgram, ub UniformBindings) {
 	if s.ib != nil {
 		ctx.GetOrCreateIndexBufferContext(s.ib).Render(s.drawMode)
 	} else {
-		gl.DrawArrays(gl.GLenum(s.drawMode), 0, s.vb.VertexCount)
+		gl.DrawArrays(uint32(s.drawMode), 0, int32(s.vb.VertexCount))
 	}
-	CheckError()
 	shader.Unbind(ctx)
+	CheckError()
 }

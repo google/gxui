@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/go-gl-legacy/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
 type VertexStream struct {
@@ -20,7 +20,7 @@ type VertexStream struct {
 }
 
 type VertexStreamContext struct {
-	buffer gl.Buffer
+	buffer uint32
 }
 
 func CreateVertexStream(name string, ty ShaderDataType, data interface{}) *VertexStream {
@@ -69,20 +69,21 @@ func (s VertexStream) CreateContext() VertexStreamContext {
 	dataLen := dataVal.Len()
 	size := dataLen * s.ty.VectorElementType().SizeInBytes()
 
-	buffer := gl.GenBuffer()
-	buffer.Bind(gl.ARRAY_BUFFER)
-	gl.BufferData(gl.ARRAY_BUFFER, size, s.data, gl.STATIC_DRAW)
+	var buffer uint32
+	gl.GenBuffers(1, &buffer)
+	gl.BindBuffer(gl.ARRAY_BUFFER, buffer)
+	gl.BufferData(gl.ARRAY_BUFFER, size, gl.Ptr(s.data), gl.STATIC_DRAW)
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	CheckError()
-	buffer.Unbind(gl.ARRAY_BUFFER)
 
 	return VertexStreamContext{buffer}
 }
 
 func (c VertexStreamContext) Bind() {
-	c.buffer.Bind(gl.ARRAY_BUFFER)
+	gl.BindBuffer(gl.ARRAY_BUFFER, c.buffer)
 }
 
 func (c *VertexStreamContext) Destroy() {
-	c.buffer.Delete()
-	c.buffer = gl.Buffer(0)
+	gl.DeleteBuffers(1, &c.buffer)
+	c.buffer = 0
 }

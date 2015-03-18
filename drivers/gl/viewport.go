@@ -9,7 +9,7 @@ import (
 	"sync"
 	"unicode"
 
-	"github.com/go-gl-legacy/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl/platform"
@@ -64,8 +64,8 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 		panic(err)
 	}
 	wnd.MakeContextCurrent()
-	if gl.Init() != gl.GLenum(0) {
-		panic("Failed to initialize gl")
+	if err := gl.Init(); err != nil {
+		panic(fmt.Errorf("Failed to initialize gl: %v", err))
 	}
 
 	v.context = CreateContext()
@@ -91,7 +91,7 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 		v.Lock()
 		v.sizePixels = math.Size{W: w, H: h}
 		v.Unlock()
-		gl.Viewport(0, 0, w, h)
+		gl.Viewport(0, 0, int32(w), int32(h))
 		gl.ClearColor(kClearColorR, kClearColorG, kClearColorB, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 	})
@@ -209,8 +209,8 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	gl.Enable(gl.BLEND)
 	gl.Enable(gl.SCISSOR_TEST)
-	gl.Viewport(0, 0, fw, fh)
-	gl.Scissor(0, 0, fw, fh)
+	gl.Viewport(0, 0, int32(fw), int32(fh))
+	gl.Scissor(0, 0, int32(fw), int32(fh))
 	gl.ClearColor(kClearColorR, kClearColorG, kClearColorB, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 	wnd.SwapBuffers()

@@ -7,100 +7,90 @@ package gl
 import (
 	"fmt"
 
-	"github.com/go-gl-legacy/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/google/gxui"
 	"github.com/google/gxui/math"
 )
 
-type ShaderUniform struct {
-	Name        string
-	Size        int
-	Type        ShaderDataType
-	Location    gl.UniformLocation
-	TextureUnit int
+type shaderUniform struct {
+	name        string
+	size        int
+	ty          ShaderDataType
+	location    int32
+	textureUnit int
 }
 
-func CreateShaderUniform(name string, size int, ty ShaderDataType, location gl.UniformLocation, textureUnit int) ShaderUniform {
-	return ShaderUniform{
-		Name:        name,
-		Size:        size,
-		Type:        ty,
-		Location:    location,
-		TextureUnit: textureUnit,
-	}
-}
-
-func (u *ShaderUniform) Bind(context *Context, v interface{}) {
+func (u *shaderUniform) Bind(context *Context, v interface{}) {
 	transpose := true // UniformMatrix expects column-major, gxui is row-major
-	switch u.Type {
+	switch u.ty {
 	case FLOAT_MAT2x3:
-		u.Location.UniformMatrix2x3fv(transpose, v.([6]float32))
+		gl.UniformMatrix2x3fv(u.location, 1, transpose, &v.([]float32)[0])
 	case FLOAT_MAT2x4:
-		u.Location.UniformMatrix2x4fv(transpose, v.([8]float32))
+		gl.UniformMatrix2x4fv(u.location, 1, transpose, &v.([]float32)[0])
 	case FLOAT_MAT2:
-		u.Location.UniformMatrix2fv(transpose, v.([4]float32))
+		gl.UniformMatrix2fv(u.location, 1, transpose, &v.([]float32)[0])
 	case FLOAT_MAT3x2:
-		u.Location.UniformMatrix3x2fv(transpose, v.([6]float32))
+		gl.UniformMatrix3x2fv(u.location, 1, transpose, &v.([]float32)[0])
 	case FLOAT_MAT3x4:
-		u.Location.UniformMatrix3x4fv(transpose, v.([12]float32))
+		gl.UniformMatrix3x4fv(u.location, 1, transpose, &v.([]float32)[0])
 	case FLOAT_MAT3:
 		switch m := v.(type) {
 		case math.Mat3:
-			u.Location.UniformMatrix3fv(transpose, [9]float32(m))
-		case [9]float32:
-			u.Location.UniformMatrix3fv(transpose, m)
+			gl.UniformMatrix3fv(u.location, 1, transpose, &m[0])
+		case []float32:
+			gl.UniformMatrix3fv(u.location, 1, transpose, &m[0])
 		}
 	case FLOAT_MAT4x2:
-		u.Location.UniformMatrix4x2fv(transpose, v.([8]float32))
+		gl.UniformMatrix4x2fv(u.location, 1, transpose, &v.([]float32)[0])
 	case FLOAT_MAT4x3:
-		u.Location.UniformMatrix4x3fv(transpose, v.([12]float32))
+		gl.UniformMatrix4x3fv(u.location, 1, transpose, &v.([]float32)[0])
 	case FLOAT_MAT4:
-		u.Location.UniformMatrix4fv(transpose, v.([16]float32))
+		gl.UniformMatrix4fv(u.location, 1, transpose, &v.([]float32)[0])
 	case FLOAT_VEC1:
 		switch v := v.(type) {
 		case float32:
-			u.Location.Uniform1f(v)
+			gl.Uniform1f(u.location, v)
 		case []float32:
-			u.Location.Uniform1fv(len(v), v)
+			gl.Uniform1fv(u.location, int32(len(v)), &v[0])
 		}
 	case FLOAT_VEC2:
 		switch v := v.(type) {
 		case math.Vec2:
-			u.Location.Uniform2fv(1, []float32{v.X, v.Y})
+			gl.Uniform2fv(u.location, 1, &[]float32{v.X, v.Y}[0])
 		case []float32:
 			if len(v)%2 != 0 {
-				panic(fmt.Errorf("Uniform '%s' of type vec2 should be an float32 array with a multiple of two length", u.Name))
+				panic(fmt.Errorf("Uniform '%s' of type vec2 should be an float32 array with a multiple of two length", u.name))
 			}
-			u.Location.Uniform2fv(len(v)/2, v)
+			gl.Uniform2fv(u.location, int32(len(v)/2), &v[0])
 		}
 	case FLOAT_VEC3:
 		switch v := v.(type) {
 		case math.Vec3:
-			u.Location.Uniform3fv(1, []float32{v.X, v.Y, v.Z})
+			gl.Uniform3fv(u.location, 1, &[]float32{v.X, v.Y, v.Z}[0])
 		case []float32:
 			if len(v)%3 != 0 {
-				panic(fmt.Errorf("Uniform '%s' of type vec3 should be an float32 array with a multiple of three length", u.Name))
+				panic(fmt.Errorf("Uniform '%s' of type vec3 should be an float32 array with a multiple of three length", u.name))
 			}
-			u.Location.Uniform3fv(len(v)/3, v)
+			gl.Uniform3fv(u.location, int32(len(v)/3), &v[0])
 		}
 	case FLOAT_VEC4:
 		switch v := v.(type) {
 		case math.Vec4:
-			u.Location.Uniform4fv(1, []float32{v.X, v.Y, v.Z, v.W})
+			gl.Uniform4fv(u.location, 1, &[]float32{v.X, v.Y, v.Z, v.W}[0])
 		case gxui.Color:
-			u.Location.Uniform4fv(1, []float32{v.R, v.G, v.B, v.A})
+			gl.Uniform4fv(u.location, 1, &[]float32{v.R, v.G, v.B, v.A}[0])
 		case []float32:
 			if len(v)%4 != 0 {
-				panic(fmt.Errorf("Uniform '%s' of type vec4 should be an float32 array with a multiple of four length", u.Name))
+				panic(fmt.Errorf("Uniform '%s' of type vec4 should be an float32 array with a multiple of four length", u.name))
 			}
-			u.Location.Uniform4fv(len(v)/4, v)
+			gl.Uniform4fv(u.location, int32(len(v)/4), &v[0])
 		}
 	case SAMPLER_2D:
 		ss := v.(SamplerSource)
-		gl.ActiveTexture(gl.GLenum(gl.TEXTURE0 + u.TextureUnit))
-		ss.Texture().Bind(gl.TEXTURE_2D)
-		u.Location.Uniform1i(u.TextureUnit)
+		gl.ActiveTexture(gl.TEXTURE0 + uint32(u.textureUnit))
+		gl.BindTexture(gl.TEXTURE_2D, ss.Texture())
+		gl.Uniform1i(u.location, int32(u.textureUnit))
 	default:
-		panic(fmt.Errorf("Uniform of unsupported type %s", u.Type))
+		panic(fmt.Errorf("Uniform of unsupported type %s", u.ty))
 	}
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/google/gxui"
 	"github.com/google/gxui/math"
 
-	"github.com/go-gl-legacy/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
 const debugWireframePolygons = false

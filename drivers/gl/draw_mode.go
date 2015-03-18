@@ -7,7 +7,7 @@ package gl
 import (
 	"fmt"
 
-	"github.com/go-gl-legacy/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
 type DrawMode int

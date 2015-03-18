@@ -7,7 +7,7 @@ package gl
 import (
 	"fmt"
 
-	"github.com/go-gl-legacy/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/google/gxui"
 	"github.com/google/gxui/math"
 )
@@ -119,10 +119,10 @@ func (c *Canvas) AddClip(r math.Rect) {
 func (c *Canvas) Clear(color gxui.Color) {
 	c.appendOp("Clear", func(ctx *Context, dss *DrawStateStack) {
 		gl.ClearColor(
-			gl.GLclampf(color.R),
-			gl.GLclampf(color.G),
-			gl.GLclampf(color.B),
-			gl.GLclampf(color.A),
+			color.R,
+			color.G,
+			color.B,
+			color.A,
 		)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 	})
