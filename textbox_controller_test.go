@@ -4,10 +4,9 @@
 
 package gxui
 
-import test "github.com/google/gxui/testing"
 import (
 	"fmt"
-	"github.com/google/gxui/assert"
+	test "github.com/google/gxui/testing"
 	"testing"
 )
 
@@ -29,11 +28,15 @@ func parseTBC(markup string) *TextBoxController {
 			sel.caretAtStart = true
 		case ']':
 			sel.end = i
-			assert.Equals(false, sel.CaretAtStart(), "CaretAtStart")
+			if sel.CaretAtStart() {
+				panic("Carat should be at end")
+			}
 			tbc.AddSelection(sel)
 		case '}':
 			sel.end = i
-			assert.Equals(true, sel.CaretAtStart(), "CaretAtStart")
+			if !sel.CaretAtStart() {
+				panic("Carat should be at start")
+			}
 			tbc.AddSelection(sel)
 		default:
 			runes = append(runes, c)
