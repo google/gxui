@@ -1,7 +1,7 @@
 GXUI - A Go cross platform UI library.
 =======
 
-Disclamer
+Disclaimer
 ---
 All code in this package **is experimental and will have frequent breaking
 changes**. Please feel free to play, but please don't be upset when the API has significant reworkings.
