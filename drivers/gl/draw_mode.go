@@ -22,7 +22,7 @@ const (
 	TRIANGLES      DrawMode = gl.TRIANGLES
 )
 
-func (d DrawMode) PrimativeCount(vertexCount int) int {
+func (d DrawMode) PrimitiveCount(vertexCount int) int {
 	switch d {
 	case POINTS:
 		return vertexCount
