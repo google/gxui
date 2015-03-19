@@ -14,7 +14,7 @@ Build and install sample program:
 
     go install github.com/google/gxui/samples/image_viewer/
 
-When ```GOPATH/bin``` is in your PATH you can run ```imageviewer```. 
+When ```GOPATH/bin``` is in your PATH, you can run ```image_viewer```. 
 
 Disclaimer
 ---
