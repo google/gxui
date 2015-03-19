@@ -1,6 +1,21 @@
 GXUI - A Go cross platform UI library.
 =======
 
+Usage
+---
+After setting up ```GOPATH``` (see [Go documentation](https://golang.org/doc/code.html)), get the required Go libraries and this repository:
+
+    go get code.google.com/p/freetype-go/freetype
+    go get github.com/go-gl/gl/v3.2-core/gl
+    go get github.com/go-gl/glfw/v3.1/glfw
+    go get github.com/google/gxui
+
+Build and install sample program:
+
+    go install github.com/google/gxui/samples/image_viewer/
+
+When ```GOPATH/bin``` is in your PATH you can run ```imageviewer```. 
+
 Disclaimer
 ---
 All code in this package **is experimental and will have frequent breaking
