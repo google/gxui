@@ -5,8 +5,9 @@
 package gxui
 
 import (
-	"github.com/google/gxui/math"
 	"image"
+
+	"github.com/google/gxui/math"
 )
 
 type Driver interface {
@@ -18,7 +19,10 @@ type Driver interface {
 	Terminate()
 	SetClipboard(str string)
 	GetClipboard() (string, error)
-	LoadFont(name string, size int) (Font, error)
+
+	// CreateFont loads a font from the provided TrueType bytes.
+	CreateFont(data []byte, size int) (Font, error)
+
 	CreateViewport(width, height int, name string) Viewport
 	CreateCanvas(math.Size) Canvas
 	CreateTexture(img image.Image, pixelsPerDip float32) Texture

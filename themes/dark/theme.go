@@ -8,9 +8,8 @@ import (
 	"fmt"
 
 	"github.com/google/gxui"
+	"github.com/google/gxui/gxfont"
 )
-
-const defaultFontName = "Arial.ttf"
 
 type Theme struct {
 	driver      gxui.Driver
@@ -44,7 +43,7 @@ type Theme struct {
 }
 
 func CreateTheme(driver gxui.Driver) gxui.Theme {
-	defaultFont, err := driver.LoadFont(defaultFontName, 12)
+	defaultFont, err := driver.CreateFont(gxfont.Default, 12)
 	if err == nil {
 		defaultFont.LoadGlyphs(32, 126)
 	} else {

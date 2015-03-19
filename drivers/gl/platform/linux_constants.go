@@ -7,10 +7,3 @@
 package platform
 
 const ScrollSpeed = 20.0
-
-// Paths to try when a font is not found in the local data directory
-var FontPaths = []string{
-	"/usr/share/fonts",
-	"/usr/local/share/fonts",
-	"~/.fonts",
-}

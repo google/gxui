@@ -20,7 +20,6 @@ type Quad struct {
 }
 
 type Font struct {
-	name             string
 	size             int
 	scale            int32
 	glyphMaxSizeDips math.Size
@@ -31,7 +30,7 @@ type Font struct {
 	quads            []Quad // Reused each call to Draw()
 }
 
-func CreateFont(name string, data []byte, size int) (*Font, error) {
+func createFont(data []byte, size int) (*Font, error) {
 	ttf, err := truetype.Parse(data)
 	if err != nil {
 		return nil, err
@@ -46,7 +45,6 @@ func CreateFont(name string, data []byte, size int) (*Font, error) {
 	ascentDips := int(bounds.YMax >> 6)
 
 	return &Font{
-		name:             name,
 		size:             size,
 		scale:            scale,
 		glyphMaxSizeDips: glyphMaxSizeDips,
@@ -161,10 +159,6 @@ func (f *Font) DrawRunes(ctx *Context, runes []rune, col gxui.Color, points []ma
 		tc := ctx.GetOrCreateTextureContext(texture)
 		ctx.Blitter.BlitGlyph(ctx, tc, col, srcRect, dstRect, ds)
 	}
-}
-
-func (f *Font) Name() string {
-	return f.name
 }
 
 func (f *Font) Size() int {
