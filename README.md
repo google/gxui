@@ -1,21 +1,6 @@
 GXUI - A Go cross platform UI library.
 =======
 
-Usage
----
-After setting up ```GOPATH``` (see [Go documentation](https://golang.org/doc/code.html)), get the required Go libraries and this repository:
-
-    go get code.google.com/p/freetype-go/freetype
-    go get github.com/go-gl/gl/v3.2-core/gl
-    go get github.com/go-gl/glfw/v3.1/glfw
-    go get github.com/google/gxui
-
-Build and install sample program:
-
-    go install github.com/google/gxui/samples/image_viewer/
-
-When ```GOPATH/bin``` is in your PATH, you can run ```image_viewer```. 
-
 Disclaimer
 ---
 All code in this package **is experimental and will have frequent breaking
@@ -24,6 +9,53 @@ changes**. Please feel free to play, but please don't be upset when the API has 
 The code is currently undocumented, and is certainly **not idiomatic Go**. It will be heavily refactored over the coming months.
 
 This is not an official Google product (experimental or otherwise), it is just code that happens to be owned by Google.
+
+Dependencies
+---
+After setting up ```GOPATH``` (see [Go documentation](https://golang.org/doc/code.html)), you will first need to fetch the required dependencies:
+
+    go get code.google.com/p/freetype-go/freetype
+    go get github.com/go-gl/gl/v3.2-core/gl
+    go get github.com/go-gl/glfw/v3.1/glfw
+
+
+Once these have been fetched, you can then fetch the GXUI library:
+
+    go get github.com/google/gxui
+
+Samples
+---
+Samples can be found in [`gxui/samples`](https://github.com/google/gxui/tree/master/samples). 
+
+To build all samples run:
+
+    go install github.com/google/gxui/samples/...
+
+And they will be built into ```GOPATH/bin```.
+
+If you add ```GOPATH/bin``` to your PATH, you can simply type the name of a sample to run it. For example: ```image_viewer```. 
+
+Fonts
+---
+Many of the samples require a font to render text. The dark theme (and currently the only theme) uses `Arial.ttf`.
+GXUI will try to locate fonts in the following places from top to bottom:
+
+ * [Windows](https://github.com/google/gxui/blob/master/drivers/gl/platform/windows_constants.go#L21)
+  * The directory specified with the command line argument `--data` (default is CWD)
+  * The windows font directory.
+
+ * [OSX](https://github.com/google/gxui/blob/master/drivers/gl/platform/osx_constants.go#L12)
+  * The directory specified with the command line argument `--data` (default is CWD)
+  * `/Library/Fonts/`
+  * `/System/Library/Fonts/`
+
+ * [Linux](https://github.com/google/gxui/blob/master/drivers/gl/platform/linux_constants.go#L12)
+  * The directory specified with the command line argument `--data` (default is CWD)
+  * `/usr/share/fonts`
+  * `/usr/local/share/fonts`
+  * `~/.fonts`
+
+Note: We are aware that Arial does not come with certain operating systems, and are looking to bundle a font with GXUI.
 
 Contributing
 ---
