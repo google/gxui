@@ -54,12 +54,13 @@ func StartDriver(dataPath string, appThread AppThread) {
 }
 
 func (d *Driver) asyncDriver(f func()) {
-	d.Call(f)
+	d.pendingDriver <- f
+	d.wake()
 }
 
 func (d *Driver) syncDriver(f func()) {
 	c := make(chan bool, 1)
-	d.Call(func() { f(); c <- true })
+	d.asyncDriver(func() { f(); c <- true })
 	<-c
 }
 
@@ -108,11 +109,6 @@ func (d *Driver) EnableDebug(enabled bool) {
 // gxui.Driver compliance
 func (d *Driver) Events() chan func() {
 	return d.pendingApp
-}
-
-func (d *Driver) Call(f func()) {
-	d.pendingDriver <- f
-	d.wake()
 }
 
 func (d *Driver) Terminate() {

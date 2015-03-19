@@ -5,15 +5,7 @@
 package gxui
 
 func EventLoop(driver Driver) {
-	events := driver.Events()
-	for {
-		select {
-		case ev, open := <-events:
-			if open {
-				ev()
-			} else {
-				return // closed channel represents driver shutdown
-			}
-		}
+	for ev := range driver.Events() {
+		ev()
 	}
 }
