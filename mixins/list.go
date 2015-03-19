@@ -246,6 +246,9 @@ func (l *List) VisibleItemRange(includePartiallyVisible bool) (startIndex, endIn
 	s := l.outer.Bounds().Size()
 	p := l.outer.Padding()
 	majorAxisItemSize := l.MajorAxisItemSize()
+	if majorAxisItemSize == 0 {
+		return 0, 0
+	}
 	startIndex = l.scrollOffset
 	if !includePartiallyVisible {
 		startIndex += majorAxisItemSize - 1
