@@ -6,6 +6,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"image"
 	"image/draw"
 	_ "image/jpeg"
@@ -17,17 +18,24 @@ import (
 	"github.com/google/gxui/themes/dark"
 )
 
-var data = flag.String("data", "", "path to data")
-var file = flag.String("file", "", "path to file")
-
 func appMain(driver gxui.Driver) {
-	f, err := os.Open(*file)
-	if err != nil {
-		panic(err)
+	args := flag.Args()
+	if len(args) != 1 {
+		fmt.Print("usage: image_viewer image-path\n")
+		os.Exit(1)
 	}
+
+	file := args[0]
+	f, err := os.Open(file)
+	if err != nil {
+		fmt.Printf("Failed to open image '%s': %v\n", file, err)
+		os.Exit(1)
+	}
+
 	source, _, err := image.Decode(f)
 	if err != nil {
-		panic(err)
+		fmt.Printf("Failed to read image '%s': %v\n", file, err)
+		os.Exit(1)
 	}
 
 	theme := dark.CreateTheme(driver)
