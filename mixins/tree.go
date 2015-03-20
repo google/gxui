@@ -53,6 +53,21 @@ func (t *Tree) Adapter() gxui.TreeAdapter {
 	return t.adapterInner
 }
 
+func (t *Tree) Show(id gxui.AdapterItemId) {
+	t.adapterOuter.ExpandAllParents(id)
+	t.List.ScrollTo(id)
+}
+
+func (t *Tree) ExpandAll() {
+	t.adapterOuter.root.ExpandAll()
+	t.DataChanged()
+}
+
+func (t *Tree) CollapseAll() {
+	t.adapterOuter.root.CollapseAll()
+	t.DataChanged()
+}
+
 func (t *Tree) CreateExpandButton(theme gxui.Theme, node *TreeInternalNode) gxui.Button {
 	btn := theme.CreateButton()
 	btn.SetMargin(math.Spacing{L: 2, R: 2, T: 1, B: 1})

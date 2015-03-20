@@ -119,7 +119,7 @@ func (n *TreeInternalNode) Expand() bool {
 }
 
 func (n *TreeInternalNode) Collapse() bool {
-	if !n.isExpanded || n.IsLeaf() {
+	if !n.isExpanded || n.IsLeaf() || n.parent == nil {
 		return false
 	}
 	n.isExpanded = false
@@ -144,9 +144,10 @@ func (n *TreeInternalNode) ExpandAll() {
 }
 
 func (n *TreeInternalNode) CollapseAll() {
-	n.Collapse()
-	for _, c := range n.children {
-		c.CollapseAll()
+	if !n.Collapse() { // The root cannot be collapsed
+		for _, c := range n.children {
+			c.CollapseAll()
+		}
 	}
 }
 
