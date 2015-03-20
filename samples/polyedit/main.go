@@ -14,8 +14,6 @@ import (
 	"github.com/google/gxui/themes/dark"
 )
 
-var data = flag.String("data", "", "path to data")
-
 func vertexAt(p gxui.Polygon, at math.Point) int {
 	for i, v := range p {
 		if v.Position.Sub(at).Len() < 10 {
@@ -165,5 +163,5 @@ func appMain(driver gxui.Driver) {
 
 func main() {
 	flag.Parse()
-	gl.StartDriver(*data, appMain)
+	gl.StartDriver(appMain)
 }

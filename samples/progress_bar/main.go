@@ -14,8 +14,6 @@ import (
 	"github.com/google/gxui/themes/dark"
 )
 
-var data = flag.String("data", "", "path to data")
-
 func appMain(driver gxui.Driver) {
 	theme := dark.CreateTheme(driver)
 
@@ -51,5 +49,5 @@ func appMain(driver gxui.Driver) {
 
 func main() {
 	flag.Parse()
-	gl.StartDriver(*data, appMain)
+	gl.StartDriver(appMain)
 }

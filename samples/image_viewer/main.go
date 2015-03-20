@@ -50,5 +50,5 @@ func appMain(driver gxui.Driver) {
 
 func main() {
 	flag.Parse()
-	gl.StartDriver(*data, appMain)
+	gl.StartDriver(appMain)
 }

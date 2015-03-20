@@ -12,8 +12,6 @@ import (
 	"github.com/google/gxui/themes/dark"
 )
 
-var data = flag.String("data", "", "path to data")
-
 // Create a PanelHolder with a 3 panels
 func panelHolder(name string, theme gxui.Theme) gxui.PanelHolder {
 	label := func(text string) gxui.Label {
@@ -67,5 +65,5 @@ func appMain(driver gxui.Driver) {
 
 func main() {
 	flag.Parse()
-	gl.StartDriver(*data, appMain)
+	gl.StartDriver(appMain)
 }

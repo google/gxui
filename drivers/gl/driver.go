@@ -22,13 +22,12 @@ type Driver struct {
 	pendingDriver chan func()
 	pendingApp    chan func()
 	viewports     *list.List
-	dataPath      string
 	debugEnabled  bool
 }
 
 type AppThread func(driver gxui.Driver)
 
-func StartDriver(dataPath string, appThread AppThread) {
+func StartDriver(appThread AppThread) {
 	if runtime.GOMAXPROCS(-1) < 2 {
 		runtime.GOMAXPROCS(2)
 	}
@@ -42,7 +41,6 @@ func StartDriver(dataPath string, appThread AppThread) {
 		pendingDriver: make(chan func(), 256),
 		pendingApp:    make(chan func(), 256),
 		viewports:     list.New(),
-		dataPath:      dataPath,
 	}
 
 	go appThread(driver)

@@ -13,8 +13,6 @@ import (
 	"github.com/google/gxui/themes/dark"
 )
 
-var data = flag.String("data", "", "path to data")
-
 func buildStar(theme gxui.Theme, center math.Point, radius, rotation float32, points int) gxui.Image {
 	p := make(gxui.Polygon, points*2)
 	for i := 0; i < points*2; i++ {
@@ -85,5 +83,5 @@ func appMain(driver gxui.Driver) {
 
 func main() {
 	flag.Parse()
-	gl.StartDriver(*data, appMain)
+	gl.StartDriver(appMain)
 }

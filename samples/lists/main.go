@@ -14,8 +14,6 @@ import (
 	"github.com/google/gxui/themes/dark"
 )
 
-var data = flag.String("data", "", "path to data")
-
 // Number picker uses the gxui.DefaultAdapter for driving a list
 func numberPicker(theme gxui.Theme) gxui.Control {
 	data := []string{
@@ -149,5 +147,5 @@ func appMain(driver gxui.Driver) {
 
 func main() {
 	flag.Parse()
-	gl.StartDriver(*data, appMain)
+	gl.StartDriver(appMain)
 }
