@@ -32,7 +32,6 @@ func (n *TreeInternalNode) findByIndex(absIdx int, d int) (parent *TreeInternalN
 		}
 	}
 	panic(fmt.Errorf("Node does not contain index %d", absIdx))
-	return nil, 0, 0
 }
 
 func (n *TreeInternalNode) findById(id gxui.AdapterItemId, baseIdx, d int) (parent *TreeInternalNode, relIdx, absIdx, depth int) {
