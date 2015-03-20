@@ -29,8 +29,4 @@ type Viewport interface {
 	OnKeyUp(func(KeyboardEvent)) EventSubscription
 	OnKeyRepeat(func(KeyboardEvent)) EventSubscription
 	OnKeyStroke(func(KeyStrokeEvent)) EventSubscription
-
-	SetContinuousRedraw(bool)
-	ContinuousRedraw() bool
-	Stats() string
 }

@@ -238,7 +238,7 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 }
 
 // Driver methods
-// These methods are all called on the driver thread
+// These methods are all called on the driver routine
 func (v *Viewport) render() {
 	if v.destroyed {
 		panic("Attempting to render a destroyed Viewport")
@@ -287,7 +287,7 @@ func (v *Viewport) drawFrameUpdate(ctx *Context) {
 }
 
 // gxui.Viewport compliance
-// These methods are all called on the application thread
+// These methods are all called on the application routine
 func (v *Viewport) SetCanvas(canvas gxui.Canvas) {
 	if v.destroyed {
 		panic("Attempting to set the canvas on a destroyed Viewport")
@@ -412,19 +412,6 @@ func (v *Viewport) Destroy() {
 			v.destroyed = true
 		}
 	})
-}
-
-func (v *Viewport) SetContinuousRedraw(continuousRedraw bool) {
-	v.continuousRedraw = continuousRedraw
-	if continuousRedraw {
-		v.driver.asyncDriver(func() {
-			v.render()
-		})
-	}
-}
-
-func (v *Viewport) ContinuousRedraw() bool {
-	return v.continuousRedraw
 }
 
 func (v *Viewport) Stats() string {
