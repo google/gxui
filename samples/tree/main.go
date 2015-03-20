@@ -5,15 +5,11 @@
 package main
 
 import (
-	"flag"
-
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/themes/dark"
 )
-
-var data = flag.String("data", "", "path to data")
 
 type treeAdapterNode struct {
 	children []treeAdapterNode
@@ -162,6 +158,5 @@ func appMain(driver gxui.Driver) {
 }
 
 func main() {
-	flag.Parse()
-	gl.StartDriver(*data, appMain)
+	gl.StartDriver(appMain)
 }
