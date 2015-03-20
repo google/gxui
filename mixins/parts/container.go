@@ -25,6 +25,7 @@ type Container struct {
 	outer              ContainerOuter
 	children           []gxui.Control
 	isMouseEventTarget bool
+	relayoutSuspended  bool
 }
 
 func (c *Container) Init(outer ContainerOuter) {
@@ -52,6 +53,19 @@ func (c *Container) SetMouseEventTarget(mouseEventTarget bool) {
 
 func (c *Container) IsMouseEventTarget() bool {
 	return c.isMouseEventTarget
+}
+
+// RelayoutSuspended returns true if adding or removing a child Control to this
+// Container will not trigger a relayout of this Container. The default is false
+// where any mutation will trigger a relayout.
+func (c *Container) RelayoutSuspended() bool {
+	return c.relayoutSuspended
+}
+
+// SetRelayoutSuspended enables or disables relayout of the Container on
+// adding or removing a child Control to this Container.
+func (c *Container) SetRelayoutSuspended(enable bool) {
+	c.relayoutSuspended = true
 }
 
 // gxui.Container compliance
@@ -93,7 +107,9 @@ func (c *Container) AddChildAt(index int, child gxui.Control) {
 	if c.outer.Attached() {
 		child.Attach()
 	}
-	c.outer.Relayout()
+	if !c.relayoutSuspended {
+		c.outer.Relayout()
+	}
 }
 
 func (c *Container) RemoveChild(child gxui.Control) {
@@ -112,7 +128,9 @@ func (c *Container) RemoveChildAt(index int) {
 	if c.outer.Attached() {
 		child.Detach()
 	}
-	c.outer.Relayout()
+	if !c.relayoutSuspended {
+		c.outer.Relayout()
+	}
 }
 
 func (c *Container) RemoveAll() {

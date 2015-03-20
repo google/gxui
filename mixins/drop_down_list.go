@@ -67,6 +67,10 @@ func (l *DropDownList) Init(outer DropDownListOuter, theme gxui.Theme) {
 }
 
 func (l *DropDownList) LayoutChildren() {
+	// Disable relayout on AddChild / RemoveChild as we're performing layout here.
+	l.SetRelayoutSuspended(true)
+	defer l.SetRelayoutSuspended(false)
+
 	l.outer.RemoveAll()
 
 	if l.selectedItem != nil {

@@ -100,6 +100,10 @@ func (l *List) LayoutChildren() {
 		return
 	}
 
+	// Disable relayout on AddChild / RemoveChild as we're performing layout here.
+	l.SetRelayoutSuspended(true)
+	defer l.SetRelayoutSuspended(false)
+
 	s := l.outer.Bounds().Size().Contract(l.Padding())
 	o := l.Padding().LT()
 

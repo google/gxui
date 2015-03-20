@@ -33,7 +33,6 @@ func (a *Attachable) Attach() {
 		panic("Control already attached")
 	}
 	a.attached = true
-	a.outer.Relayout()
 	if a.onAttach != nil {
 		a.onAttach.Fire()
 	}
