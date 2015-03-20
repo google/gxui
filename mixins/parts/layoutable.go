@@ -21,6 +21,7 @@ type Layoutable struct {
 	margin            math.Spacing
 	rect              math.Rect
 	relayoutRequested bool
+	inLayoutChildren  bool // True when calling LayoutChildren
 }
 
 func (l *Layoutable) Init(outer LayoutableOuter) {
@@ -53,13 +54,18 @@ func (l *Layoutable) Layout(rect math.Rect) {
 	boundsChanged := l.rect != rect
 	l.rect = rect
 	if l.relayoutRequested || boundsChanged {
-		callLayoutChildrenIfSupported(l.outer)
-		l.outer.Redraw()
 		l.relayoutRequested = false
+		l.inLayoutChildren = true
+		callLayoutChildrenIfSupported(l.outer)
+		l.inLayoutChildren = false
+		l.outer.Redraw()
 	}
 }
 
 func (l *Layoutable) Relayout() {
+	if l.inLayoutChildren {
+		panic("Cannot call Relayout() while in LayoutChildren")
+	}
 	if !l.relayoutRequested {
 		if p := l.outer.Parent(); p != nil {
 			l.relayoutRequested = true

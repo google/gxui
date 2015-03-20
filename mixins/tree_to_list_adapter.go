@@ -36,11 +36,9 @@ func CreateTreeToListAdapter(inner gxui.TreeAdapter, ceb CreateExpandButton) *Tr
 func (a TreeToListAdapter) Collapse(id gxui.AdapterItemId) gxui.AdapterItemId {
 	n, i, _ := a.root.FindById(id)
 	if n.Child(i).Collapse() {
-		a.DataChanged()
 		return n.Child(i).Id()
 	}
 	if n != a.root && n.Collapse() {
-		a.DataChanged()
 		return n.Id()
 	}
 	return id
@@ -48,16 +46,13 @@ func (a TreeToListAdapter) Collapse(id gxui.AdapterItemId) gxui.AdapterItemId {
 
 func (a TreeToListAdapter) Expand(id gxui.AdapterItemId) bool {
 	n, i, _ := a.root.FindById(id)
-	if n.Child(i).Expand() {
-		a.DataChanged()
-		return true
-	}
-	return false
+	return n.Child(i).Expand()
 }
 
 func (a TreeToListAdapter) ExpandAllParents(id gxui.AdapterItemId) bool {
 	for a.Expand(a.DeepestVisibleAncestor(id)) {
 	}
+	a.DataChanged()
 	return false
 }
 
