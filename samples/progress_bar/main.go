@@ -5,7 +5,6 @@
 package main
 
 import (
-	"flag"
 	"time"
 
 	"github.com/google/gxui"
@@ -48,6 +47,5 @@ func appMain(driver gxui.Driver) {
 }
 
 func main() {
-	flag.Parse()
 	gl.StartDriver(appMain)
 }
