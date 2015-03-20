@@ -10,7 +10,6 @@ import (
 
 type Font interface {
 	LoadGlyphs(first, last rune)
-	Name() string
 	Size() int
 	GlyphMaxSize() math.Size
 	Measure(string) math.Size

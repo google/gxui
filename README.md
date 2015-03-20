@@ -37,25 +37,10 @@ If you add ```GOPATH/bin``` to your PATH, you can simply type the name of a samp
 
 Fonts
 ---
-Many of the samples require a font to render text. The dark theme (and currently the only theme) uses `Arial.ttf`.
-GXUI will try to locate fonts in the following places from top to bottom:
+Many of the samples require a font to render text. The dark theme (and currently the only theme) uses `Roboto`.
+This is built into the gxfont package.
 
- * [Windows](https://github.com/google/gxui/blob/master/drivers/gl/platform/windows_constants.go#L21)
-  * The directory specified with the command line argument `--data` (default is CWD)
-  * The windows font directory.
-
- * [OSX](https://github.com/google/gxui/blob/master/drivers/gl/platform/osx_constants.go#L12)
-  * The directory specified with the command line argument `--data` (default is CWD)
-  * `/Library/Fonts/`
-  * `/System/Library/Fonts/`
-
- * [Linux](https://github.com/google/gxui/blob/master/drivers/gl/platform/linux_constants.go#L12)
-  * The directory specified with the command line argument `--data` (default is CWD)
-  * `/usr/share/fonts`
-  * `/usr/local/share/fonts`
-  * `~/.fonts`
-
-Note: We are aware that Arial does not come with certain operating systems, and are looking to bundle a font with GXUI.
+Make sure to mention this font in any notices file distributed with your application.
 
 Contributing
 ---

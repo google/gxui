@@ -6,15 +6,11 @@ package gl
 
 import (
 	"container/list"
-	"fmt"
 	"image"
-	"io/ioutil"
-	"path/filepath"
 	"runtime"
 
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/google/gxui"
-	"github.com/google/gxui/drivers/gl/platform"
 	"github.com/google/gxui/math"
 )
 
@@ -138,19 +134,8 @@ func (d *Driver) GetClipboard() (str string, err error) {
 	return
 }
 
-func (d *Driver) LoadFont(name string, size int) (gxui.Font, error) {
-	// Try the data path first.
-	f, err := ioutil.ReadFile(filepath.Join(d.dataPath, name))
-	if err == nil {
-		return CreateFont(name, f, size)
-	}
-	// No luck. Search the OS font directories next...
-	for _, path := range platform.FontPaths {
-		if f, err := ioutil.ReadFile(filepath.Join(path, name)); err == nil {
-			return CreateFont(name, f, size)
-		}
-	}
-	return nil, fmt.Errorf("Unable to find font '%s'", name)
+func (d *Driver) CreateFont(data []byte, size int) (gxui.Font, error) {
+	return createFont(data, size)
 }
 
 func (d *Driver) CreateViewport(width, height int, name string) gxui.Viewport {
