@@ -53,9 +53,9 @@ func (t *Tree) Adapter() gxui.TreeAdapter {
 	return t.adapterInner
 }
 
-func (t *Tree) Show(id gxui.AdapterItemId) {
-	t.adapterOuter.ExpandAllParents(id)
-	t.List.ScrollTo(id)
+func (t *Tree) Show(item gxui.AdapterItem) {
+	t.adapterOuter.ExpandAllParents(item)
+	t.List.ScrollTo(item)
 }
 
 func (t *Tree) ExpandAll() {
@@ -102,13 +102,13 @@ func (t *Tree) PaintUnexpandedSelection(c gxui.Canvas, r math.Rect) {
 // List override
 func (t *Tree) PaintChild(c gxui.Canvas, child gxui.Control, idx int) {
 	t.List.PaintChild(c, child, idx)
-	if t.selectedId != gxui.InvalidAdapterItemId {
-		id := t.adapterOuter.DeepestVisibleAncestor(t.selectedId)
-		if id != t.selectedId {
+	if t.selectedItem != nil {
+		item := t.adapterOuter.DeepestVisibleAncestor(t.selectedItem)
+		if item != t.selectedItem {
 			// The selected item is hidden by an unexpanded node.
 			// Highlight the deepest visible node instead.
-			if item, found := t.items[id]; found {
-				if child == item.Control {
+			if details, found := t.details[item]; found {
+				if child == details.control {
 					b := child.Bounds().Expand(child.Margin())
 					t.outer.PaintUnexpandedSelection(c, b)
 				}
@@ -119,16 +119,16 @@ func (t *Tree) PaintChild(c gxui.Canvas, child gxui.Control, idx int) {
 
 // InputEventHandler override
 func (t *Tree) KeyPress(ev gxui.KeyboardEvent) (consume bool) {
-	id := t.Selected()
+	item := t.Selected()
 	switch ev.Key {
 	case gxui.KeyLeft:
-		newId := t.adapterOuter.Collapse(id)
-		if newId != id {
-			t.Select(newId)
+		newItem := t.adapterOuter.Collapse(item)
+		if newItem != item {
+			t.Select(newItem)
 			return true
 		}
 	case gxui.KeyRight:
-		if t.adapterOuter.Expand(id) {
+		if t.adapterOuter.Expand(item) {
 			return true
 		}
 	}

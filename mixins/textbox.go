@@ -218,7 +218,7 @@ func (t *TextBox) LineEnd(line int) int {
 }
 
 func (t *TextBox) ScrollToLine(i int) {
-	t.List.ScrollTo(gxui.AdapterItemId(i))
+	t.List.ScrollTo(i)
 }
 
 func (t *TextBox) ScrollToRune(i int) {
@@ -449,12 +449,12 @@ func (t *TextBox) Count() int {
 	return math.Max(t.controller.LineCount(), 1)
 }
 
-func (t *TextBox) ItemId(index int) gxui.AdapterItemId {
-	return gxui.AdapterItemId(index)
+func (t *TextBox) ItemAt(index int) gxui.AdapterItem {
+	return index
 }
 
-func (t *TextBox) ItemIndex(id gxui.AdapterItemId) int {
-	return int(id)
+func (t *TextBox) ItemIndex(item gxui.AdapterItem) int {
+	return item.(int)
 }
 
 func (t *TextBox) Create(theme gxui.Theme, index int) gxui.Control {

@@ -9,9 +9,8 @@ type Tree interface {
 	SetAdapter(TreeAdapter)
 	Adapter() TreeAdapter
 
-	// Show makes the item with the specified id visible, expanding the tree if
-	// necessary.
-	Show(AdapterItemId)
+	// Show makes the specifieditem visible, expanding the tree if necessary.
+	Show(AdapterItem)
 
 	// ExpandAll expands all tree nodes.
 	ExpandAll()
@@ -19,7 +18,7 @@ type Tree interface {
 	// CollapseAll collapses all tree nodes.
 	CollapseAll()
 
-	Selected() AdapterItemId
-	Select(AdapterItemId)
-	OnSelectionChanged(func(AdapterItemId)) EventSubscription
+	Selected() AdapterItem
+	Select(AdapterItem)
+	OnSelectionChanged(func(AdapterItem)) EventSubscription
 }

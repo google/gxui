@@ -8,17 +8,15 @@ import (
 	"github.com/google/gxui/math"
 )
 
-const InvalidAdapterItemId AdapterItemId = 0xFFFFFFFFFFFFFFFF
-
-type AdapterItemId uint64
-
-func (i AdapterItemId) IsValid() bool { return i != InvalidAdapterItemId }
+// AdapterItem is a user defined type that can be used to uniquely identify a
+// single item in an adapter. The type must support equality.
+type AdapterItem interface{}
 
 type Adapter interface {
 	ItemSize(theme Theme) math.Size
 	Count() int
-	ItemId(index int) AdapterItemId
-	ItemIndex(id AdapterItemId) int
+	ItemAt(index int) AdapterItem
+	ItemIndex(item AdapterItem) int
 	Create(theme Theme, index int) Control
 	OnDataChanged(func()) EventSubscription
 	OnDataReplaced(func()) EventSubscription

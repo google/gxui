@@ -20,9 +20,10 @@ type Stringer interface {
 
 type DefaultAdapter struct {
 	AdapterBase
-	data       reflect.Value
-	itemSize   math.Size
-	styleLabel func(Theme, Label)
+	items       reflect.Value
+	itemToIndex map[AdapterItem]int
+	itemSize    math.Size
+	styleLabel  func(Theme, Label)
 }
 
 func CreateDefaultAdapter() *DefaultAdapter {
@@ -36,7 +37,7 @@ func (a *DefaultAdapter) SetItemSizeAsLargest(theme Theme) {
 	s := math.Size{}
 	font := theme.DefaultFont()
 	for i := 0; i < a.Count(); i++ {
-		e := a.data.Index(i).Interface()
+		e := a.items.Index(i).Interface()
 		switch t := e.(type) {
 		case Viewer:
 			s = s.Max(t.View(theme).DesiredSize(math.ZeroSize, math.MaxSize))
@@ -61,34 +62,19 @@ func (a *DefaultAdapter) SetStyleLabel(f func(Theme, Label)) {
 }
 
 func (a *DefaultAdapter) Count() int {
-	if a.data.IsValid() {
-		return a.data.Len()
+	if a.items.IsValid() {
+		return a.items.Len()
 	} else {
 		return 0
 	}
 }
 
-func (a *DefaultAdapter) IdOf(data interface{}) AdapterItemId {
-	for i := 0; i < a.Count(); i++ {
-		e := a.data.Index(i).Interface()
-		if e == data {
-			return a.ItemId(i)
-		}
-	}
-	return InvalidAdapterItemId
+func (a *DefaultAdapter) ItemAt(index int) AdapterItem {
+	return a.items.Index(index).Interface()
 }
 
-func (a *DefaultAdapter) ValueOf(id AdapterItemId) interface{} {
-	index := a.ItemIndex(id)
-	return a.data.Index(index).Interface()
-}
-
-func (a *DefaultAdapter) ItemId(index int) AdapterItemId {
-	return AdapterItemId(index)
-}
-
-func (a *DefaultAdapter) ItemIndex(id AdapterItemId) int {
-	return int(id)
+func (a *DefaultAdapter) ItemIndex(item AdapterItem) int {
+	return a.itemToIndex[item]
 }
 
 func (a *DefaultAdapter) ItemSize(theme Theme) math.Size {
@@ -96,7 +82,7 @@ func (a *DefaultAdapter) ItemSize(theme Theme) math.Size {
 }
 
 func (a *DefaultAdapter) Create(theme Theme, index int) Control {
-	e := a.data.Index(index).Interface()
+	e := a.items.Index(index).Interface()
 	switch t := e.(type) {
 	case Viewer:
 		return t.View(theme)
@@ -121,11 +107,16 @@ func (a *DefaultAdapter) Create(theme Theme, index int) Control {
 	}
 }
 
-func (a *DefaultAdapter) Data() interface{} {
-	return a.data.Interface()
+func (a *DefaultAdapter) Items() interface{} {
+	return a.items.Interface()
 }
 
-func (a *DefaultAdapter) SetData(data interface{}) {
-	a.data = reflect.ValueOf(data)
+func (a *DefaultAdapter) SetItems(items interface{}) {
+	a.items = reflect.ValueOf(items)
+	a.itemToIndex = make(map[AdapterItem]int)
+	for idx := 0; idx < a.Count(); idx++ {
+		item := a.items.Index(idx).Interface()
+		a.itemToIndex[item] = idx
+	}
 	a.DataReplaced()
 }

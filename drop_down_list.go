@@ -15,9 +15,9 @@ type DropDownList interface {
 	SetBorderPen(Pen)
 	BackgroundBrush() Brush
 	SetBackgroundBrush(Brush)
-	Selected() AdapterItemId
-	Select(AdapterItemId)
-	OnSelectionChanged(func(AdapterItemId)) EventSubscription
+	Selected() AdapterItem
+	Select(AdapterItem)
+	OnSelectionChanged(func(AdapterItem)) EventSubscription
 	OnShowList(func()) EventSubscription
 	OnHideList(func()) EventSubscription
 }
