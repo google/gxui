@@ -7,6 +7,7 @@ package main
 import (
 	"flag"
 	"image"
+	"image/draw"
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
@@ -18,48 +19,33 @@ import (
 
 var data = flag.String("data", "", "path to data")
 var file = flag.String("file", "", "path to file")
-var width = flag.Int("width", 0, "width of the image")
-var height = flag.Int("height", 0, "height of the image")
-var imageType = flag.String("type", "rgba", "The type of the image (rgba or depth)")
 
 func appMain(driver gxui.Driver) {
 	f, err := os.Open(*file)
 	if err != nil {
 		panic(err)
 	}
-	bmp, _, err := image.Decode(f)
+	source, _, err := image.Decode(f)
 	if err != nil {
 		panic(err)
 	}
 
-	raw := img2rgba(bmp)
-
 	theme := dark.CreateTheme(driver)
 	img := theme.CreateImage()
 
-	mx := raw.Bounds().Max
-
+	mx := source.Bounds().Max
 	window := theme.CreateWindow(mx.X, mx.Y, "Image viewer")
 	window.AddChild(img)
 
-	texture := driver.CreateTexture(raw, 1)
+	// Copy the image to a RGBA format before handing to a gxui.Texture
+	rgba := image.NewRGBA(source.Bounds())
+	draw.Draw(rgba, source.Bounds(), source, image.ZP, draw.Src)
+	texture := driver.CreateTexture(rgba, 1)
+	texture.SetFlipY(true)
 	img.SetTexture(texture)
 
 	window.OnClose(driver.Terminate)
 	gxui.EventLoop(driver)
-}
-
-func img2rgba(bmp image.Image) *image.RGBA {
-	mx := bmp.Bounds().Max
-	raw := image.NewRGBA(bmp.Bounds())
-
-	for y := 0; y < mx.Y; y++ {
-		for x := 0; x < mx.X; x++ {
-			raw.Set(x, mx.Y-y-1, bmp.At(x, y))
-		}
-	}
-
-	return raw
 }
 
 func main() {
