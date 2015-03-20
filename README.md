@@ -12,6 +12,15 @@ This is not an official Google product (experimental or otherwise), it is just c
 
 Dependencies
 ---
+
+### Linux:
+
+In order to build GXUI on linux, you will need the following packages installed:
+
+    sudo apt-get install libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev
+
+### Common:
+
 After setting up ```GOPATH``` (see [Go documentation](https://golang.org/doc/code.html)), you will first need to fetch the required dependencies:
 
     go get code.google.com/p/freetype-go/freetype
