@@ -145,7 +145,6 @@ func (e *EventBase) Listen(listener interface{}) EventSubscription {
 			function = reflect.ValueOf(listener).MethodByName("Fire")
 		default:
 			panic(fmt.Errorf("Listener cannot be of type %v", reflectTy.String()))
-			return EventSubscription(nil)
 		}
 	}
 
@@ -156,7 +155,7 @@ func (e *EventBase) Listen(listener interface{}) EventSubscription {
 	for i, listenerTy := range paramTypes {
 		if !listenerTy.AssignableTo(e.paramTypes[i]) {
 			panic(fmt.Errorf("%v.Listen(%v) Listener parameter %v for was of the wrong type. Got: %v, Expected: %v",
-				e.String(), i, listenerTy, e.paramTypes[i]))
+				e.String(), listener, i, listenerTy, e.paramTypes[i]))
 		}
 	}
 

@@ -123,7 +123,7 @@ func (i *Image) PixelAt(p math.Point) (math.Point, bool) {
 			return p, true
 		}
 	}
-	return math.Point{-1, -1}, false
+	return math.Point{X: -1, Y: -1}, false
 }
 
 func (i *Image) DesiredSize(min, max math.Size) math.Size {
