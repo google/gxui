@@ -20,8 +20,8 @@ var COPY_VS_SOURCE = `
   uniform mat3 mUV;
   void main() {
   	vec3 pos3 = vec3(aPosition, 1.0);
-    gl_Position = vec4(pos3 * mPos, 1.0);
-    vTexcoords = (pos3 * mUV).xy;
+    gl_Position = vec4(mPos * pos3, 1.0);
+    vTexcoords = (mUV * pos3).xy;
   }
 `
 var COPY_FS_SOURCE = `
@@ -37,7 +37,7 @@ var COLOR_VS_SOURCE = `
   uniform mat3 mPos;
   void main() {
   	vec3 pos3 = vec3(aPosition, 1.0);
-    gl_Position = vec4((pos3 * mPos).xy, 0.0, 1.0);
+    gl_Position = vec4((mPos * pos3).xy, 0.0, 1.0);
   }
 `
 
@@ -60,10 +60,10 @@ var FONT_VS_SOURCE = `
   uniform mat3 mSrc;
   uniform mat3 mDst;
   void main() {
-    vec2 vClipMin = (vec3(aClp.xy, 1.0) * mDst).xy;
-    vec2 vClipMax = (vec3(aClp.zw, 1.0) * mDst).xy;
-    gl_Position = vec4(vec3(aDst, 1.0) * mDst, 1.0);
-    vSrc = (vec3(aSrc, 1.0) * mSrc).xy;
+    vec2 vClipMin = (mDst * vec3(aClp.xy, 1.0)).xy;
+    vec2 vClipMax = (mDst * vec3(aClp.zw, 1.0)).xy;
+    gl_Position = vec4(mDst * vec3(aDst, 1.0), 1.0);
+    vSrc = (mSrc * vec3(aSrc, 1.0)).xy;
     vClp = (gl_Position.xy - vClipMin) / (vClipMax - vClipMin);
     vCol = aCol;
   }

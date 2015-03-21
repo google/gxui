@@ -21,7 +21,7 @@ type shaderUniform struct {
 }
 
 func (u *shaderUniform) Bind(context *Context, v interface{}) {
-	transpose := true // UniformMatrix expects column-major, gxui is row-major
+	transpose := false
 	switch u.ty {
 	case FLOAT_MAT2x3:
 		gl.UniformMatrix2x3fv(u.location, 1, transpose, &v.([]float32)[0])
