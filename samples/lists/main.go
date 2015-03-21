@@ -61,7 +61,7 @@ func (a *customAdapter) Count() int {
 }
 
 func (a *customAdapter) ItemAt(index int) gxui.AdapterItem {
-	return index // This adapter stores integer indices the items
+	return index // This adapter uses integer indices as AdapterItems
 }
 
 func (a *customAdapter) ItemIndex(item gxui.AdapterItem) int {

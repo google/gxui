@@ -20,7 +20,7 @@ type FilteredListAdapter struct {
 }
 
 func (a *FilteredListAdapter) SetItems(items []FilteredListItem) {
-	// Clone, as we can mutate the order
+	// Clone, as the order can be mutated
 	a.items = append([]FilteredListItem{}, items...)
 	a.DefaultAdapter.SetItems(a.items)
 }
