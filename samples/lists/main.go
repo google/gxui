@@ -56,18 +56,22 @@ type customAdapter struct {
 	gxui.AdapterBase
 }
 
-func (a *customAdapter) ItemSize(theme gxui.Theme) math.Size {
-	return math.Size{W: 100, H: 100}
-}
 func (a *customAdapter) Count() int {
 	return 1000
 }
+
 func (a *customAdapter) ItemAt(index int) gxui.AdapterItem {
 	return index // This adapter stores integer indices the items
 }
+
 func (a *customAdapter) ItemIndex(item gxui.AdapterItem) int {
 	return item.(int) // Inverse of ItemAt()
 }
+
+func (a *customAdapter) Size(theme gxui.Theme) math.Size {
+	return math.Size{W: 100, H: 100}
+}
+
 func (a *customAdapter) Create(theme gxui.Theme, index int) gxui.Control {
 	phase := float32(index) / 1000
 	c := gxui.Color{

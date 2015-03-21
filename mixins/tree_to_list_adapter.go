@@ -63,10 +63,6 @@ func (a TreeToListAdapter) DeepestVisibleAncestor(item gxui.AdapterItem) gxui.Ad
 }
 
 // Adapter compliance
-func (a TreeToListAdapter) ItemSize(theme gxui.Theme) math.Size {
-	return a.adapter.ItemSize(theme)
-}
-
 func (a TreeToListAdapter) Count() int {
 	return a.root.childCount
 }
@@ -77,6 +73,10 @@ func (a TreeToListAdapter) ItemAt(index int) gxui.AdapterItem {
 
 func (a TreeToListAdapter) ItemIndex(item gxui.AdapterItem) int {
 	return a.root.ItemIndex(item)
+}
+
+func (a TreeToListAdapter) Size(theme gxui.Theme) math.Size {
+	return a.adapter.Size(theme)
 }
 
 func (a TreeToListAdapter) Create(theme gxui.Theme, index int) gxui.Control {

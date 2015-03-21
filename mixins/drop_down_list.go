@@ -93,7 +93,7 @@ func (l *DropDownList) DesiredSize(min, max math.Size) math.Size {
 
 func (l *DropDownList) DataReplaced() {
 	adapter := l.list.Adapter()
-	itemSize := adapter.ItemSize(l.theme)
+	itemSize := adapter.Size(l.theme)
 	l.itemSize = itemSize
 	l.outer.Relayout()
 }

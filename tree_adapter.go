@@ -4,9 +4,7 @@
 
 package gxui
 
-import (
-	"github.com/google/gxui/math"
-)
+import "github.com/google/gxui/math"
 
 type TreeAdapterNode interface {
 	Count() int
@@ -18,7 +16,7 @@ type TreeAdapterNode interface {
 
 type TreeAdapter interface {
 	TreeAdapterNode
-	ItemSize(theme Theme) math.Size
+	Size(Theme) math.Size
 	OnDataChanged(func()) EventSubscription
 	OnDataReplaced(func()) EventSubscription
 }

@@ -22,18 +22,18 @@ type DefaultAdapter struct {
 	AdapterBase
 	items       reflect.Value
 	itemToIndex map[AdapterItem]int
-	itemSize    math.Size
+	size        math.Size
 	styleLabel  func(Theme, Label)
 }
 
 func CreateDefaultAdapter() *DefaultAdapter {
 	l := &DefaultAdapter{
-		itemSize: math.Size{W: 200, H: 16},
+		size: math.Size{W: 200, H: 16},
 	}
 	return l
 }
 
-func (a *DefaultAdapter) SetItemSizeAsLargest(theme Theme) {
+func (a *DefaultAdapter) SetSizeAsLargest(theme Theme) {
 	s := math.Size{}
 	font := theme.DefaultFont()
 	for i := 0; i < a.Count(); i++ {
@@ -48,12 +48,7 @@ func (a *DefaultAdapter) SetItemSizeAsLargest(theme Theme) {
 			s = s.Max(font.Measure(str))
 		}
 	}
-	a.SetItemSize(s)
-}
-
-func (a *DefaultAdapter) SetItemSize(s math.Size) {
-	a.itemSize = s
-	a.DataChanged()
+	a.SetSize(s)
 }
 
 func (a *DefaultAdapter) SetStyleLabel(f func(Theme, Label)) {
@@ -77,8 +72,13 @@ func (a *DefaultAdapter) ItemIndex(item AdapterItem) int {
 	return a.itemToIndex[item]
 }
 
-func (a *DefaultAdapter) ItemSize(theme Theme) math.Size {
-	return a.itemSize
+func (a *DefaultAdapter) Size(theme Theme) math.Size {
+	return a.size
+}
+
+func (a *DefaultAdapter) SetSize(s math.Size) {
+	a.size = s
+	a.DataChanged()
 }
 
 func (a *DefaultAdapter) Create(theme Theme, index int) Control {

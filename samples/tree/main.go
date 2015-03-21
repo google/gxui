@@ -56,7 +56,7 @@ type treeAdapter struct {
 	onDataReplaced gxui.Event
 }
 
-func (a treeAdapter) ItemSize(theme gxui.Theme) math.Size {
+func (a treeAdapter) Size(theme gxui.Theme) math.Size {
 	return math.Size{W: math.MaxSize.W, H: 20}
 }
 

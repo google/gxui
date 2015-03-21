@@ -272,8 +272,8 @@ func (l *List) VisibleItemRange(includePartiallyVisible bool) (startIndex, endIn
 	return startIndex, endIndex
 }
 
-func (l *List) ItemSizeChanged() {
-	l.itemSize = l.adapter.ItemSize(l.theme)
+func (l *List) SizeChanged() {
+	l.itemSize = l.adapter.Size(l.theme)
 	l.scrollBar.SetScrollLimit(l.itemCount * l.MajorAxisItemSize())
 	l.SetScrollOffset(l.scrollOffset)
 	l.outer.Relayout()
@@ -281,7 +281,7 @@ func (l *List) ItemSizeChanged() {
 
 func (l *List) DataChanged() {
 	l.itemCount = l.adapter.Count()
-	l.ItemSizeChanged()
+	l.SizeChanged()
 }
 
 func (l *List) DataReplaced() {
