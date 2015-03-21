@@ -4,13 +4,34 @@
 
 // Package gxfont provides default fonts.
 //
-// Note that the Roboto fonts are owned by Google Inc. (one of the Go
-// Authors) and released under the Apache 2 license. Any notices
-// distributed with applications build with GXUI and using this package
-// should include both the GXUI license and the Roboto font license.
+// Note that the Roboto and Droid Sans Mono fonts are owned by
+// Google Inc. (one of the Go Authors) and released under the Apache 2
+// license. Any notices distributed with applications build with GXUI
+// and using this package should include both the GXUI license and the
+// fonts license.
 package gxfont
 
 //go:generate go run mkfont.go
 
-// Default is the standard GXUI sans-serif font.
-var Default []byte
+import (
+	"bytes"
+	"compress/flate"
+	"io/ioutil"
+)
+
+var (
+	// Default is the standard GXUI sans-serif font.
+	Default []byte = inflate(roboto_regular)
+
+	// Monospace is the standard GXUI fixed-width font.
+	Monospace []byte = inflate(droid_sans_mono)
+)
+
+func inflate(src []byte) []byte {
+	r := bytes.NewReader(src)
+	b, err := ioutil.ReadAll(flate.NewReader(r))
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
