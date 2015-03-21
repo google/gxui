@@ -76,7 +76,7 @@ func (m Mat2) Invert() Mat2 {
 	// │ M₂ M₃ │      ─── │ -M₂  M₀ │
 	// ╰       ╯      det ╰         ╯
 	//
-	// Where: det = M₀ • M₃ - M₁ - M₂
+	// Where: det = M₀ • M₃ - M₁ • M₂
 	//
 	det := m[0]*m[3] - m[1]*m[2]
 	return DivM2S(CreateMat2(m[3], -m[1], -m[2], m[0]), det)
