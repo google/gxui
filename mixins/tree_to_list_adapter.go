@@ -33,50 +33,50 @@ func CreateTreeToListAdapter(inner gxui.TreeAdapter, ceb CreateExpandButton) *Tr
 	return outer
 }
 
-func (a TreeToListAdapter) Collapse(id gxui.AdapterItemId) gxui.AdapterItemId {
-	n, i, _ := a.root.FindById(id)
+func (a TreeToListAdapter) Collapse(item gxui.AdapterItem) gxui.AdapterItem {
+	n, i, _ := a.root.FindByItem(item)
 	if n.Child(i).Collapse() {
-		return n.Child(i).Id()
+		return n.Child(i).Item()
 	}
 	if n != a.root && n.Collapse() {
-		return n.Id()
+		return n.Item()
 	}
-	return id
+	return item
 }
 
-func (a TreeToListAdapter) Expand(id gxui.AdapterItemId) bool {
-	n, i, _ := a.root.FindById(id)
+func (a TreeToListAdapter) Expand(item gxui.AdapterItem) bool {
+	n, i, _ := a.root.FindByItem(item)
 	return n.Child(i).Expand()
 }
 
-func (a TreeToListAdapter) ExpandAllParents(id gxui.AdapterItemId) bool {
-	for a.Expand(a.DeepestVisibleAncestor(id)) {
+func (a TreeToListAdapter) ExpandAllParents(item gxui.AdapterItem) bool {
+	for a.Expand(a.DeepestVisibleAncestor(item)) {
 	}
 	a.DataChanged()
 	return false
 }
 
-func (a TreeToListAdapter) DeepestVisibleAncestor(id gxui.AdapterItemId) gxui.AdapterItemId {
-	n, i, _ := a.root.FindById(id)
+func (a TreeToListAdapter) DeepestVisibleAncestor(item gxui.AdapterItem) gxui.AdapterItem {
+	n, i, _ := a.root.FindByItem(item)
 	child := n.Child(i)
-	return child.Id()
+	return child.Item()
 }
 
 // Adapter compliance
-func (a TreeToListAdapter) ItemSize(theme gxui.Theme) math.Size {
-	return a.adapter.ItemSize(theme)
-}
-
 func (a TreeToListAdapter) Count() int {
 	return a.root.childCount
 }
 
-func (a TreeToListAdapter) ItemId(index int) gxui.AdapterItemId {
-	return a.root.ItemId(index)
+func (a TreeToListAdapter) ItemAt(index int) gxui.AdapterItem {
+	return a.root.ItemAt(index)
 }
 
-func (a TreeToListAdapter) ItemIndex(id gxui.AdapterItemId) int {
-	return a.root.ItemIndex(id)
+func (a TreeToListAdapter) ItemIndex(item gxui.AdapterItem) int {
+	return a.root.ItemIndex(item)
+}
+
+func (a TreeToListAdapter) Size(theme gxui.Theme) math.Size {
+	return a.adapter.Size(theme)
 }
 
 func (a TreeToListAdapter) Create(theme gxui.Theme, index int) gxui.Control {

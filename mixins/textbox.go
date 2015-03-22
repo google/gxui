@@ -19,7 +19,6 @@ type TextBoxLine interface {
 
 type TextBoxOuter interface {
 	ListOuter
-	gxui.Adapter
 	CreateLine(theme gxui.Theme, index int) (line TextBoxLine, container gxui.Control)
 }
 
@@ -35,6 +34,7 @@ type TextBox struct {
 	onRedrawLines     gxui.Event
 	multiline         bool
 	controller        *gxui.TextBoxController
+	adapter           *TextBoxAdapter
 	selectionDragging bool
 	selectionDrag     gxui.TextSelection
 	desiredWidth      int
@@ -70,6 +70,7 @@ func (t *TextBox) Init(outer TextBoxOuter, driver gxui.Driver, theme gxui.Theme,
 	t.font = font
 	t.onRedrawLines = gxui.CreateEvent(func() {})
 	t.controller = gxui.CreateTextBoxController()
+	t.adapter = &TextBoxAdapter{TextBox: t}
 	t.desiredWidth = 100
 	t.SetScrollBarEnabled(false) // Defaults to single line
 	t.OnGainedFocus(func() { t.onRedrawLines.Fire() })
@@ -82,11 +83,10 @@ func (t *TextBox) Init(outer TextBoxOuter, driver gxui.Driver, theme gxui.Theme,
 		t.onRedrawLines.Fire()
 	})
 
-	t.List.SetAdapter(t.outer)
+	t.List.SetAdapter(t.adapter)
 
 	// Interface compliance test
 	_ = gxui.TextBox(t)
-	_ = gxui.Adapter(t)
 }
 
 func (t *TextBox) textRect() math.Rect {
@@ -161,7 +161,7 @@ func (t *TextBox) DesiredWidth() int {
 func (t *TextBox) SetDesiredWidth(desiredWidth int) {
 	if t.desiredWidth != desiredWidth {
 		t.desiredWidth = desiredWidth
-		t.ItemSizeChanged()
+		t.SizeChanged()
 	}
 }
 
@@ -218,7 +218,7 @@ func (t *TextBox) LineEnd(line int) int {
 }
 
 func (t *TextBox) ScrollToLine(i int) {
-	t.List.ScrollTo(gxui.AdapterItemId(i))
+	t.List.ScrollTo(i)
 }
 
 func (t *TextBox) ScrollToRune(i int) {
@@ -441,25 +441,35 @@ func (t *TextBox) PaintSelection(c gxui.Canvas, r math.Rect) {}
 func (t *TextBox) PaintMouseOverBackground(c gxui.Canvas, r math.Rect) {}
 
 // gxui.AdapterCompliance
-func (t *TextBox) ItemSize(theme gxui.Theme) math.Size {
-	return math.Size{W: t.desiredWidth, H: t.font.GlyphMaxSize().H}
+type TextBoxAdapter struct {
+	gxui.DefaultAdapter
+	TextBox *TextBox
 }
 
-func (t *TextBox) Count() int {
-	return math.Max(t.controller.LineCount(), 1)
+func (t *TextBoxAdapter) Count() int {
+	return math.Max(t.TextBox.controller.LineCount(), 1)
 }
 
-func (t *TextBox) ItemId(index int) gxui.AdapterItemId {
-	return gxui.AdapterItemId(index)
+func (t *TextBoxAdapter) ItemAt(index int) gxui.AdapterItem {
+	return index
 }
 
-func (t *TextBox) ItemIndex(id gxui.AdapterItemId) int {
-	return int(id)
+func (t *TextBoxAdapter) ItemIndex(item gxui.AdapterItem) int {
+	return item.(int)
 }
 
-func (t *TextBox) Create(theme gxui.Theme, index int) gxui.Control {
-	line, container := t.outer.CreateLine(theme, index)
-	line.OnMouseDown(func(ev gxui.MouseEvent) { t.lineMouseDown(line, ev) })
-	line.OnMouseUp(func(ev gxui.MouseEvent) { t.lineMouseUp(line, ev) })
+func (t *TextBoxAdapter) Size(theme gxui.Theme) math.Size {
+	tb := t.TextBox
+	return math.Size{W: tb.desiredWidth, H: tb.font.GlyphMaxSize().H}
+}
+
+func (t *TextBoxAdapter) Create(theme gxui.Theme, index int) gxui.Control {
+	line, container := t.TextBox.outer.CreateLine(theme, index)
+	line.OnMouseDown(func(ev gxui.MouseEvent) {
+		t.TextBox.lineMouseDown(line, ev)
+	})
+	line.OnMouseUp(func(ev gxui.MouseEvent) {
+		t.TextBox.lineMouseUp(line, ev)
+	})
 	return container
 }

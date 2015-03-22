@@ -11,8 +11,7 @@ import (
 )
 
 func calcScore(str, partial string) int {
-	a := FilteredListAdapter{}
-	return a.score(str, strings.ToLower(str), partial, strings.ToLower(partial))
+	return flaScore(str, strings.ToLower(str), partial, strings.ToLower(partial))
 }
 
 func TestFilteredListAdapterScore(t *testing.T) {

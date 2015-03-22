@@ -128,7 +128,7 @@ func (t *CodeEditor) ShowSuggestionList() {
 	target := line.PositionAt(caret).Add(lineOffset)
 	cs := t.suggestionList.DesiredSize(math.ZeroSize, bounds.Size())
 	t.suggestionList.Layout(cs.Rect().Offset(target).Intersect(bounds))
-	t.suggestionList.Select(t.suggestionList.Adapter().ItemId(0))
+	t.suggestionList.Select(t.suggestionList.Adapter().ItemAt(0))
 	t.suggestionList.SetVisible(true)
 }
 
@@ -137,8 +137,7 @@ func (t *CodeEditor) HideSuggestionList() {
 }
 
 func (t *CodeEditor) Line(idx int) TextBoxLine {
-	id := gxui.AdapterItemId(idx)
-	return gxui.FindControl(t.Item(id), func(c gxui.Control) bool {
+	return gxui.FindControl(t.ItemControl(idx), func(c gxui.Control) bool {
 		_, b := c.(TextBoxLine)
 		return b
 	}).(TextBoxLine)

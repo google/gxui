@@ -13,24 +13,23 @@ import (
 
 type treeAdapterNode struct {
 	children []treeAdapterNode
-	data     string
-	id       gxui.AdapterItemId
+	item     string
 }
 
 func (n treeAdapterNode) Count() int {
 	return len(n.children)
 }
 
-func (n treeAdapterNode) ItemId(index int) gxui.AdapterItemId {
-	return n.children[index].id
+func (n treeAdapterNode) ItemAt(index int) gxui.AdapterItem {
+	return n.children[index].item
 }
 
-func (n treeAdapterNode) ItemIndex(id gxui.AdapterItemId) int {
+func (n treeAdapterNode) ItemIndex(item gxui.AdapterItem) int {
 	for i, c := range n.children {
-		if c.id == id {
+		if c.item == item {
 			return i
 		}
-		if c.ItemIndex(id) >= 0 {
+		if c.ItemIndex(item) >= 0 {
 			return i
 		}
 	}
@@ -39,7 +38,7 @@ func (n treeAdapterNode) ItemIndex(id gxui.AdapterItemId) int {
 
 func (n treeAdapterNode) Create(theme gxui.Theme, index int) gxui.Control {
 	l := theme.CreateLabel()
-	l.SetText(n.children[index].data)
+	l.SetText(n.children[index].item)
 	return l
 }
 
@@ -57,7 +56,7 @@ type treeAdapter struct {
 	onDataReplaced gxui.Event
 }
 
-func (a treeAdapter) ItemSize(theme gxui.Theme) math.Size {
+func (a treeAdapter) Size(theme gxui.Theme) math.Size {
 	return math.Size{W: math.MaxSize.W, H: 20}
 }
 
@@ -78,11 +77,10 @@ func (a treeAdapter) OnDataReplaced(f func()) gxui.EventSubscription {
 func appMain(driver gxui.Driver) {
 	theme := dark.CreateTheme(driver)
 
-	node := func(id gxui.AdapterItemId, data string, children ...treeAdapterNode) treeAdapterNode {
+	node := func(item string, children ...treeAdapterNode) treeAdapterNode {
 		return treeAdapterNode{
 			children: children,
-			data:     data,
-			id:       id,
+			item:     item,
 		}
 	}
 
@@ -91,39 +89,39 @@ func appMain(driver gxui.Driver) {
 
 	adapter := treeAdapter{}
 	adapter.children = []treeAdapterNode{
-		node(0x000, "Animals",
-			node(0x100, "Mammals",
-				node(0x110, "Cats"),
-				node(0x120, "Dogs"),
-				node(0x130, "Horses"),
-				node(0x140, "Duck-billed platypuses"),
+		node("Animals",
+			node("Mammals",
+				node("Cats"),
+				node("Dogs"),
+				node("Horses"),
+				node("Duck-billed platypuses"),
 			),
-			node(0x200, "Birds",
-				node(0x210, "Peacocks"),
-				node(0x220, "Doves"),
+			node("Birds",
+				node("Peacocks"),
+				node("Doves"),
 			),
-			node(0x300, "Reptiles",
-				node(0x310, "Lizards"),
-				node(0x320, "Turtles"),
-				node(0x330, "Crocodiles"),
-				node(0x340, "Snakes"),
+			node("Reptiles",
+				node("Lizards"),
+				node("Turtles"),
+				node("Crocodiles"),
+				node("Snakes"),
 			),
-			node(0x400, "Amphibians",
-				node(0x410, "Frogs"),
-				node(0x420, "Toads"),
+			node("Amphibians",
+				node("Frogs"),
+				node("Toads"),
 			),
-			node(0x500, "Arthropods",
-				node(0x510, "Crustaceans",
-					node(0x511, "Crabs"),
-					node(0x512, "Lobsters"),
+			node("Arthropods",
+				node("Crustaceans",
+					node("Crabs"),
+					node("Lobsters"),
 				),
-				node(0x520, "Insects",
-					node(0x521, "Ants"),
-					node(0x522, "Bees"),
+				node("Insects",
+					node("Ants"),
+					node("Bees"),
 				),
-				node(0x530, "Arachnids",
-					node(0x531, "Spiders"),
-					node(0x532, "Scorpions"),
+				node("Arachnids",
+					node("Spiders"),
+					node("Scorpions"),
 				),
 			),
 		),
@@ -131,7 +129,7 @@ func appMain(driver gxui.Driver) {
 
 	tree := theme.CreateTree()
 	tree.SetAdapter(adapter)
-	tree.Select(0x140) // Duck-billed platypuses
+	tree.Select("Duck-billed platypuses")
 	tree.Show(tree.Selected())
 
 	layout.AddChild(tree)

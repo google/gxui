@@ -21,6 +21,6 @@ func (a *SuggestionAdapter) SetSuggestions(suggestions []gxui.CodeSuggestion) {
 	a.SetItems(items)
 }
 
-func (a *SuggestionAdapter) Suggestion(id gxui.AdapterItemId) gxui.CodeSuggestion {
-	return a.Item(id).Data.(gxui.CodeSuggestion)
+func (a *SuggestionAdapter) Suggestion(item gxui.AdapterItem) gxui.CodeSuggestion {
+	return item.(gxui.FilteredListItem).Data.(gxui.CodeSuggestion)
 }

@@ -14,7 +14,7 @@ type TreeInternalNode struct {
 	childCount      int
 	children        []*TreeInternalNode
 	isExpanded      bool
-	id              gxui.AdapterItemId
+	item            gxui.AdapterItem
 	parent          *TreeInternalNode
 	onExpandChanged gxui.Event
 }
@@ -34,15 +34,15 @@ func (n *TreeInternalNode) findByIndex(absIdx int, d int) (parent *TreeInternalN
 	panic(fmt.Errorf("Node does not contain index %d", absIdx))
 }
 
-func (n *TreeInternalNode) findById(id gxui.AdapterItemId, baseIdx, d int) (parent *TreeInternalNode, relIdx, absIdx, depth int) {
-	relIdx = n.adapterNode.ItemIndex(id)
+func (n *TreeInternalNode) findByItem(item gxui.AdapterItem, baseIdx, d int) (parent *TreeInternalNode, relIdx, absIdx, depth int) {
+	relIdx = n.adapterNode.ItemIndex(item)
 	if relIdx < 0 {
-		panic(fmt.Errorf("Node does not contain id %d", id))
+		panic(fmt.Errorf("Node does not contain item %d", item))
 	}
 	if relIdx < 0 || relIdx >= len(n.children) {
 		panic(fmt.Errorf(
 			"%T.ItemIndex(%v) returned out of bounds index %v. Acceptable range: [%d - %d]",
-			n.adapterNode, id, relIdx, 0, len(n.children)-1))
+			n.adapterNode, item, relIdx, 0, len(n.children)-1))
 	}
 
 	absIdx = baseIdx + 1 // +1 for n
@@ -51,22 +51,19 @@ func (n *TreeInternalNode) findById(id gxui.AdapterItemId, baseIdx, d int) (pare
 		absIdx += n.children[i].childCount + 1
 	}
 
-	if n.adapterNode.ItemId(relIdx) == id {
+	if n.adapterNode.ItemAt(relIdx) == item {
 		return n, relIdx, absIdx, d
 	}
 
 	if n.children[relIdx].IsExpanded() {
-		return n.children[relIdx].findById(id, absIdx, d+1)
+		return n.children[relIdx].findByItem(item, absIdx, d+1)
 	} else {
 		return n, relIdx, absIdx, d
 	}
 }
 
 func CreateTreeInternalRoot(adapterNode gxui.TreeAdapterNode) *TreeInternalNode {
-	root := &TreeInternalNode{
-		adapterNode: adapterNode,
-		id:          gxui.InvalidAdapterItemId,
-	}
+	root := &TreeInternalNode{adapterNode: adapterNode}
 	root.Expand()
 	return root
 }
@@ -78,8 +75,8 @@ func (n *TreeInternalNode) OnExpandedChanged(f func(bool)) gxui.EventSubscriptio
 	return n.onExpandChanged.Listen(f)
 }
 
-func (n *TreeInternalNode) Id() gxui.AdapterItemId {
-	return n.id
+func (n *TreeInternalNode) Item() gxui.AdapterItem {
+	return n.item
 }
 
 func (n *TreeInternalNode) IsExpanded() bool {
@@ -103,7 +100,7 @@ func (n *TreeInternalNode) Expand() bool {
 	for i := range n.children {
 		n.children[i] = &TreeInternalNode{
 			adapterNode: n.adapterNode.CreateNode(i),
-			id:          n.adapterNode.ItemId(i),
+			item:        n.adapterNode.ItemAt(i),
 			parent:      n,
 		}
 	}
@@ -159,17 +156,17 @@ func (n *TreeInternalNode) FindByIndex(idx int) (parent *TreeInternalNode, child
 	return n.findByIndex(idx, 0)
 }
 
-func (n *TreeInternalNode) FindById(id gxui.AdapterItemId) (parent *TreeInternalNode, childIndex int, depth int) {
-	c, relIdx, _, depth := n.findById(id, -1, 0)
+func (n *TreeInternalNode) FindByItem(item gxui.AdapterItem) (parent *TreeInternalNode, childIndex int, depth int) {
+	c, relIdx, _, depth := n.findByItem(item, -1, 0)
 	return c, relIdx, depth
 }
 
-func (n *TreeInternalNode) ItemId(idx int) gxui.AdapterItemId {
+func (n *TreeInternalNode) ItemAt(idx int) gxui.AdapterItem {
 	p, i, _ := n.FindByIndex(idx)
-	return p.adapterNode.ItemId(i)
+	return p.adapterNode.ItemAt(i)
 }
 
-func (n *TreeInternalNode) ItemIndex(id gxui.AdapterItemId) int {
-	_, _, absIdx, _ := n.findById(id, -1, 0)
+func (n *TreeInternalNode) ItemIndex(item gxui.AdapterItem) int {
+	_, _, absIdx, _ := n.findByItem(item, -1, 0)
 	return absIdx
 }

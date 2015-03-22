@@ -15,11 +15,11 @@ type List interface {
 	SetBorderPen(Pen)
 	BackgroundBrush() Brush
 	SetBackgroundBrush(Brush)
-	ScrollTo(AdapterItemId)
-	IsItemVisible(AdapterItemId) bool
-	Item(AdapterItemId) Control
-	Selected() AdapterItemId
-	Select(AdapterItemId)
-	OnSelectionChanged(func(AdapterItemId)) EventSubscription
-	OnItemClicked(func(MouseEvent, AdapterItemId)) EventSubscription
+	ScrollTo(AdapterItem)
+	IsItemVisible(AdapterItem) bool
+	ItemControl(AdapterItem) Control
+	Selected() AdapterItem
+	Select(AdapterItem)
+	OnSelectionChanged(func(AdapterItem)) EventSubscription
+	OnItemClicked(func(MouseEvent, AdapterItem)) EventSubscription
 }
