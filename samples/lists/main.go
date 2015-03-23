@@ -14,7 +14,7 @@ import (
 )
 
 // Number picker uses the gxui.DefaultAdapter for driving a list
-func numberPicker(theme gxui.Theme) gxui.Control {
+func numberPicker(theme gxui.Theme, overlay gxui.BubbleOverlay) gxui.Control {
 	items := []string{
 		"zero", "one", "two", "three", "four", "five",
 		"six", "seven", "eight", "nine", "ten",
@@ -32,6 +32,11 @@ func numberPicker(theme gxui.Theme) gxui.Control {
 	label0.SetText("Numbers:")
 	layout.AddChild(label0)
 
+	dropList := theme.CreateDropDownList()
+	dropList.SetAdapter(adapter)
+	dropList.SetBubbleOverlay(overlay)
+	layout.AddChild(dropList)
+
 	list := theme.CreateList()
 	list.SetAdapter(adapter)
 	list.SetOrientation(gxui.Vertical)
@@ -45,7 +50,16 @@ func numberPicker(theme gxui.Theme) gxui.Control {
 	selected := theme.CreateLabel()
 	layout.AddChild(selected)
 
+	dropList.OnSelectionChanged(func(item gxui.AdapterItem) {
+		if list.Selected() != item {
+			list.Select(item)
+		}
+	})
+
 	list.OnSelectionChanged(func(item gxui.AdapterItem) {
+		if dropList.Selected() != item {
+			dropList.Select(item)
+		}
 		selected.SetText(fmt.Sprintf("%s - %d", item, adapter.ItemIndex(item)))
 	})
 
@@ -136,12 +150,15 @@ func colorPicker(theme gxui.Theme) gxui.Control {
 func appMain(driver gxui.Driver) {
 	theme := dark.CreateTheme(driver)
 
+	overlay := theme.CreateBubbleOverlay()
+
 	holder := theme.CreatePanelHolder()
-	holder.AddPanel(numberPicker(theme), "Default adapter")
+	holder.AddPanel(numberPicker(theme, overlay), "Default adapter")
 	holder.AddPanel(colorPicker(theme), "Custom adapter")
 
 	window := theme.CreateWindow(800, 600, "Lists")
 	window.AddChild(holder)
+	window.AddChild(overlay)
 	window.OnClose(driver.Terminate)
 	window.SetPadding(math.Spacing{L: 10, T: 10, R: 10, B: 10})
 	gxui.EventLoop(driver)
