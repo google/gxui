@@ -36,7 +36,7 @@ type List struct {
 	outer ListOuter
 
 	theme                    gxui.Theme
-	adapter                  gxui.Adapter
+	adapter                  gxui.ListAdapter
 	scrollBar                gxui.ScrollBar
 	scrollBarEnabled         bool
 	selectedItem             gxui.AdapterItem
@@ -129,8 +129,8 @@ func (l *List) LayoutChildren() {
 		details, found := l.details[item]
 		if found {
 			if details.mark == mark {
-				panic(fmt.Errorf("Adapter returned duplicate item (%v) for indices %v and %v",
-					item, details.index, idx))
+				panic(fmt.Errorf("Adapter for control '%s' returned duplicate item (%v) for indices %v and %v",
+					gxui.Path(l.outer), item, details.index, idx))
 			}
 		} else {
 			details.control = l.adapter.Create(l.theme, idx)
@@ -407,11 +407,11 @@ func (l *List) KeyPress(ev gxui.KeyboardEvent) (consume bool) {
 }
 
 // gxui.List compliance
-func (l *List) Adapter() gxui.Adapter {
+func (l *List) Adapter() gxui.ListAdapter {
 	return l.adapter
 }
 
-func (l *List) SetAdapter(adapter gxui.Adapter) {
+func (l *List) SetAdapter(adapter gxui.ListAdapter) {
 	if l.adapter != adapter {
 		if l.adapter != nil {
 			l.dataChangedSubscription.Unlisten()
@@ -487,8 +487,11 @@ func (l *List) Selected() gxui.AdapterItem {
 	return l.selectedItem
 }
 
-func (l *List) Select(item gxui.AdapterItem) {
+func (l *List) Select(item gxui.AdapterItem) bool {
 	if l.selectedItem != item {
+		if l.adapter.ItemIndex(item) < 0 {
+			return false // Adapter does not contain the item
+		}
 		l.selectedItem = item
 		if l.onSelectionChanged != nil {
 			l.onSelectionChanged.Fire(item)
@@ -496,6 +499,7 @@ func (l *List) Select(item gxui.AdapterItem) {
 		l.Redraw()
 	}
 	l.ScrollTo(item)
+	return true
 }
 
 func (l *List) OnSelectionChanged(f func(gxui.AdapterItem)) gxui.EventSubscription {

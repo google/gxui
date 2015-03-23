@@ -11,125 +11,123 @@ import (
 	"github.com/google/gxui/themes/dark"
 )
 
-type treeAdapterNode struct {
-	children []treeAdapterNode
-	item     string
+type node struct {
+	name     string
+	children []node
 }
 
-func (n treeAdapterNode) Count() int {
+func (n node) Count() int {
 	return len(n.children)
 }
 
-func (n treeAdapterNode) ItemAt(index int) gxui.AdapterItem {
-	return n.children[index].item
+func (n node) NodeAt(index int) gxui.TreeNode {
+	return n.children[index]
 }
 
-func (n treeAdapterNode) ItemIndex(item gxui.AdapterItem) int {
+func (n node) ItemAt(index int) gxui.AdapterItem {
+	return n.children[index].name
+}
+
+func (n node) ItemIndex(item gxui.AdapterItem) int {
+	name := item.(string)
 	for i, c := range n.children {
-		if c.item == item {
-			return i
-		}
-		if c.ItemIndex(item) >= 0 {
+		if c.name == name || c.ItemIndex(item) >= 0 {
 			return i
 		}
 	}
 	return -1
 }
 
-func (n treeAdapterNode) Create(theme gxui.Theme, index int) gxui.Control {
-	l := theme.CreateLabel()
-	l.SetText(n.children[index].item)
-	return l
+func (n node) Create(theme gxui.Theme, index int) gxui.Control {
+	label := theme.CreateLabel()
+	label.SetText(n.children[index].name)
+	return label
 }
 
-func (n treeAdapterNode) CreateNode(index int) gxui.TreeAdapterNode {
-	if len(n.children[index].children) > 0 {
-		return n.children[index]
-	} else {
-		return nil // This child is a leaf.
-	}
+type adapter struct {
+	gxui.AdapterBase
+	node
 }
 
-type treeAdapter struct {
-	treeAdapterNode
-	onDataChanged  gxui.Event
-	onDataReplaced gxui.Event
-}
-
-func (a treeAdapter) Size(theme gxui.Theme) math.Size {
-	return math.Size{W: math.MaxSize.W, H: 20}
-}
-
-func (a treeAdapter) OnDataChanged(f func()) gxui.EventSubscription {
-	if a.onDataChanged == nil {
-		a.onDataChanged = gxui.CreateEvent(f)
-	}
-	return a.onDataChanged.Listen(f)
-}
-
-func (a treeAdapter) OnDataReplaced(f func()) gxui.EventSubscription {
-	if a.onDataReplaced == nil {
-		a.onDataReplaced = gxui.CreateEvent(f)
-	}
-	return a.onDataReplaced.Listen(f)
+func (a *adapter) Size(t gxui.Theme) math.Size {
+	return math.Size{W: math.MaxSize.W, H: 18}
 }
 
 func appMain(driver gxui.Driver) {
 	theme := dark.CreateTheme(driver)
 
-	node := func(item string, children ...treeAdapterNode) treeAdapterNode {
-		return treeAdapterNode{
-			children: children,
-			item:     item,
-		}
-	}
-
 	layout := theme.CreateLinearLayout()
 	layout.SetDirection(gxui.TopToBottom)
 
-	adapter := treeAdapter{}
-	adapter.children = []treeAdapterNode{
-		node("Animals",
-			node("Mammals",
-				node("Cats"),
-				node("Dogs"),
-				node("Horses"),
-				node("Duck-billed platypuses"),
-			),
-			node("Birds",
-				node("Peacocks"),
-				node("Doves"),
-			),
-			node("Reptiles",
-				node("Lizards"),
-				node("Turtles"),
-				node("Crocodiles"),
-				node("Snakes"),
-			),
-			node("Amphibians",
-				node("Frogs"),
-				node("Toads"),
-			),
-			node("Arthropods",
-				node("Crustaceans",
-					node("Crabs"),
-					node("Lobsters"),
-				),
-				node("Insects",
-					node("Ants"),
-					node("Bees"),
-				),
-				node("Arachnids",
-					node("Spiders"),
-					node("Scorpions"),
-				),
-			),
-		),
+	animals := &adapter{
+		node: node{
+			name: "Animals",
+			children: []node{
+				node{
+					name: "Mammals",
+					children: []node{
+						node{name: "Cats"},
+						node{name: "Dogs"},
+						node{name: "Horses"},
+						node{name: "Duck-billed platypuses"},
+					},
+				},
+				node{
+					name: "Birds",
+					children: []node{
+						node{name: "Peacocks"},
+						node{name: "Doves"},
+					},
+				},
+				node{
+					name: "Reptiles",
+					children: []node{
+						node{name: "Lizards"},
+						node{name: "Turtles"},
+						node{name: "Crocodiles"},
+						node{name: "Snakes"},
+					},
+				},
+				node{
+					name: "Amphibians",
+					children: []node{
+						node{name: "Frogs"},
+						node{name: "Toads"},
+					},
+				},
+				node{
+					name: "Arthropods",
+					children: []node{
+						node{
+							name: "Crustaceans",
+							children: []node{
+								node{name: "Crabs"},
+								node{name: "Lobsters"},
+							},
+						},
+						node{
+							name: "Insects",
+							children: []node{
+								node{name: "Ants"},
+								node{name: "Bees"},
+							},
+						},
+						node{
+							name: "Arachnids",
+							children: []node{
+								node{name: "Spiders"},
+								node{name: "Scorpions"},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	tree := theme.CreateTree()
-	tree.SetAdapter(adapter)
-	tree.Select("Duck-billed platypuses")
+	tree.SetAdapter(animals)
+	tree.Select("Doves")
 	tree.Show(tree.Selected())
 
 	layout.AddChild(tree)
