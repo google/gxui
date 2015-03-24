@@ -6,8 +6,9 @@ package gxui
 
 import (
 	"fmt"
-	"github.com/google/gxui/math"
 	"reflect"
+
+	"github.com/google/gxui/math"
 )
 
 type Viewer interface {
@@ -42,10 +43,13 @@ func (a *DefaultAdapter) SetSizeAsLargest(theme Theme) {
 		case Viewer:
 			s = s.Max(t.View(theme).DesiredSize(math.ZeroSize, math.MaxSize))
 		case Stringer:
-			s = s.Max(font.Measure(t.String()))
+			s = s.Max(font.Measure(&TextBlock{
+				Runes: []rune(t.String()),
+			}))
 		default:
-			str := fmt.Sprintf("%+v", e)
-			s = s.Max(font.Measure(str))
+			s = s.Max(font.Measure(&TextBlock{
+				Runes: []rune(fmt.Sprintf("%+v", e)),
+			}))
 		}
 	}
 	a.SetSize(s)

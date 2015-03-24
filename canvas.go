@@ -17,7 +17,6 @@ type Canvas interface {
 	Clear(Color)
 	DrawCanvas(c Canvas, position math.Point)
 	DrawTexture(t Texture, bounds math.Rect)
-	DrawText(Font, string, Color, math.Rect, HorizontalAlignment, VerticalAlignment)
 	DrawRunes(font Font, runes []rune, color Color, points []math.Point, origin math.Point)
 	DrawLines(Polygon, Pen)
 	DrawPolygon(Polygon, Pen, Brush)

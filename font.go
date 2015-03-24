@@ -8,11 +8,19 @@ import (
 	"github.com/google/gxui/math"
 )
 
+// A Font represents a TrueType font loaded by the GXUI driver.
 type Font interface {
 	LoadGlyphs(first, last rune)
 	Size() int
 	GlyphMaxSize() math.Size
-	Measure(string) math.Size
-	MeasureRunes([]rune) math.Size
-	LayoutRunes(offsets []math.Point, runes []rune, alignRect math.Rect, h HorizontalAlignment, v VerticalAlignment)
+	Measure(*TextBlock) math.Size
+	Layout(*TextBlock) (offsets []math.Point)
+}
+
+// TextBlock is a sequence of runes to be laid out.
+type TextBlock struct {
+	Runes     []rune
+	AlignRect math.Rect
+	H         HorizontalAlignment
+	V         VerticalAlignment
 }

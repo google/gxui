@@ -5,10 +5,11 @@
 package mixins
 
 import (
+	"strings"
+
 	"github.com/google/gxui"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/mixins/base"
-	"strings"
 )
 
 type LabelOuter interface {
@@ -79,7 +80,7 @@ func (l *Label) DesiredSize(min, max math.Size) math.Size {
 	if !l.multiline {
 		t = strings.Replace(t, "\n", " ", -1)
 	}
-	s := l.font.Measure(t)
+	s := l.font.Measure(&gxui.TextBlock{Runes: []rune(t)})
 	return s.Clamp(min, max)
 }
 
@@ -112,5 +113,14 @@ func (l *Label) Paint(c gxui.Canvas) {
 	if !l.multiline {
 		t = strings.Replace(t, "\n", " ", -1)
 	}
-	c.DrawText(l.font, t, l.color, r, l.horizontalAlignment, l.verticalAlignment)
+
+	runes := []rune(t)
+	offsets := l.font.Layout(&gxui.TextBlock{
+		Runes:     runes,
+		AlignRect: r,
+		H:         l.horizontalAlignment,
+		V:         l.verticalAlignment,
+	})
+	origin := math.Point{}
+	c.DrawRunes(l.font, runes, l.color, offsets, origin)
 }
