@@ -6,7 +6,6 @@ package gl
 
 import (
 	"fmt"
-	"unicode/utf8"
 
 	"github.com/google/gxui"
 	"github.com/google/gxui/math"
@@ -102,59 +101,24 @@ func (f *Font) align(rect math.Rect, size math.Size, ascent int, h gxui.Horizont
 	return origin
 }
 
-func (f *Font) Draw(ctx *Context, str string, col gxui.Color, alignRectDips math.Rect, h gxui.HorizontalAlignment, v gxui.VerticalAlignment, ds *DrawState) {
-	resolution := ctx.Resolution()
-	glyphMaxSizePixels := resolution.SizeDipsToPixels(f.glyphMaxSizeDips)
-	ascentPixels := resolution.IntDipsToPixels(f.ascentDips)
-	alignRectPixels := resolution.RectDipsToPixels(alignRectDips)
-	table := f.glyphTable(resolution)
-	quads := f.quads[:0]
-	sizePixels := math.Size{}
-	offset := math.Point{}
-	for i := 0; i < len(str); {
-		r, l := utf8.DecodeRuneInString(str[i:])
-		i += l
-
-		if r == '\n' {
-			offset.X = 0
-			offset.Y += glyphMaxSizePixels.H
-			continue
-		}
-
-		glyph := f.glyph(r)
-		page := table.get(r, glyph)
-		srcRect := glyph.size(resolution).Rect().Offset(page.offset(r))
-		dstRect := glyph.rect(resolution).Offset(offset)
-		offset.X += glyph.advance(resolution)
-		quads = append(quads, Quad{page.texture(), srcRect, dstRect})
-		sizePixels = sizePixels.Max(math.Size{
-			W: offset.X,
-			H: offset.Y + glyphMaxSizePixels.H,
-		})
-	}
-
-	origin := f.align(alignRectPixels, sizePixels, ascentPixels, h, v)
-	for _, q := range quads {
-		tc := ctx.GetOrCreateTextureContext(q.Texture)
-		ctx.Blitter.BlitGlyph(ctx, tc, col, q.SrcRect, q.DstRect.Offset(origin), ds)
-	}
-}
-
-func (f *Font) DrawRunes(ctx *Context, runes []rune, col gxui.Color, points []math.Point, origin math.Point, ds *DrawState) {
-	if len(runes) != len(points) {
-		panic(fmt.Errorf("There must be the same number of runes to points. Got %d runes and %d points",
-			len(runes), len(points)))
+func (f *Font) DrawRunes(ctx *Context, runes []rune, col gxui.Color, offsets []math.Point, origin math.Point, ds *DrawState) {
+	if len(runes) != len(offsets) {
+		panic(fmt.Errorf("There must be the same number of runes to offsets. Got %d runes and %d offsets",
+			len(runes), len(offsets)))
 	}
 	resolution := ctx.Resolution()
 	table := f.glyphTable(resolution)
 
 	for i, r := range runes {
+		if r == '\t' {
+			continue
+		}
 		glyph := f.glyph(r)
 		page := table.get(r, glyph)
 		texture := page.texture()
 		srcRect := glyph.size(resolution).Rect().Offset(page.offset(r))
 		dstRect := glyph.rect(resolution).
-			Offset(resolution.PointDipsToPixels(points[i])).
+			Offset(resolution.PointDipsToPixels(offsets[i])).
 			Offset(origin)
 		tc := ctx.GetOrCreateTextureContext(texture)
 		ctx.Blitter.BlitGlyph(ctx, tc, col, srcRect, dstRect, ds)
@@ -165,60 +129,42 @@ func (f *Font) Size() int {
 	return f.size
 }
 
-func (f *Font) Measure(s string) math.Size {
+func (f *Font) Measure(fl *gxui.TextBlock) math.Size {
 	size := math.Size{W: 0, H: f.glyphMaxSizeDips.H}
 	var offset math.Point
-	for i := 0; i < len(s); {
-		r, l := utf8.DecodeRuneInString(s[i:])
-		i += l
-
+	for _, r := range fl.Runes {
 		if r == '\n' {
 			offset.X = 0
 			offset.Y += f.glyphMaxSizeDips.H
 			continue
 		}
-
 		offset.X += f.glyph(r).advanceDips()
 		size = size.Max(math.Size{W: offset.X, H: offset.Y + f.glyphMaxSizeDips.H})
 	}
 	return size
 }
 
-func (f *Font) MeasureRunes(runes []rune) math.Size {
-	size := math.Size{W: 0, H: f.glyphMaxSizeDips.H}
-	var offset math.Point
-	for _, r := range runes {
-		if r == '\n' {
-			offset.X = 0
-			offset.Y += f.glyphMaxSizeDips.H
-			continue
-		}
-
-		offset.X += f.glyph(r).advanceDips()
-		size = size.Max(math.Size{W: offset.X, H: offset.Y + f.glyphMaxSizeDips.H})
-	}
-	return size
-}
-
-func (f *Font) LayoutRunes(points []math.Point, runes []rune, alignRectDips math.Rect, h gxui.HorizontalAlignment, v gxui.VerticalAlignment) {
+func (f *Font) Layout(fl *gxui.TextBlock) (offsets []math.Point) {
 	sizeDips := math.Size{}
+	offsets = make([]math.Point, len(fl.Runes))
 	var offset math.Point
-	for i, r := range runes {
+	for i, r := range fl.Runes {
 		if r == '\n' {
 			offset.X = 0
 			offset.Y += f.glyphMaxSizeDips.H
 			continue
 		}
 
-		points[i] = offset
+		offsets[i] = offset
 		offset.X += f.glyph(r).advanceDips()
 		sizeDips = sizeDips.Max(math.Size{W: offset.X, H: offset.Y + f.glyphMaxSizeDips.H})
 	}
 
-	origin := f.align(alignRectDips, sizeDips, f.ascentDips, h, v)
-	for i, p := range points {
-		points[i] = p.Add(origin)
+	origin := f.align(fl.AlignRect, sizeDips, f.ascentDips, fl.H, fl.V)
+	for i, p := range offsets {
+		offsets[i] = p.Add(origin)
 	}
+	return offsets
 }
 
 func (f *Font) LoadGlyphs(first, last rune) {

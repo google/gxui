@@ -69,14 +69,21 @@ func (t *DefaultTextBoxLine) Paint(c gxui.Canvas) {
 
 func (t *DefaultTextBoxLine) MeasureRunes(s, e int) math.Size {
 	controller := t.textbox.controller
-	text := controller.TextRunes()
-	return t.textbox.font.MeasureRunes(text[s:e])
+	return t.textbox.font.Measure(&gxui.TextBlock{
+		Runes: controller.TextRunes()[s:e],
+	})
 }
 
 func (t *DefaultTextBoxLine) PaintText(c gxui.Canvas) {
-	text := t.textbox.controller.Line(t.lineIndex)
-	r := t.Bounds().Size().Rect().OffsetX(t.caretWidth)
-	c.DrawText(t.textbox.font, text, t.textbox.textColor, r, gxui.AlignLeft, gxui.AlignBottom)
+	runes := []rune(t.textbox.controller.Line(t.lineIndex))
+	f := t.textbox.font
+	offsets := f.Layout(&gxui.TextBlock{
+		Runes:     runes,
+		AlignRect: t.Bounds().Size().Rect().OffsetX(t.caretWidth),
+		H:         gxui.AlignLeft,
+		V:         gxui.AlignBottom,
+	})
+	c.DrawRunes(f, runes, t.textbox.textColor, offsets, math.Point{})
 }
 
 func (t *DefaultTextBoxLine) PaintCarets(c gxui.Canvas) {
@@ -132,7 +139,7 @@ func (t *DefaultTextBoxLine) RuneIndexAt(p math.Point) int {
 	x := p.X
 	line := controller.Line(t.lineIndex)
 	i := 0
-	for ; i < len(line) && x > font.Measure(line[:i+1]).W; i++ {
+	for ; i < len(line) && x > font.Measure(&gxui.TextBlock{Runes: []rune(line[:i+1])}).W; i++ {
 	}
 
 	return controller.LineStart(t.lineIndex) + i
@@ -144,5 +151,5 @@ func (t *DefaultTextBoxLine) PositionAt(runeIndex int) math.Point {
 
 	x := runeIndex - controller.LineStart(t.lineIndex)
 	line := controller.Line(t.lineIndex)
-	return font.Measure(line[:x]).Point()
+	return font.Measure(&gxui.TextBlock{Runes: []rune(line[:x])}).Point()
 }

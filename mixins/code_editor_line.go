@@ -112,12 +112,16 @@ func (t *CodeEditorLine) Paint(c gxui.Canvas) {
 
 		lineHeight := t.Bounds().Size().H
 		glyphWidth := font.GlyphMaxSize().W
-		offsets := make([]math.Point, len(runes))
-		font.LayoutRunes(offsets, runes, rect, gxui.AlignLeft, gxui.AlignMiddle)
+		offsets := font.Layout(&gxui.TextBlock{
+			Runes:     runes,
+			AlignRect: rect,
+			H:         gxui.AlignLeft,
+			V:         gxui.AlignMiddle,
+		})
 
 		info := CodeEditorLinePaintInfo{
 			LineSpan:     lineSpan,
-			Runes:        runes,
+			Runes:        runes, // TODO gxui.TextBlock?
 			GlyphOffsets: offsets,
 			GlyphWidth:   glyphWidth,
 			LineHeight:   lineHeight,
