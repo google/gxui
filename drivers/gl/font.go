@@ -13,23 +13,17 @@ import (
 	"code.google.com/p/freetype-go/freetype/truetype"
 )
 
-type Quad struct {
-	Texture          *Texture
-	SrcRect, DstRect math.Rect
-}
-
-type Font struct {
+type font struct {
 	size             int
 	scale            int32
 	glyphMaxSizeDips math.Size
 	ascentDips       int
 	ttf              *truetype.Font
-	resolutions      map[Resolution]*glyphTable
+	resolutions      map[resolution]*glyphTable
 	glyphs           map[rune]*glyph
-	quads            []Quad // Reused each call to Draw()
 }
 
-func createFont(data []byte, size int) (*Font, error) {
+func newFont(data []byte, size int) (*font, error) {
 	ttf, err := truetype.Parse(data)
 	if err != nil {
 		return nil, err
@@ -43,19 +37,18 @@ func createFont(data []byte, size int) (*Font, error) {
 	}
 	ascentDips := int(bounds.YMax >> 6)
 
-	return &Font{
+	return &font{
 		size:             size,
 		scale:            scale,
 		glyphMaxSizeDips: glyphMaxSizeDips,
 		ascentDips:       ascentDips,
 		ttf:              ttf,
-		resolutions:      make(map[Resolution]*glyphTable),
+		resolutions:      make(map[resolution]*glyphTable),
 		glyphs:           make(map[rune]*glyph),
-		quads:            []Quad{},
 	}, nil
 }
 
-func (f *Font) glyph(r rune) *glyph {
+func (f *font) glyph(r rune) *glyph {
 	if g, found := f.glyphs[r]; found {
 		return g
 	}
@@ -71,7 +64,7 @@ func (f *Font) glyph(r rune) *glyph {
 	return &g
 }
 
-func (f *Font) glyphTable(resolution Resolution) *glyphTable {
+func (f *font) glyphTable(resolution resolution) *glyphTable {
 	t, found := f.resolutions[resolution]
 	if !found {
 		t = createGlyphTable(resolution, f.glyphMaxSizeDips)
@@ -80,7 +73,7 @@ func (f *Font) glyphTable(resolution Resolution) *glyphTable {
 	return t
 }
 
-func (f *Font) align(rect math.Rect, size math.Size, ascent int, h gxui.HorizontalAlignment, v gxui.VerticalAlignment) math.Point {
+func (f *font) align(rect math.Rect, size math.Size, ascent int, h gxui.HorizontalAlignment, v gxui.VerticalAlignment) math.Point {
 	var origin math.Point
 	switch h {
 	case gxui.AlignLeft:
@@ -101,12 +94,12 @@ func (f *Font) align(rect math.Rect, size math.Size, ascent int, h gxui.Horizont
 	return origin
 }
 
-func (f *Font) DrawRunes(ctx *Context, runes []rune, offsets []math.Point, col gxui.Color, ds *DrawState) {
+func (f *font) DrawRunes(ctx *context, runes []rune, offsets []math.Point, col gxui.Color, ds *drawState) {
 	if len(runes) != len(offsets) {
 		panic(fmt.Errorf("There must be the same number of runes to offsets. Got %d runes and %d offsets",
 			len(runes), len(offsets)))
 	}
-	resolution := ctx.Resolution()
+	resolution := ctx.resolution
 	table := f.glyphTable(resolution)
 
 	for i, r := range runes {
@@ -117,17 +110,17 @@ func (f *Font) DrawRunes(ctx *Context, runes []rune, offsets []math.Point, col g
 		page := table.get(r, glyph)
 		texture := page.texture()
 		srcRect := glyph.size(resolution).Rect().Offset(page.offset(r))
-		dstRect := glyph.rect(resolution).Offset(resolution.PointDipsToPixels(offsets[i]))
-		tc := ctx.GetOrCreateTextureContext(texture)
-		ctx.Blitter.BlitGlyph(ctx, tc, col, srcRect, dstRect, ds)
+		dstRect := glyph.rect(resolution).Offset(resolution.pointDipsToPixels(offsets[i]))
+		tc := ctx.getOrCreateTextureContext(texture)
+		ctx.blitter.blitGlyph(ctx, tc, col, srcRect, dstRect, ds)
 	}
 }
 
-func (f *Font) Size() int {
+func (f *font) Size() int {
 	return f.size
 }
 
-func (f *Font) Measure(fl *gxui.TextBlock) math.Size {
+func (f *font) Measure(fl *gxui.TextBlock) math.Size {
 	size := math.Size{W: 0, H: f.glyphMaxSizeDips.H}
 	var offset math.Point
 	for _, r := range fl.Runes {
@@ -142,7 +135,7 @@ func (f *Font) Measure(fl *gxui.TextBlock) math.Size {
 	return size
 }
 
-func (f *Font) Layout(fl *gxui.TextBlock) (offsets []math.Point) {
+func (f *font) Layout(fl *gxui.TextBlock) (offsets []math.Point) {
 	sizeDips := math.Size{}
 	offsets = make([]math.Point, len(fl.Runes))
 	var offset math.Point
@@ -165,7 +158,7 @@ func (f *Font) Layout(fl *gxui.TextBlock) (offsets []math.Point) {
 	return offsets
 }
 
-func (f *Font) LoadGlyphs(first, last rune) {
+func (f *font) LoadGlyphs(first, last rune) {
 	if first > last {
 		first, last = last, first
 	}
@@ -174,6 +167,6 @@ func (f *Font) LoadGlyphs(first, last rune) {
 	}
 }
 
-func (f *Font) GlyphMaxSize() math.Size {
+func (f *font) GlyphMaxSize() math.Size {
 	return f.glyphMaxSizeDips
 }

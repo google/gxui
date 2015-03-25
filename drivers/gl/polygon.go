@@ -141,7 +141,7 @@ func segment(penWidth, r float32, a, b, c math.Vec2, aIsLast bool, vsEdgePos []f
 	return vsEdgePos, fillEdge
 }
 
-func closedPolyToShape(p gxui.Polygon, penWidth float32) (fillShape, edgeShape *Shape) {
+func closedPolyToShape(p gxui.Polygon, penWidth float32) (fillShape, edgeShape *shape) {
 	p = pruneDuplicates(p)
 
 	fillEdge := []math.Vec2{}
@@ -167,21 +167,21 @@ func closedPolyToShape(p gxui.Polygon, penWidth float32) (fillShape, edgeShape *
 			fillPos[i*2+0] = t.X
 			fillPos[i*2+1] = t.Y
 		}
-		fillShape = CreateShape(CreateVertexBuffer(
-			CreateVertexStream("aPosition", FLOAT_VEC2, fillPos),
-		), nil, TRIANGLES)
+		fillShape = newShape(newVertexBuffer(
+			newVertexStream("aPosition", stFloatVec2, fillPos),
+		), nil, dmTriangles)
 	}
 
 	if len(vsEdgePos) > 0 {
-		edgeShape = CreateShape(CreateVertexBuffer(
-			CreateVertexStream("aPosition", FLOAT_VEC2, vsEdgePos),
-		), nil, TRIANGLE_STRIP)
+		edgeShape = newShape(newVertexBuffer(
+			newVertexStream("aPosition", stFloatVec2, vsEdgePos),
+		), nil, dmTriangleStrip)
 	}
 
 	return fillShape, edgeShape
 }
 
-func openPolyToShape(p gxui.Polygon, penWidth float32) *Shape {
+func openPolyToShape(p gxui.Polygon, penWidth float32) *shape {
 	p = pruneDuplicates(p)
 	if len(p) < 2 {
 		return nil
@@ -212,9 +212,9 @@ func openPolyToShape(p gxui.Polygon, penWidth float32) *Shape {
 	}
 
 	if len(vsEdgePos) > 0 {
-		return CreateShape(CreateVertexBuffer(
-			CreateVertexStream("aPosition", FLOAT_VEC2, vsEdgePos),
-		), nil, TRIANGLE_STRIP)
+		return newShape(newVertexBuffer(
+			newVertexStream("aPosition", stFloatVec2, vsEdgePos),
+		), nil, dmTriangleStrip)
 	} else {
 		return nil
 	}

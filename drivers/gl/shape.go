@@ -6,66 +6,68 @@ package gl
 
 import "github.com/go-gl/gl/v3.2-core/gl"
 
-type Shape struct {
+type shape struct {
 	refCounted
-	vb       *VertexBuffer
-	ib       *IndexBuffer
-	drawMode DrawMode
+	vb       *vertexBuffer
+	ib       *indexBuffer
+	drawMode drawMode
 }
 
-func CreateShape(vb *VertexBuffer, ib *IndexBuffer, drawMode DrawMode) *Shape {
+func newShape(vb *vertexBuffer, ib *indexBuffer, drawMode drawMode) *shape {
 	if vb == nil {
 		panic("VertexBuffer cannot be nil")
 	}
 
-	s := &Shape{
+	s := &shape{
 		vb:       vb,
 		ib:       ib,
 		drawMode: drawMode,
 	}
 	s.init()
-	globalStats.ShapeCount++
+	globalStats.shapeCount++
 	return s
 }
 
-func (s *Shape) Release() {
-	if s.release() {
-		if s.vb != nil {
-			s.vb.Release()
-			s.vb = nil
-		}
-		if s.ib != nil {
-			s.ib.Release()
-			s.ib = nil
-		}
-		globalStats.ShapeCount--
+func (s *shape) release() bool {
+	if !s.refCounted.release() {
+		return false
 	}
+	if s.vb != nil {
+		s.vb.release()
+		s.vb = nil
+	}
+	if s.ib != nil {
+		s.ib.release()
+		s.ib = nil
+	}
+	globalStats.shapeCount--
+	return true
 }
 
-func CreateQuadShape() *Shape {
-	pos := CreateVertexStream("aPosition", FLOAT_VEC2, []float32{
+func newQuadShape() *shape {
+	pos := newVertexStream("aPosition", stFloatVec2, []float32{
 		0.0, 0.0,
 		1.0, 0.0,
 		0.0, 1.0,
 		1.0, 1.0,
 	})
-	vb := CreateVertexBuffer(pos)
-	ib := CreateIndexBuffer(UINT, []uint32{
+	vb := newVertexBuffer(pos)
+	ib := newIndexBuffer(ptUint, []uint32{
 		0, 1, 2,
 		2, 1, 3,
 	})
-	return CreateShape(vb, ib, TRIANGLES)
+	return newShape(vb, ib, dmTriangles)
 }
 
-func (s Shape) Draw(ctx *Context, shader *ShaderProgram, ub UniformBindings) {
-	s.AssertAlive("Draw")
+func (s shape) draw(ctx *context, shader *shaderProgram, ub uniformBindings) {
+	s.assertAlive("draw")
 
-	shader.Bind(ctx, s.vb, ub)
+	shader.bind(ctx, s.vb, ub)
 	if s.ib != nil {
-		ctx.GetOrCreateIndexBufferContext(s.ib).Render(s.drawMode)
+		ctx.getOrCreateIndexBufferContext(s.ib).render(s.drawMode)
 	} else {
-		gl.DrawArrays(uint32(s.drawMode), 0, int32(s.vb.VertexCount))
+		gl.DrawArrays(uint32(s.drawMode), 0, int32(s.vb.count))
 	}
-	shader.Unbind(ctx)
-	CheckError()
+	shader.unbind(ctx)
+	checkError()
 }

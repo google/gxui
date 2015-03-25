@@ -6,133 +6,120 @@ package gl
 
 import (
 	"github.com/google/gxui/math"
-	"sync"
 
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
-type Context struct {
-	lastStatsMutex       sync.Mutex
-	Blitter              *Blitter
-	currStats, lastStats Stats
-	textureContexts      map[*Texture]*TextureContext
-	vertexStreamContexts map[*VertexStream]VertexStreamContext
-	indexBufferContexts  map[*IndexBuffer]IndexBufferContext
-	renderTarget         *Canvas
+type context struct {
+	blitter              *blitter
+	resolution           resolution
+	stats                contextStats
+	textureContexts      map[*texture]*textureContext
+	vertexStreamContexts map[*vertexStream]*vertexStreamContext
+	indexBufferContexts  map[*indexBuffer]*indexBufferContext
 	sizeDips, sizePixels math.Size
 	clip                 math.Rect
 }
 
-func CreateContext() *Context {
-	ctx := &Context{}
-	ctx.Blitter = CreateBlitter(ctx, &ctx.currStats)
-	ctx.textureContexts = make(map[*Texture]*TextureContext)
-	ctx.vertexStreamContexts = make(map[*VertexStream]VertexStreamContext)
-	ctx.indexBufferContexts = make(map[*IndexBuffer]IndexBufferContext)
-
+func newContext() *context {
+	ctx := &context{
+		textureContexts:      make(map[*texture]*textureContext),
+		vertexStreamContexts: make(map[*vertexStream]*vertexStreamContext),
+		indexBufferContexts:  make(map[*indexBuffer]*indexBufferContext),
+	}
+	ctx.blitter = newBlitter(ctx, &ctx.stats)
 	return ctx
 }
 
-func (c *Context) Destroy() {
+func (c *context) destroy() {
 	for texture, tc := range c.textureContexts {
 		delete(c.textureContexts, texture)
 		tc.destroy()
-		c.currStats.TextureCount--
+		c.stats.textureCount--
 	}
 	for stream, sc := range c.vertexStreamContexts {
 		delete(c.vertexStreamContexts, stream)
-		sc.Destroy()
-		c.currStats.VertexStreamCount--
+		sc.destroy()
+		c.stats.vertexStreamCount--
 	}
 	for buffer, ic := range c.indexBufferContexts {
 		delete(c.indexBufferContexts, buffer)
-		ic.Destroy()
-		c.currStats.IndexBufferCount--
+		ic.destroy()
+		c.stats.indexBufferCount--
 	}
-	c.Blitter.Destroy(c)
-	c.Blitter = nil
+	c.blitter.destroy(c)
+	c.blitter = nil
 }
 
-func (c *Context) Stats() *Stats {
-	return &c.currStats
-}
-
-func (c *Context) LastStats() Stats {
-	c.lastStatsMutex.Lock()
-	defer c.lastStatsMutex.Unlock()
-	return c.lastStats
-}
-
-func (c *Context) BeginDraw(sizeDips, sizePixels math.Size) {
+func (c *context) beginDraw(sizeDips, sizePixels math.Size) {
 	// Reap any dead textures
 	for texture, tc := range c.textureContexts {
-		if !texture.Alive() {
+		if !texture.alive() {
 			delete(c.textureContexts, texture)
 			tc.destroy()
-			c.currStats.TextureCount--
+			c.stats.textureCount--
 		}
 	}
 	for stream, sc := range c.vertexStreamContexts {
-		if !stream.Alive() {
+		if !stream.alive() {
 			delete(c.vertexStreamContexts, stream)
-			sc.Destroy()
-			c.currStats.VertexStreamCount--
+			sc.destroy()
+			c.stats.vertexStreamCount--
 		}
 	}
 	for buffer, ic := range c.indexBufferContexts {
-		if !buffer.Alive() {
+		if !buffer.alive() {
 			delete(c.indexBufferContexts, buffer)
-			ic.Destroy()
-			c.currStats.IndexBufferCount--
+			ic.destroy()
+			c.stats.indexBufferCount--
 		}
 	}
 
+	dipsToPixels := float32(c.sizePixels.W) / float32(c.sizeDips.W)
+
 	c.sizeDips = sizeDips
 	c.sizePixels = sizePixels
-	c.currStats.DrawCallCount = 0
-	c.currStats.Timer("Frame").Start()
+	c.resolution = resolution(dipsToPixels*0xffff + 0.5)
+	c.stats.drawCallCount = 0
+	c.stats.timer("Frame").start()
 }
 
-func (c *Context) EndDraw() {
-	c.currStats.Timer("Frame").Stop()
-	c.currStats.FrameCount++
-
-	c.lastStatsMutex.Lock()
-	c.lastStats = c.currStats
-	c.lastStatsMutex.Unlock()
+func (c *context) endDraw() {
+	c.stats.timer("Frame").stop()
+	c.stats.frameCount++
 }
 
-func (c *Context) GetOrCreateTextureContext(t *Texture) *TextureContext {
+func (c *context) getOrCreateTextureContext(t *texture) *textureContext {
 	tc, found := c.textureContexts[t]
 	if !found {
-		tc = t.CreateContext()
+		tc = t.newContext()
 		c.textureContexts[t] = tc
-		c.currStats.TextureCount++
+		c.stats.textureCount++
 	}
 	return tc
 }
 
-func (c *Context) GetOrCreateVertexStreamContext(vs *VertexStream) VertexStreamContext {
+func (c *context) getOrCreateVertexStreamContext(vs *vertexStream) *vertexStreamContext {
 	vc, found := c.vertexStreamContexts[vs]
 	if !found {
-		vc = vs.CreateContext()
+		vc = vs.newContext()
 		c.vertexStreamContexts[vs] = vc
-		c.currStats.VertexStreamCount++
+		c.stats.vertexStreamCount++
 	}
 	return vc
 }
 
-func (c *Context) GetOrCreateIndexBufferContext(ib *IndexBuffer) IndexBufferContext {
+func (c *context) getOrCreateIndexBufferContext(ib *indexBuffer) *indexBufferContext {
 	ic, found := c.indexBufferContexts[ib]
 	if !found {
-		ic = ib.CreateContext()
+		ic = ib.newContext()
 		c.indexBufferContexts[ib] = ic
-		c.currStats.IndexBufferCount++
+		c.stats.indexBufferCount++
 	}
 	return ic
 }
 
-func (c *Context) Apply(ds *DrawState) {
+func (c *context) apply(ds *drawState) {
 	r := ds.ClipPixels
 	o := c.clip
 	if o != r {
@@ -140,53 +127,5 @@ func (c *Context) Apply(ds *DrawState) {
 		vs := c.sizePixels
 		rs := r.Size()
 		gl.Scissor(int32(r.Min.X), int32(vs.H)-int32(r.Max.Y), int32(rs.W), int32(rs.H))
-	}
-}
-
-func (c *Context) RenderTargetSizePixels() math.Size {
-	return c.sizePixels
-}
-
-func (c *Context) DipsToPixels() float32 {
-	wd := c.sizeDips.W
-	wp := c.sizePixels.W
-	return float32(wp) / float32(wd)
-}
-
-func (c *Context) PointDipsToPixels(dips math.Point) math.Point {
-	sd := c.sizeDips
-	sp := c.sizePixels
-	return math.Point{
-		X: (dips.X * sp.W) / sd.W,
-		Y: (dips.Y * sp.H) / sd.H,
-	}
-}
-
-func (c *Context) RectDipsToPixels(dips math.Rect) math.Rect {
-	return math.Rect{
-		Min: c.PointDipsToPixels(dips.Min),
-		Max: c.PointDipsToPixels(dips.Max),
-	}
-}
-
-func (c *Context) Resolution() Resolution {
-	return Resolution(c.DipsToPixels()*0xffff + 0.5)
-}
-
-func (c *Context) SizeDipsToPixels(dips math.Size) math.Size {
-	sd := c.sizeDips
-	sp := c.sizePixels
-	return math.Size{
-		W: (dips.W * sp.W) / sd.W,
-		H: (dips.H * sp.H) / sd.H,
-	}
-}
-
-func (c *Context) SizePixelsToDips(dips math.Size) math.Size {
-	sd := c.sizeDips
-	sp := c.sizePixels
-	return math.Size{
-		W: (dips.W * sd.W) / sp.W,
-		H: (dips.H * sd.H) / sp.H,
 	}
 }

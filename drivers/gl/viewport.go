@@ -20,13 +20,13 @@ const kClearColorR = 0.5
 const kClearColorG = 0.5
 const kClearColorB = 0.5
 
-type Viewport struct {
+type viewport struct {
 	sync.Mutex
 
-	driver                  *Driver
-	context                 *Context
+	driver                  *driver
+	context                 *context
 	window                  *glfw.Window
-	canvas                  *Canvas
+	canvas                  *canvas
 	sizeDips, sizePixels    math.Size
 	title                   string
 	pendingMouseMoveEvent   *gxui.MouseEvent
@@ -34,7 +34,6 @@ type Viewport struct {
 	scrollAccumX            float64
 	scrollAccumY            float64
 	destroyed               bool
-	continuousRedraw        bool
 	redrawCount             int
 
 	// Broadcasts to application thread
@@ -54,8 +53,8 @@ type Viewport struct {
 	onDestroy gxui.Event
 }
 
-func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
-	v := &Viewport{}
+func newViewport(driver *driver, width, height int, title string) *viewport {
+	v := &viewport{}
 
 	glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.Samples, 4)
@@ -68,7 +67,7 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 		panic(fmt.Errorf("Failed to initialize gl: %v", err))
 	}
 
-	v.context = CreateContext()
+	v.context = newContext()
 
 	cursorPoint := func(x, y float64) math.Point {
 		// HACK: xpos is off by 1 and ypos is off by 3 on OSX.
@@ -239,17 +238,17 @@ func CreateViewport(driver *Driver, width, height int, title string) *Viewport {
 
 // Driver methods
 // These methods are all called on the driver routine
-func (v *Viewport) render() {
+func (v *viewport) render() {
 	if v.destroyed {
-		panic("Attempting to render a destroyed Viewport")
+		panic("Attempting to render a destroyed viewport")
 	}
 
 	v.window.MakeContextCurrent()
 
 	ctx := v.context
-	ctx.BeginDraw(v.SizeDips(), v.SizePixels())
+	ctx.beginDraw(v.SizeDips(), v.SizePixels())
 
-	dss := DrawStateStack{DrawState{
+	dss := drawStateStack{drawState{
 		ClipPixels: v.sizePixels.Rect(),
 	}}
 
@@ -258,45 +257,36 @@ func (v *Viewport) render() {
 		panic("DrawStateStack count was not 1 after calling Canvas.Draw")
 	}
 
-	ctx.Apply(dss.Head())
-	ctx.Blitter.Commit(ctx)
+	ctx.apply(dss.head())
+	ctx.blitter.commit(ctx)
 
 	if v.driver.debugEnabled {
 		v.drawFrameUpdate(ctx)
 	}
 
-	ctx.EndDraw()
+	ctx.endDraw()
 
 	v.window.SwapBuffers()
-
-	if v.continuousRedraw {
-		if ctx.Stats().FrameCount%60 == 0 {
-			print(ctx.Stats().String() + "\n")
-		}
-		glfw.PollEvents()
-		v.driver.flush()
-		v.driver.asyncDriver(v.render)
-	}
 }
 
-func (v *Viewport) drawFrameUpdate(ctx *Context) {
-	dx := (ctx.Stats().FrameCount * 10) & 0xFF
+func (v *viewport) drawFrameUpdate(ctx *context) {
+	dx := (ctx.stats.frameCount * 10) & 0xFF
 	r := math.CreateRect(dx-5, 0, dx+5, 3)
-	ds := &DrawState{}
-	ctx.Blitter.BlitRect(ctx, r, gxui.White, ds)
+	ds := &drawState{}
+	ctx.blitter.blitRect(ctx, r, gxui.White, ds)
 }
 
-// gxui.Viewport compliance
+// gxui.viewport compliance
 // These methods are all called on the application routine
-func (v *Viewport) SetCanvas(canvas gxui.Canvas) {
+func (v *viewport) SetCanvas(cc gxui.Canvas) {
 	if v.destroyed {
-		panic("Attempting to set the canvas on a destroyed Viewport")
+		panic("Attempting to set the canvas on a destroyed viewport")
 	}
 	v.redrawCount++
 	cnt := v.redrawCount
-	c := canvas.(*Canvas)
+	c := cc.(*canvas)
 	if c != nil {
-		c.AddRef()
+		c.addRef()
 	}
 	v.driver.asyncDriver(func() {
 		if v.redrawCount == cnt {
@@ -313,25 +303,25 @@ func (v *Viewport) SetCanvas(canvas gxui.Canvas) {
 	})
 }
 
-func (v *Viewport) SizeDips() math.Size {
+func (v *viewport) SizeDips() math.Size {
 	v.Lock()
 	defer v.Unlock()
 	return v.sizeDips
 }
 
-func (v *Viewport) SizePixels() math.Size {
+func (v *viewport) SizePixels() math.Size {
 	v.Lock()
 	defer v.Unlock()
 	return v.sizePixels
 }
 
-func (v *Viewport) Title() string {
+func (v *viewport) Title() string {
 	v.Lock()
 	defer v.Unlock()
 	return v.title
 }
 
-func (v *Viewport) SetTitle(title string) {
+func (v *viewport) SetTitle(title string) {
 	v.Lock()
 	v.title = title
 	v.Unlock()
@@ -340,71 +330,71 @@ func (v *Viewport) SetTitle(title string) {
 	})
 }
 
-func (v *Viewport) Show() {
+func (v *viewport) Show() {
 	v.driver.asyncDriver(func() { v.window.Show() })
 }
 
-func (v *Viewport) Hide() {
+func (v *viewport) Hide() {
 	v.driver.asyncDriver(func() { v.window.Hide() })
 }
 
-func (v *Viewport) Close() {
+func (v *viewport) Close() {
 	v.Destroy()
 }
 
-func (v *Viewport) OnResize(f func()) gxui.EventSubscription {
+func (v *viewport) OnResize(f func()) gxui.EventSubscription {
 	return v.onResize.Listen(f)
 }
 
-func (v *Viewport) OnClose(f func()) gxui.EventSubscription {
+func (v *viewport) OnClose(f func()) gxui.EventSubscription {
 	return v.onClose.Listen(f)
 }
 
-func (v *Viewport) OnMouseMove(f func(gxui.MouseEvent)) gxui.EventSubscription {
+func (v *viewport) OnMouseMove(f func(gxui.MouseEvent)) gxui.EventSubscription {
 	return v.onMouseMove.Listen(f)
 }
 
-func (v *Viewport) OnMouseEnter(f func(gxui.MouseEvent)) gxui.EventSubscription {
+func (v *viewport) OnMouseEnter(f func(gxui.MouseEvent)) gxui.EventSubscription {
 	return v.onMouseEnter.Listen(f)
 }
 
-func (v *Viewport) OnMouseExit(f func(gxui.MouseEvent)) gxui.EventSubscription {
+func (v *viewport) OnMouseExit(f func(gxui.MouseEvent)) gxui.EventSubscription {
 	return v.onMouseExit.Listen(f)
 }
 
-func (v *Viewport) OnMouseDown(f func(gxui.MouseEvent)) gxui.EventSubscription {
+func (v *viewport) OnMouseDown(f func(gxui.MouseEvent)) gxui.EventSubscription {
 	return v.onMouseDown.Listen(f)
 }
 
-func (v *Viewport) OnMouseUp(f func(gxui.MouseEvent)) gxui.EventSubscription {
+func (v *viewport) OnMouseUp(f func(gxui.MouseEvent)) gxui.EventSubscription {
 	return v.onMouseUp.Listen(f)
 }
 
-func (v *Viewport) OnMouseScroll(f func(gxui.MouseEvent)) gxui.EventSubscription {
+func (v *viewport) OnMouseScroll(f func(gxui.MouseEvent)) gxui.EventSubscription {
 	return v.onMouseScroll.Listen(f)
 }
 
-func (v *Viewport) OnKeyDown(f func(gxui.KeyboardEvent)) gxui.EventSubscription {
+func (v *viewport) OnKeyDown(f func(gxui.KeyboardEvent)) gxui.EventSubscription {
 	return v.onKeyDown.Listen(f)
 }
 
-func (v *Viewport) OnKeyUp(f func(gxui.KeyboardEvent)) gxui.EventSubscription {
+func (v *viewport) OnKeyUp(f func(gxui.KeyboardEvent)) gxui.EventSubscription {
 	return v.onKeyUp.Listen(f)
 }
 
-func (v *Viewport) OnKeyRepeat(f func(gxui.KeyboardEvent)) gxui.EventSubscription {
+func (v *viewport) OnKeyRepeat(f func(gxui.KeyboardEvent)) gxui.EventSubscription {
 	return v.onKeyRepeat.Listen(f)
 }
 
-func (v *Viewport) OnKeyStroke(f func(gxui.KeyStrokeEvent)) gxui.EventSubscription {
+func (v *viewport) OnKeyStroke(f func(gxui.KeyStrokeEvent)) gxui.EventSubscription {
 	return v.onKeyStroke.Listen(f)
 }
 
-func (v *Viewport) Destroy() {
+func (v *viewport) Destroy() {
 	v.driver.asyncDriver(func() {
 		if !v.destroyed {
 			v.window.MakeContextCurrent()
-			v.context.Destroy()
+			v.context.destroy()
 			v.window.Destroy()
 			v.onDestroy.Fire()
 			v.canvas.Release()
@@ -412,8 +402,4 @@ func (v *Viewport) Destroy() {
 			v.destroyed = true
 		}
 	})
-}
-
-func (v *Viewport) Stats() string {
-	return fmt.Sprintf("Global: %s\nViewport: %s", globalStats.String(), v.context.LastStats().String())
 }

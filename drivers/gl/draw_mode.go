@@ -10,35 +10,35 @@ import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
-type DrawMode int
+type drawMode int
 
 const (
-	POINTS         DrawMode = gl.POINTS
-	LINE_STRIP     DrawMode = gl.LINE_STRIP
-	LINE_LOOP      DrawMode = gl.LINE_LOOP
-	LINES          DrawMode = gl.LINES
-	TRIANGLE_STRIP DrawMode = gl.TRIANGLE_STRIP
-	TRIANGLE_FAN   DrawMode = gl.TRIANGLE_FAN
-	TRIANGLES      DrawMode = gl.TRIANGLES
+	dmPoints        drawMode = gl.POINTS
+	dmLineStrip     drawMode = gl.LINE_STRIP
+	dmLineLoop      drawMode = gl.LINE_LOOP
+	dmLines         drawMode = gl.LINES
+	dmTriangleStrip drawMode = gl.TRIANGLE_STRIP
+	dmTriangleFan   drawMode = gl.TRIANGLE_FAN
+	dmTriangles     drawMode = gl.TRIANGLES
 )
 
-func (d DrawMode) PrimitiveCount(vertexCount int) int {
+func (d drawMode) primitiveCount(vertexCount int) int {
 	switch d {
-	case POINTS:
+	case dmPoints:
 		return vertexCount
-	case LINE_STRIP:
+	case dmLineStrip:
 		return vertexCount - 1
-	case LINE_LOOP:
+	case dmLineLoop:
 		return vertexCount
-	case LINES:
+	case dmLines:
 		return vertexCount / 2
-	case TRIANGLE_STRIP:
+	case dmTriangleStrip:
 		return vertexCount - 2
-	case TRIANGLE_FAN:
+	case dmTriangleFan:
 		return vertexCount - 2
-	case TRIANGLES:
+	case dmTriangles:
 		return vertexCount / 3
 	default:
-		panic(fmt.Errorf("Unknown DrawMode 0x%.4x", d))
+		panic(fmt.Errorf("Unknown drawMode 0x%.4x", d))
 	}
 }

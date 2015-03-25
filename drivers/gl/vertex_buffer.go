@@ -6,37 +6,39 @@ package gl
 
 import "fmt"
 
-type VertexBuffer struct {
+type vertexBuffer struct {
 	refCounted
-	Streams     map[string]*VertexStream
-	VertexCount int
+	streams map[string]*vertexStream
+	count   int
 }
 
-func CreateVertexBuffer(streams ...*VertexStream) *VertexBuffer {
-	vb := &VertexBuffer{
-		Streams: map[string]*VertexStream{},
+func newVertexBuffer(streams ...*vertexStream) *vertexBuffer {
+	vb := &vertexBuffer{
+		streams: map[string]*vertexStream{},
 	}
 	vb.init()
 	for i, s := range streams {
 		if i == 0 {
-			vb.VertexCount = s.VertexCount()
+			vb.count = s.count
 		} else {
-			if vb.VertexCount != s.VertexCount() {
+			if vb.count != s.count {
 				panic(fmt.Errorf("Inconsistent vertex count in vertex buffer. %s has %d vertices, %s has %d",
-					streams[i-1].Name(), streams[i-1].VertexCount(), s.Name(), s.VertexCount()))
+					streams[i-1].name, streams[i-1].count, s.name, s.count))
 			}
 		}
-		vb.Streams[s.Name()] = s
+		vb.streams[s.name] = s
 	}
-	globalStats.VertexBufferCount++
+	globalStats.vertexBufferCount++
 	return vb
 }
 
-func (vb *VertexBuffer) Release() {
-	if vb.release() {
-		for _, s := range vb.Streams {
-			s.Release()
-		}
-		globalStats.VertexBufferCount--
+func (vb *vertexBuffer) release() bool {
+	if !vb.refCounted.release() {
+		return false
 	}
+	for _, s := range vb.streams {
+		s.release()
+	}
+	globalStats.vertexBufferCount--
+	return true
 }

@@ -15,6 +15,6 @@ type Texture interface {
 	SizePixels() math.Size
 	FlipY() bool
 	SetFlipY(bool)
-	AddRef()
+	//AddRef()
 	Release()
 }

@@ -11,47 +11,47 @@ import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
-type PrimitiveType int
+type primitiveType int
 
 const (
-	FLOAT  PrimitiveType = gl.FLOAT
-	INT    PrimitiveType = gl.INT
-	UINT   PrimitiveType = gl.UNSIGNED_INT
-	USHORT PrimitiveType = gl.UNSIGNED_SHORT
-	UBYTE  PrimitiveType = gl.UNSIGNED_BYTE
+	ptFloat  primitiveType = gl.FLOAT
+	ptInt    primitiveType = gl.INT
+	ptUint   primitiveType = gl.UNSIGNED_INT
+	ptUshort primitiveType = gl.UNSIGNED_SHORT
+	ptUbyte  primitiveType = gl.UNSIGNED_BYTE
 )
 
-func (p PrimitiveType) SizeInBytes() int {
+func (p primitiveType) sizeInBytes() int {
 	switch p {
-	case FLOAT:
+	case ptFloat:
 		return 4
-	case INT:
+	case ptInt:
 		return 4
-	case UINT:
+	case ptUint:
 		return 4
-	case USHORT:
+	case ptUshort:
 		return 2
-	case UBYTE:
+	case ptUbyte:
 		return 1
 	default:
-		panic(fmt.Errorf("Unknown PrimitiveType 0x%.4x", p))
+		panic(fmt.Errorf("Unknown primitiveType 0x%.4x", p))
 	}
 }
 
-func (p PrimitiveType) IsArrayOfType(array interface{}) bool {
+func (p primitiveType) isArrayOfType(array interface{}) bool {
 	ty := reflect.TypeOf(array).Elem()
 	switch p {
-	case FLOAT:
+	case ptFloat:
 		return ty.Name() == "float32"
-	case INT:
+	case ptInt:
 		return ty.Name() == "int32"
-	case UINT:
+	case ptUint:
 		return ty.Name() == "uint32"
-	case USHORT:
+	case ptUshort:
 		return ty.Name() == "uint16"
-	case UBYTE:
+	case ptUbyte:
 		return ty.Name() == "uint8"
 	default:
-		panic(fmt.Errorf("Unknown PrimitiveType 0x%.4x", p))
+		panic(fmt.Errorf("Unknown primitiveType 0x%.4x", p))
 	}
 }

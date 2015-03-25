@@ -18,16 +18,14 @@ func init() {
 	runtime.LockOSThread()
 }
 
-type Driver struct {
+type driver struct {
 	pendingDriver chan func()
 	pendingApp    chan func()
 	viewports     *list.List
 	debugEnabled  bool
 }
 
-type AppThread func(driver gxui.Driver)
-
-func StartDriver(appThread AppThread) {
+func StartDriver(appRoutine func(driver gxui.Driver)) {
 	if runtime.GOMAXPROCS(-1) < 2 {
 		runtime.GOMAXPROCS(2)
 	}
@@ -37,36 +35,36 @@ func StartDriver(appThread AppThread) {
 	}
 	defer glfw.Terminate()
 
-	driver := &Driver{
+	driver := &driver{
 		pendingDriver: make(chan func(), 256),
 		pendingApp:    make(chan func(), 256),
 		viewports:     list.New(),
 	}
 
-	go appThread(driver)
+	go appRoutine(driver)
 	driver.run()
 }
 
-func (d *Driver) asyncDriver(f func()) {
+func (d *driver) asyncDriver(f func()) {
 	d.pendingDriver <- f
 	d.wake()
 }
 
-func (d *Driver) syncDriver(f func()) {
+func (d *driver) syncDriver(f func()) {
 	c := make(chan bool, 1)
 	d.asyncDriver(func() { f(); c <- true })
 	<-c
 }
 
-func (d *Driver) createDriverEvent(signature interface{}) gxui.Event {
+func (d *driver) createDriverEvent(signature interface{}) gxui.Event {
 	return gxui.CreateChanneledEvent(signature, d.pendingDriver)
 }
 
-func (d *Driver) createAppEvent(signature interface{}) gxui.Event {
+func (d *driver) createAppEvent(signature interface{}) gxui.Event {
 	return gxui.CreateChanneledEvent(signature, d.pendingApp)
 }
 
-func (d *Driver) flush() {
+func (d *driver) flush() {
 	for {
 		select {
 		case ev := <-d.pendingDriver:
@@ -77,7 +75,7 @@ func (d *Driver) flush() {
 	}
 }
 
-func (d *Driver) run() {
+func (d *driver) run() {
 	for {
 		select {
 		case ev, open := <-d.pendingDriver:
@@ -92,23 +90,23 @@ func (d *Driver) run() {
 	}
 }
 
-func (d *Driver) wake() {
+func (d *driver) wake() {
 	glfw.PostEmptyEvent()
 }
 
-func (d *Driver) EnableDebug(enabled bool) {
+func (d *driver) EnableDebug(enabled bool) {
 	d.debugEnabled = enabled
 }
 
 // gxui.Driver compliance
-func (d *Driver) Events() chan func() {
+func (d *driver) Events() chan func() {
 	return d.pendingApp
 }
 
-func (d *Driver) Terminate() {
+func (d *driver) Terminate() {
 	d.asyncDriver(func() {
 		for v := d.viewports.Front(); v != nil; v = v.Next() {
-			v.Value.(*Viewport).Destroy()
+			v.Value.(*viewport).Destroy()
 		}
 		d.flush()
 		close(d.pendingDriver)
@@ -117,29 +115,29 @@ func (d *Driver) Terminate() {
 	})
 }
 
-func (d *Driver) SetClipboard(str string) {
+func (d *driver) SetClipboard(str string) {
 	d.asyncDriver(func() {
-		v := d.viewports.Front().Value.(*Viewport)
+		v := d.viewports.Front().Value.(*viewport)
 		v.window.SetClipboardString(str)
 	})
 }
 
-func (d *Driver) GetClipboard() (str string, err error) {
+func (d *driver) GetClipboard() (str string, err error) {
 	d.syncDriver(func() {
-		c := d.viewports.Front().Value.(*Viewport)
+		c := d.viewports.Front().Value.(*viewport)
 		str, err = c.window.GetClipboardString()
 	})
 	return
 }
 
-func (d *Driver) CreateFont(data []byte, size int) (gxui.Font, error) {
-	return createFont(data, size)
+func (d *driver) CreateFont(data []byte, size int) (gxui.Font, error) {
+	return newFont(data, size)
 }
 
-func (d *Driver) CreateViewport(width, height int, name string) gxui.Viewport {
-	var v *Viewport
+func (d *driver) CreateViewport(width, height int, name string) gxui.Viewport {
+	var v *viewport
 	d.syncDriver(func() {
-		v = CreateViewport(d, width, height, name)
+		v = newViewport(d, width, height, name)
 		e := d.viewports.PushBack(v)
 		v.onDestroy.Listen(func() {
 			d.viewports.Remove(e)
@@ -148,10 +146,10 @@ func (d *Driver) CreateViewport(width, height int, name string) gxui.Viewport {
 	return v
 }
 
-func (d *Driver) CreateCanvas(s math.Size) gxui.Canvas {
-	return CreateCanvas(s)
+func (d *driver) CreateCanvas(s math.Size) gxui.Canvas {
+	return newCanvas(s)
 }
 
-func (d *Driver) CreateTexture(img image.Image, pixelsPerDip float32) gxui.Texture {
-	return CreateTexture(img, pixelsPerDip)
+func (d *driver) CreateTexture(img image.Image, pixelsPerDip float32) gxui.Texture {
+	return newTexture(img, pixelsPerDip)
 }

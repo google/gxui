@@ -11,79 +11,69 @@ import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
-type VertexStream struct {
+type vertexStream struct {
 	refCounted
 	name  string
 	data  interface{}
-	ty    ShaderDataType
+	ty    shaderDataType
 	count int
 }
 
-type VertexStreamContext struct {
+type vertexStreamContext struct {
 	buffer uint32
 }
 
-func CreateVertexStream(name string, ty ShaderDataType, data interface{}) *VertexStream {
+func newVertexStream(name string, ty shaderDataType, data interface{}) *vertexStream {
 	dataVal := reflect.ValueOf(data)
 	dataLen := dataVal.Len()
 
-	if dataLen%ty.VectorElementCount() != 0 {
+	if dataLen%ty.vectorElementCount() != 0 {
 		panic(fmt.Errorf("Incorrect multiple of elements. Got: %d, Requires multiple of %d",
-			dataLen, ty.VectorElementCount()))
+			dataLen, ty.vectorElementCount()))
 	}
-	if !ty.VectorElementType().IsArrayOfType(data) {
+	if !ty.vectorElementType().isArrayOfType(data) {
 		panic("Data is not of the specified type")
 	}
 
-	vs := &VertexStream{
+	vs := &vertexStream{
 		name:  name,
 		data:  data,
 		ty:    ty,
-		count: dataLen / ty.VectorElementCount(),
+		count: dataLen / ty.vectorElementCount(),
 	}
 	vs.init()
-	globalStats.VertexStreamCount++
+	globalStats.vertexStreamCount++
 	return vs
 }
 
-func (s *VertexStream) Release() {
-	if s.release() {
-		globalStats.VertexStreamCount--
+func (s *vertexStream) release() bool {
+	if !s.refCounted.release() {
+		return false
 	}
+	globalStats.vertexStreamCount--
+	return true
 }
 
-func (s VertexStream) Name() string {
-	return s.name
-}
-
-func (s VertexStream) Type() ShaderDataType {
-	return s.ty
-}
-
-func (s VertexStream) VertexCount() int {
-	return s.count
-}
-
-func (s VertexStream) CreateContext() VertexStreamContext {
+func (s *vertexStream) newContext() *vertexStreamContext {
 	dataVal := reflect.ValueOf(s.data)
 	dataLen := dataVal.Len()
-	size := dataLen * s.ty.VectorElementType().SizeInBytes()
+	size := dataLen * s.ty.vectorElementType().sizeInBytes()
 
 	var buffer uint32
 	gl.GenBuffers(1, &buffer)
 	gl.BindBuffer(gl.ARRAY_BUFFER, buffer)
 	gl.BufferData(gl.ARRAY_BUFFER, size, gl.Ptr(s.data), gl.STATIC_DRAW)
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	CheckError()
+	checkError()
 
-	return VertexStreamContext{buffer}
+	return &vertexStreamContext{buffer}
 }
 
-func (c VertexStreamContext) Bind() {
+func (c vertexStreamContext) bind() {
 	gl.BindBuffer(gl.ARRAY_BUFFER, c.buffer)
 }
 
-func (c *VertexStreamContext) Destroy() {
+func (c *vertexStreamContext) destroy() {
 	gl.DeleteBuffers(1, &c.buffer)
 	c.buffer = 0
 }

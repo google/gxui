@@ -12,76 +12,94 @@ import (
 	"github.com/google/gxui/math"
 )
 
-type DrawStateStack []DrawState
+type drawStateStack []drawState
 
-func (s *DrawStateStack) Head() *DrawState {
+func (s *drawStateStack) head() *drawState {
 	return &(*s)[len(*s)-1]
 }
-func (s *DrawStateStack) Push(ds DrawState) {
+func (s *drawStateStack) push(ds drawState) {
 	*s = append(*s, ds)
 }
-func (s *DrawStateStack) Pop() {
+func (s *drawStateStack) pop() {
 	*s = (*s)[:len(*s)-1]
 }
 
-type CanvasOp func(ctx *Context, dss *DrawStateStack)
+type canvasOp func(ctx *context, dss *drawStateStack)
 
-type DrawState struct {
+type drawState struct {
 	// The below are all in window coordinates
 	ClipPixels   math.Rect
 	OriginPixels math.Point
 }
 
-type Canvas struct {
+type resource interface {
+	addRef()
+	release() bool
+}
+
+type canvas struct {
 	refCounted
 	sizeDips          math.Size
-	resources         []RefCounted
-	ops               []CanvasOp
+	resources         []resource
+	ops               []canvasOp
 	built             bool
 	buildingPushCount int
 }
 
-func CreateCanvas(sizeDips math.Size) *Canvas {
+func newCanvas(sizeDips math.Size) *canvas {
 	if sizeDips.W <= 0 || sizeDips.H < 0 {
 		panic(fmt.Errorf("Canvas width and height must be positive. Size: %d", sizeDips))
 	}
-	c := &Canvas{
+	c := &canvas{
 		sizeDips: sizeDips,
 	}
 	c.init()
-	globalStats.CanvasCount++
+	globalStats.canvasCount++
 	return c
 }
 
-func (c *Canvas) draw(ctx *Context, dss *DrawStateStack) {
-	c.AssertAlive("draw")
-	ds := dss.Head()
-	ctx.Apply(ds)
+func (c *canvas) draw(ctx *context, dss *drawStateStack) {
+	c.assertAlive("draw")
+	ds := dss.head()
+	ctx.apply(ds)
 
 	for _, op := range c.ops {
 		op(ctx, dss)
 	}
 }
 
-func (c *Canvas) appendOp(name string, op CanvasOp) {
-	c.AssertAlive(name)
+func (c *canvas) appendOp(name string, op canvasOp) {
+	c.assertAlive(name)
 	if c.built {
 		panic(fmt.Errorf("%s() called after Complete()", name))
 	}
 	c.ops = append(c.ops, op)
 }
 
-func (c *Canvas) appendResource(r RefCounted) {
-	r.AddRef()
+func (c *canvas) appendResource(r resource) {
+	r.addRef()
 	c.resources = append(c.resources, r)
 }
 
+func (c *canvas) release() bool {
+	if !c.refCounted.release() {
+		return false
+	}
+	for _, r := range c.resources {
+		r.release()
+	}
+	c.ops = nil
+	c.resources = nil
+	globalStats.canvasCount--
+	return true
+}
+
 // gxui.Canvas compliance
-func (c *Canvas) Size() math.Size {
+func (c *canvas) Size() math.Size {
 	return c.sizeDips
 }
 
-func (c *Canvas) Complete() {
+func (c *canvas) Complete() {
 	if c.built {
 		panic("Complete() called twice")
 	}
@@ -91,33 +109,33 @@ func (c *Canvas) Complete() {
 	c.built = true
 }
 
-func (c *Canvas) Push() {
+func (c *canvas) Push() {
 	c.buildingPushCount++
-	c.appendOp("Push", func(ctx *Context, dss *DrawStateStack) {
-		dss.Push(*dss.Head())
+	c.appendOp("Push", func(ctx *context, dss *drawStateStack) {
+		dss.push(*dss.head())
 	})
 }
 
-func (c *Canvas) Pop() {
+func (c *canvas) Pop() {
 	c.buildingPushCount--
-	c.appendOp("Pop", func(ctx *Context, dss *DrawStateStack) {
-		dss.Pop()
-		ctx.Apply(dss.Head())
+	c.appendOp("Pop", func(ctx *context, dss *drawStateStack) {
+		dss.pop()
+		ctx.apply(dss.head())
 	})
 }
 
-func (c *Canvas) AddClip(r math.Rect) {
-	c.appendOp("AddClip", func(ctx *Context, dss *DrawStateStack) {
-		ds := dss.Head()
-		rectLocalPixels := ctx.RectDipsToPixels(r)
+func (c *canvas) AddClip(r math.Rect) {
+	c.appendOp("AddClip", func(ctx *context, dss *drawStateStack) {
+		ds := dss.head()
+		rectLocalPixels := ctx.resolution.rectDipsToPixels(r)
 		rectWindowPixels := rectLocalPixels.Offset(ds.OriginPixels)
 		ds.ClipPixels = ds.ClipPixels.Intersect(rectWindowPixels)
-		ctx.Apply(ds)
+		ctx.apply(ds)
 	})
 }
 
-func (c *Canvas) Clear(color gxui.Color) {
-	c.appendOp("Clear", func(ctx *Context, dss *DrawStateStack) {
+func (c *canvas) Clear(color gxui.Color) {
+	c.appendOp("Clear", func(ctx *context, dss *drawStateStack) {
 		gl.ClearColor(
 			color.R,
 			color.G,
@@ -128,76 +146,76 @@ func (c *Canvas) Clear(color gxui.Color) {
 	})
 }
 
-func (c *Canvas) DrawCanvas(canvas gxui.Canvas, offsetDips math.Point) {
-	if canvas == nil {
+func (c *canvas) DrawCanvas(cc gxui.Canvas, offsetDips math.Point) {
+	if cc == nil {
 		panic("Canvas cannot be nil")
 	}
-	childCanvas := canvas.(*Canvas)
-	c.appendOp("DrawCanvas", func(ctx *Context, dss *DrawStateStack) {
-		offsetPixels := ctx.PointDipsToPixels(offsetDips)
-		dss.Push(*dss.Head())
-		ds := dss.Head()
+	childCanvas := cc.(*canvas)
+	c.appendOp("DrawCanvas", func(ctx *context, dss *drawStateStack) {
+		offsetPixels := ctx.resolution.pointDipsToPixels(offsetDips)
+		dss.push(*dss.head())
+		ds := dss.head()
 		ds.OriginPixels = ds.OriginPixels.Add(offsetPixels)
 		childCanvas.draw(ctx, dss)
-		dss.Pop()
-		ctx.Apply(dss.Head())
+		dss.pop()
+		ctx.apply(dss.head())
 	})
 	c.appendResource(childCanvas)
 }
 
-func (c *Canvas) DrawRunes(f gxui.Font, r []rune, p []math.Point, col gxui.Color) {
+func (c *canvas) DrawRunes(f gxui.Font, r []rune, p []math.Point, col gxui.Color) {
 	if f == nil {
 		panic("Font cannot be nil")
 	}
 	runes := append([]rune{}, r...)
 	points := append([]math.Point{}, p...)
-	c.appendOp("DrawRunes", func(ctx *Context, dss *DrawStateStack) {
-		f.(*Font).DrawRunes(ctx, runes, points, col, dss.Head())
+	c.appendOp("DrawRunes", func(ctx *context, dss *drawStateStack) {
+		f.(*font).DrawRunes(ctx, runes, points, col, dss.head())
 	})
 }
 
-func (c *Canvas) DrawLines(lines gxui.Polygon, pen gxui.Pen) {
+func (c *canvas) DrawLines(lines gxui.Polygon, pen gxui.Pen) {
 	edge := openPolyToShape(lines, pen.Width)
-	c.appendOp("DrawLines", func(ctx *Context, dss *DrawStateStack) {
-		ds := dss.Head()
+	c.appendOp("DrawLines", func(ctx *context, dss *drawStateStack) {
+		ds := dss.head()
 		if edge != nil && pen.Color.A > 0 {
-			ctx.Blitter.BlitShape(ctx, *edge, pen.Color, ds)
+			ctx.blitter.blitShape(ctx, *edge, pen.Color, ds)
 		}
 	})
 	if edge != nil {
 		c.appendResource(edge)
-		edge.Release()
+		edge.release()
 	}
 }
 
-func (c *Canvas) DrawPolygon(poly gxui.Polygon, pen gxui.Pen, brush gxui.Brush) {
+func (c *canvas) DrawPolygon(poly gxui.Polygon, pen gxui.Pen, brush gxui.Brush) {
 	fill, edge := closedPolyToShape(poly, pen.Width)
-	c.appendOp("DrawPolygon", func(ctx *Context, dss *DrawStateStack) {
-		ds := dss.Head()
+	c.appendOp("DrawPolygon", func(ctx *context, dss *drawStateStack) {
+		ds := dss.head()
 		if fill != nil && brush.Color.A > 0 {
-			ctx.Blitter.BlitShape(ctx, *fill, brush.Color, ds)
+			ctx.blitter.blitShape(ctx, *fill, brush.Color, ds)
 		}
 		if edge != nil && pen.Color.A > 0 {
-			ctx.Blitter.BlitShape(ctx, *edge, pen.Color, ds)
+			ctx.blitter.blitShape(ctx, *edge, pen.Color, ds)
 		}
 	})
 	if fill != nil {
 		c.appendResource(fill)
-		fill.Release()
+		fill.release()
 	}
 	if edge != nil {
 		c.appendResource(edge)
-		edge.Release()
+		edge.release()
 	}
 }
 
-func (c *Canvas) DrawRect(r math.Rect, brush gxui.Brush) {
-	c.appendOp("DrawRect", func(ctx *Context, dss *DrawStateStack) {
-		ctx.Blitter.BlitRect(ctx, ctx.RectDipsToPixels(r), brush.Color, dss.Head())
+func (c *canvas) DrawRect(r math.Rect, brush gxui.Brush) {
+	c.appendOp("DrawRect", func(ctx *context, dss *drawStateStack) {
+		ctx.blitter.blitRect(ctx, ctx.resolution.rectDipsToPixels(r), brush.Color, dss.head())
 	})
 }
 
-func (c *Canvas) DrawRoundedRect(r math.Rect, tl, tr, bl, br float32, pen gxui.Pen, brush gxui.Brush) {
+func (c *canvas) DrawRoundedRect(r math.Rect, tl, tr, bl, br float32, pen gxui.Pen, brush gxui.Brush) {
 	if tl == 0 && tr == 0 && bl == 0 && br == 0 && pen.Color.A == 0 {
 		c.DrawRect(r, brush)
 		return
@@ -211,25 +229,18 @@ func (c *Canvas) DrawRoundedRect(r math.Rect, tl, tr, bl, br float32, pen gxui.P
 	c.DrawPolygon(p, pen, brush)
 }
 
-func (c *Canvas) DrawTexture(t gxui.Texture, r math.Rect) {
+func (c *canvas) DrawTexture(t gxui.Texture, r math.Rect) {
 	if t == nil {
 		panic("Texture cannot be nil")
 	}
 
-	c.appendOp("DrawTexture", func(ctx *Context, dss *DrawStateStack) {
-		tc := ctx.GetOrCreateTextureContext(t.(*Texture))
-		ctx.Blitter.Blit(ctx, tc, tc.sizePixels.Rect(), ctx.RectDipsToPixels(r), dss.Head())
+	c.appendOp("DrawTexture", func(ctx *context, dss *drawStateStack) {
+		tc := ctx.getOrCreateTextureContext(t.(*texture))
+		ctx.blitter.blit(ctx, tc, tc.sizePixels.Rect(), ctx.resolution.rectDipsToPixels(r), dss.head())
 	})
-	c.appendResource(t)
+	c.appendResource(t.(*texture))
 }
 
-func (c *Canvas) Release() {
-	if c.release() {
-		for _, r := range c.resources {
-			r.Release()
-		}
-		c.ops = nil
-		c.resources = nil
-		globalStats.CanvasCount--
-	}
+func (c *canvas) Release() {
+	c.release()
 }

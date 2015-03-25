@@ -11,12 +11,12 @@ import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
-type UniformBindings map[string]interface{}
+type uniformBindings map[string]interface{}
 
-type ShaderProgram struct {
-	Program    uint32
-	Uniforms   []shaderUniform
-	Attributes []shaderAttribute
+type shaderProgram struct {
+	program    uint32
+	uniforms   []shaderUniform
+	attributes []shaderAttribute
 }
 
 func compile(source string, ty uint32) uint32 {
@@ -34,12 +34,12 @@ func compile(source string, ty uint32) uint32 {
 		gl.GetShaderInfoLog(shader, l, nil, gl.Str(log))
 		panic(log)
 	}
-	CheckError()
+	checkError()
 
 	return shader
 }
 
-func CreateShaderProgram(ctx *Context, vsSource, fsSource string) *ShaderProgram {
+func newShaderProgram(ctx *context, vsSource, fsSource string) *shaderProgram {
 	vs := compile(vsSource, gl.VERTEX_SHADER)
 	fs := compile(fsSource, gl.FRAGMENT_SHADER)
 
@@ -59,7 +59,7 @@ func CreateShaderProgram(ctx *Context, vsSource, fsSource string) *ShaderProgram
 	}
 
 	gl.UseProgram(program)
-	CheckError()
+	checkError()
 
 	var uniformCount int32
 	gl.GetProgramiv(program, gl.ACTIVE_UNIFORMS, &uniformCount)
@@ -76,7 +76,7 @@ func CreateShaderProgram(ctx *Context, vsSource, fsSource string) *ShaderProgram
 		uniforms[i] = shaderUniform{
 			name:        name,
 			size:        int(size),
-			ty:          ShaderDataType(ty),
+			ty:          shaderDataType(ty),
 			location:    location,
 			textureUnit: textureUnit,
 		}
@@ -99,57 +99,57 @@ func CreateShaderProgram(ctx *Context, vsSource, fsSource string) *ShaderProgram
 		attributes[i] = shaderAttribute{
 			name:     name,
 			size:     int(size),
-			ty:       ShaderDataType(ty),
+			ty:       shaderDataType(ty),
 			location: uint32(location),
 		}
 	}
 
-	ctx.Stats().ShaderProgramCount++
+	ctx.stats.shaderProgramCount++
 
-	return &ShaderProgram{
-		Program:    program,
-		Uniforms:   uniforms,
-		Attributes: attributes,
+	return &shaderProgram{
+		program:    program,
+		uniforms:   uniforms,
+		attributes: attributes,
 	}
 }
 
-func (s *ShaderProgram) Destroy(ctx *Context) {
-	gl.DeleteProgram(s.Program)
-	s.Program = 0
+func (s *shaderProgram) destroy(ctx *context) {
+	gl.DeleteProgram(s.program)
+	s.program = 0
 	// TODO: Delete shaders.
-	ctx.Stats().ShaderProgramCount--
+	ctx.stats.shaderProgramCount--
 }
 
-func (s *ShaderProgram) Bind(ctx *Context, vb *VertexBuffer, uniforms UniformBindings) {
-	gl.UseProgram(s.Program)
-	for _, a := range s.Attributes {
-		vs, found := vb.Streams[a.name]
+func (s *shaderProgram) bind(ctx *context, vb *vertexBuffer, uniforms uniformBindings) {
+	gl.UseProgram(s.program)
+	for _, a := range s.attributes {
+		vs, found := vb.streams[a.name]
 		if !found {
 			panic(fmt.Errorf("VertexBuffer missing required stream '%s'", a.name))
 		}
-		if a.ty != vs.Type() {
+		if a.ty != vs.ty {
 			panic(fmt.Errorf("Attribute '%s' type '%s' does not match stream type '%s'",
-				a.name, a.ty, vs.Type()))
+				a.name, a.ty, vs.ty))
 		}
-		elementCount := a.ty.VectorElementCount()
-		elementTy := a.ty.VectorElementType()
-		ctx.GetOrCreateVertexStreamContext(vs).Bind()
-		a.EnableArray()
-		a.AttribPointer(int32(elementCount), uint32(elementTy), false, 0, nil)
+		elementCount := a.ty.vectorElementCount()
+		elementTy := a.ty.vectorElementType()
+		ctx.getOrCreateVertexStreamContext(vs).bind()
+		a.enableArray()
+		a.attribPointer(int32(elementCount), uint32(elementTy), false, 0, nil)
 	}
-	for _, u := range s.Uniforms {
+	for _, u := range s.uniforms {
 		v, found := uniforms[u.name]
 		if !found {
 			panic(fmt.Errorf("Uniforms missing '%s'", u.name))
 		}
-		u.Bind(ctx, v)
+		u.bind(ctx, v)
 	}
-	CheckError()
+	checkError()
 }
 
-func (s *ShaderProgram) Unbind(ctx *Context) {
-	for _, a := range s.Attributes {
-		a.DisableArray()
+func (s *shaderProgram) unbind(ctx *context) {
+	for _, a := range s.attributes {
+		a.disableArray()
 	}
-	CheckError()
+	checkError()
 }

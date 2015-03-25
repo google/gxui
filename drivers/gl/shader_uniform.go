@@ -15,45 +15,45 @@ import (
 type shaderUniform struct {
 	name        string
 	size        int
-	ty          ShaderDataType
+	ty          shaderDataType
 	location    int32
 	textureUnit int
 }
 
-func (u *shaderUniform) Bind(context *Context, v interface{}) {
+func (u *shaderUniform) bind(context *context, v interface{}) {
 	transpose := false
 	switch u.ty {
-	case FLOAT_MAT2x3:
+	case stFloatMat2x3:
 		gl.UniformMatrix2x3fv(u.location, 1, transpose, &v.([]float32)[0])
-	case FLOAT_MAT2x4:
+	case stFloatMat2x4:
 		gl.UniformMatrix2x4fv(u.location, 1, transpose, &v.([]float32)[0])
-	case FLOAT_MAT2:
+	case stFloatMat2:
 		gl.UniformMatrix2fv(u.location, 1, transpose, &v.([]float32)[0])
-	case FLOAT_MAT3x2:
+	case stFloatMat3x2:
 		gl.UniformMatrix3x2fv(u.location, 1, transpose, &v.([]float32)[0])
-	case FLOAT_MAT3x4:
+	case stFloatMat3x4:
 		gl.UniformMatrix3x4fv(u.location, 1, transpose, &v.([]float32)[0])
-	case FLOAT_MAT3:
+	case stFloatMat3:
 		switch m := v.(type) {
 		case math.Mat3:
 			gl.UniformMatrix3fv(u.location, 1, transpose, &m[0])
 		case []float32:
 			gl.UniformMatrix3fv(u.location, 1, transpose, &m[0])
 		}
-	case FLOAT_MAT4x2:
+	case stFloatMat4x2:
 		gl.UniformMatrix4x2fv(u.location, 1, transpose, &v.([]float32)[0])
-	case FLOAT_MAT4x3:
+	case stFloatMat4x3:
 		gl.UniformMatrix4x3fv(u.location, 1, transpose, &v.([]float32)[0])
-	case FLOAT_MAT4:
+	case stFloatMat4:
 		gl.UniformMatrix4fv(u.location, 1, transpose, &v.([]float32)[0])
-	case FLOAT_VEC1:
+	case stFloatVec1:
 		switch v := v.(type) {
 		case float32:
 			gl.Uniform1f(u.location, v)
 		case []float32:
 			gl.Uniform1fv(u.location, int32(len(v)), &v[0])
 		}
-	case FLOAT_VEC2:
+	case stFloatVec2:
 		switch v := v.(type) {
 		case math.Vec2:
 			gl.Uniform2fv(u.location, 1, &[]float32{v.X, v.Y}[0])
@@ -63,7 +63,7 @@ func (u *shaderUniform) Bind(context *Context, v interface{}) {
 			}
 			gl.Uniform2fv(u.location, int32(len(v)/2), &v[0])
 		}
-	case FLOAT_VEC3:
+	case stFloatVec3:
 		switch v := v.(type) {
 		case math.Vec3:
 			gl.Uniform3fv(u.location, 1, &[]float32{v.X, v.Y, v.Z}[0])
@@ -73,7 +73,7 @@ func (u *shaderUniform) Bind(context *Context, v interface{}) {
 			}
 			gl.Uniform3fv(u.location, int32(len(v)/3), &v[0])
 		}
-	case FLOAT_VEC4:
+	case stFloatVec4:
 		switch v := v.(type) {
 		case math.Vec4:
 			gl.Uniform4fv(u.location, 1, &[]float32{v.X, v.Y, v.Z, v.W}[0])
@@ -85,8 +85,8 @@ func (u *shaderUniform) Bind(context *Context, v interface{}) {
 			}
 			gl.Uniform4fv(u.location, int32(len(v)/4), &v[0])
 		}
-	case SAMPLER_2D:
-		tc := v.(*TextureContext)
+	case stSampler2d:
+		tc := v.(*textureContext)
 		gl.ActiveTexture(gl.TEXTURE0 + uint32(u.textureUnit))
 		gl.BindTexture(gl.TEXTURE_2D, tc.texture)
 		gl.Uniform1i(u.location, int32(u.textureUnit))

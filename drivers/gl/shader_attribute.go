@@ -9,18 +9,18 @@ import "github.com/go-gl/gl/v3.2-core/gl"
 type shaderAttribute struct {
 	name     string
 	size     int
-	ty       ShaderDataType
+	ty       shaderDataType
 	location uint32
 }
 
-func (a shaderAttribute) EnableArray() {
+func (a shaderAttribute) enableArray() {
 	gl.EnableVertexAttribArray(a.location)
 }
 
-func (a shaderAttribute) DisableArray() {
+func (a shaderAttribute) disableArray() {
 	gl.DisableVertexAttribArray(a.location)
 }
 
-func (a shaderAttribute) AttribPointer(size int32, ty uint32, normalized bool, stride int32, data interface{}) {
+func (a shaderAttribute) attribPointer(size int32, ty uint32, normalized bool, stride int32, data interface{}) {
 	gl.VertexAttribPointer(a.location, size, ty, normalized, stride, gl.Ptr(data))
 }

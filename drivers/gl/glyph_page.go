@@ -22,17 +22,17 @@ const (
 )
 
 type glyphPage struct {
-	resolution         Resolution
+	resolution         resolution
 	glyphMaxSizePixels math.Size
 	image              *image.Alpha
 	offsets            map[rune]math.Point
 	rowHeight          int
 	rast               *raster.Rasterizer
-	tex                *Texture
+	tex                *texture
 	nextPoint          math.Point
 }
 
-func createGlyphPage(resolution Resolution, glyphMaxSizePixels math.Size) *glyphPage {
+func createGlyphPage(resolution resolution, glyphMaxSizePixels math.Size) *glyphPage {
 	return &glyphPage{
 		resolution:         resolution,
 		glyphMaxSizePixels: glyphMaxSizePixels,
@@ -96,7 +96,7 @@ func (p *glyphPage) commit() {
 	if p.tex != nil {
 		return
 	}
-	p.tex = CreateTexture(p.image, 1.0)
+	p.tex = newTexture(p.image, 1.0)
 	if dumpGlyphPages {
 		f, _ := os.Create("glyph-page.png")
 		defer f.Close()
@@ -155,7 +155,7 @@ func (p *glyphPage) add(rune rune, g *glyph) bool {
 	return true
 }
 
-func (p *glyphPage) texture() *Texture {
+func (p *glyphPage) texture() *texture {
 	if p.tex == nil {
 		p.commit()
 	}

@@ -9,29 +9,33 @@ import (
 )
 
 // 16:16 fixed point ratio of DIPs to pixels
-type Resolution uint32
+type resolution uint32
 
-func (r Resolution) IntDipsToPixels(s int) int {
+func (r resolution) dipsToPixels() float32 {
+	return float32(r) / 65536.0
+}
+
+func (r resolution) intDipsToPixels(s int) int {
 	return (s * int(r)) >> 16
 }
 
-func (r Resolution) PointDipsToPixels(s math.Point) math.Point {
+func (r resolution) pointDipsToPixels(s math.Point) math.Point {
 	return math.Point{
-		X: r.IntDipsToPixels(s.X),
-		Y: r.IntDipsToPixels(s.Y),
+		X: r.intDipsToPixels(s.X),
+		Y: r.intDipsToPixels(s.Y),
 	}
 }
 
-func (r Resolution) SizeDipsToPixels(s math.Size) math.Size {
+func (r resolution) sizeDipsToPixels(s math.Size) math.Size {
 	return math.Size{
-		W: r.IntDipsToPixels(s.W),
-		H: r.IntDipsToPixels(s.H),
+		W: r.intDipsToPixels(s.W),
+		H: r.intDipsToPixels(s.H),
 	}
 }
 
-func (r Resolution) RectDipsToPixels(s math.Rect) math.Rect {
+func (r resolution) rectDipsToPixels(s math.Rect) math.Rect {
 	return math.Rect{
-		Min: r.PointDipsToPixels(s.Min),
-		Max: r.PointDipsToPixels(s.Max),
+		Min: r.pointDipsToPixels(s.Min),
+		Max: r.pointDipsToPixels(s.Max),
 	}
 }

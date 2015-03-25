@@ -13,8 +13,8 @@ type glyphTable struct {
 	pages []*glyphPage
 }
 
-func createGlyphTable(resolution Resolution, glyphMaxSizeDips math.Size) *glyphTable {
-	glyphMaxSizePixels := resolution.SizeDipsToPixels(glyphMaxSizeDips)
+func createGlyphTable(resolution resolution, glyphMaxSizeDips math.Size) *glyphTable {
+	glyphMaxSizePixels := resolution.sizeDipsToPixels(glyphMaxSizeDips)
 	return &glyphTable{
 		index: make(map[rune]int),
 		pages: []*glyphPage{createGlyphPage(resolution, glyphMaxSizePixels)},
