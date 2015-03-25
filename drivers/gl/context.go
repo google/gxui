@@ -11,22 +11,14 @@ import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
-type SamplerSource interface {
-	Texture() uint32
-	SizePixels() math.Size
-	FlipY() bool
-	PremultipliedAlpha() bool
-}
-
 type Context struct {
 	lastStatsMutex       sync.Mutex
 	Blitter              *Blitter
 	currStats, lastStats Stats
-	textureContexts      map[*Texture]TextureContext
+	textureContexts      map[*Texture]*TextureContext
 	vertexStreamContexts map[*VertexStream]VertexStreamContext
 	indexBufferContexts  map[*IndexBuffer]IndexBufferContext
 	renderTarget         *Canvas
-	framebufferPool      *FramebufferPool
 	sizeDips, sizePixels math.Size
 	clip                 math.Rect
 }
@@ -34,10 +26,9 @@ type Context struct {
 func CreateContext() *Context {
 	ctx := &Context{}
 	ctx.Blitter = CreateBlitter(ctx, &ctx.currStats)
-	ctx.textureContexts = make(map[*Texture]TextureContext)
+	ctx.textureContexts = make(map[*Texture]*TextureContext)
 	ctx.vertexStreamContexts = make(map[*VertexStream]VertexStreamContext)
 	ctx.indexBufferContexts = make(map[*IndexBuffer]IndexBufferContext)
-	ctx.framebufferPool = CreateFramebufferPool(256*1024*1024, &ctx.currStats)
 
 	return ctx
 }
@@ -45,7 +36,7 @@ func CreateContext() *Context {
 func (c *Context) Destroy() {
 	for texture, tc := range c.textureContexts {
 		delete(c.textureContexts, texture)
-		tc.Destroy()
+		tc.destroy()
 		c.currStats.TextureCount--
 	}
 	for stream, sc := range c.vertexStreamContexts {
@@ -77,7 +68,7 @@ func (c *Context) BeginDraw(sizeDips, sizePixels math.Size) {
 	for texture, tc := range c.textureContexts {
 		if !texture.Alive() {
 			delete(c.textureContexts, texture)
-			tc.Destroy()
+			tc.destroy()
 			c.currStats.TextureCount--
 		}
 	}
@@ -111,7 +102,7 @@ func (c *Context) EndDraw() {
 	c.lastStatsMutex.Unlock()
 }
 
-func (c *Context) GetOrCreateTextureContext(t *Texture) TextureContext {
+func (c *Context) GetOrCreateTextureContext(t *Texture) *TextureContext {
 	tc, found := c.textureContexts[t]
 	if !found {
 		tc = t.CreateContext()

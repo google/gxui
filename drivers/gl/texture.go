@@ -49,7 +49,7 @@ func (t *Texture) SetFlipY(flipY bool) {
 	t.flipY = flipY
 }
 
-func (t *Texture) CreateContext() TextureContext {
+func (t *Texture) CreateContext() *TextureContext {
 	var fmt uint32
 	var data interface{}
 	var pma bool
@@ -82,7 +82,7 @@ func (t *Texture) CreateContext() TextureContext {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 	CheckError()
 
-	return TextureContext{
+	return &TextureContext{
 		texture:    texture,
 		sizePixels: t.Size(),
 		flipY:      t.flipY,
@@ -97,22 +97,7 @@ type TextureContext struct {
 	pma        bool
 }
 
-func (c TextureContext) Texture() uint32 {
-	return c.texture
-}
-
-func (c TextureContext) SizePixels() math.Size {
-	return c.sizePixels
-}
-
-func (c TextureContext) FlipY() bool {
-	return c.flipY
-}
-
-func (c TextureContext) PremultipliedAlpha() bool {
-	return c.pma
-}
-
-func (c *TextureContext) Destroy() {
+func (c *TextureContext) destroy() {
 	gl.DeleteTextures(1, &c.texture)
+	c.texture = 0
 }

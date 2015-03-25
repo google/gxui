@@ -49,7 +49,6 @@ func appMain(driver gxui.Driver) {
 	rgba := image.NewRGBA(source.Bounds())
 	draw.Draw(rgba, source.Bounds(), source, image.ZP, draw.Src)
 	texture := driver.CreateTexture(rgba, 1)
-	texture.SetFlipY(true)
 	img.SetTexture(texture)
 
 	window.OnClose(driver.Terminate)

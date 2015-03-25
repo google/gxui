@@ -86,9 +86,9 @@ func (u *shaderUniform) Bind(context *Context, v interface{}) {
 			gl.Uniform4fv(u.location, int32(len(v)/4), &v[0])
 		}
 	case SAMPLER_2D:
-		ss := v.(SamplerSource)
+		tc := v.(*TextureContext)
 		gl.ActiveTexture(gl.TEXTURE0 + uint32(u.textureUnit))
-		gl.BindTexture(gl.TEXTURE_2D, ss.Texture())
+		gl.BindTexture(gl.TEXTURE_2D, tc.texture)
 		gl.Uniform1i(u.location, int32(u.textureUnit))
 	default:
 		panic(fmt.Errorf("Uniform of unsupported type %s", u.ty))

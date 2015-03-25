@@ -218,7 +218,7 @@ func (c *Canvas) DrawTexture(t gxui.Texture, r math.Rect) {
 
 	c.appendOp("DrawTexture", func(ctx *Context, dss *DrawStateStack) {
 		tc := ctx.GetOrCreateTextureContext(t.(*Texture))
-		ctx.Blitter.Blit(ctx, tc, tc.SizePixels().Rect(), ctx.RectDipsToPixels(r), dss.Head())
+		ctx.Blitter.Blit(ctx, tc, tc.sizePixels.Rect(), ctx.RectDipsToPixels(r), dss.Head())
 	})
 	c.appendResource(t)
 }

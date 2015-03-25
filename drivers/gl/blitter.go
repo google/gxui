@@ -87,7 +87,7 @@ type GlyphBatch struct {
 	Colors    []float32
 	ClipRects []float32
 	Indices   []uint32
-	GlyphPage SamplerSource
+	GlyphPage *TextureContext
 }
 
 type Blitter struct {
@@ -116,27 +116,27 @@ func (b *Blitter) Destroy(ctx *Context) {
 	b.fontShader.Destroy(ctx)
 }
 
-func (b *Blitter) Blit(ctx *Context, ss SamplerSource, srcRect, dstRect math.Rect, ds *DrawState) {
+func (b *Blitter) Blit(ctx *Context, tc *TextureContext, srcRect, dstRect math.Rect, ds *DrawState) {
 	b.CommitGlyphs(ctx)
 
 	dstRect = dstRect.Offset(ds.OriginPixels)
-	sw, sh := ss.SizePixels().WH()
+	sw, sh := tc.sizePixels.WH()
 	dw, dh := ctx.RenderTargetSizePixels().WH()
 
 	var mUV math.Mat3
-	if ss.FlipY() {
-		mUV = math.CreateMat3(
-			float32(srcRect.W())/float32(sw), 0, 0,
-			0, float32(srcRect.H())/float32(sh), 0,
-			float32(srcRect.Min.X)/float32(sw),
-			float32(srcRect.Min.Y)/float32(sh), 1,
-		)
-	} else {
+	if tc.flipY {
 		mUV = math.CreateMat3(
 			float32(srcRect.W())/float32(sw), 0, 0,
 			0, -float32(srcRect.H())/float32(sh), 0,
 			float32(srcRect.Min.X)/float32(sw),
 			1.0-float32(srcRect.Min.Y)/float32(sh), 1,
+		)
+	} else {
+		mUV = math.CreateMat3(
+			float32(srcRect.W())/float32(sw), 0, 0,
+			0, float32(srcRect.H())/float32(sh), 0,
+			float32(srcRect.Min.X)/float32(sw),
+			float32(srcRect.Min.Y)/float32(sh), 1,
 		)
 	}
 	mPos := math.CreateMat3(
@@ -145,26 +145,26 @@ func (b *Blitter) Blit(ctx *Context, ss SamplerSource, srcRect, dstRect math.Rec
 		-1.0+2.0*float32(dstRect.Min.X)/float32(dw),
 		+1.0-2.0*float32(dstRect.Min.Y)/float32(dh), 1,
 	)
-	if !ss.PremultipliedAlpha() {
+	if !tc.pma {
 		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	}
 	b.quad.Draw(ctx, b.copyShader, UniformBindings{
-		"source": ss,
+		"source": tc,
 		"mUV":    mUV,
 		"mPos":   mPos,
 	})
-	if !ss.PremultipliedAlpha() {
+	if !tc.pma {
 		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	}
 	b.stats.DrawCallCount++
 }
 
-func (b *Blitter) BlitGlyph(ctx *Context, ss SamplerSource, c gxui.Color, srcRect, dstRect math.Rect, ds *DrawState) {
+func (b *Blitter) BlitGlyph(ctx *Context, tc *TextureContext, c gxui.Color, srcRect, dstRect math.Rect, ds *DrawState) {
 	dstRect = dstRect.Offset(ds.OriginPixels)
 
-	if b.glyphBatch.GlyphPage != ss {
+	if b.glyphBatch.GlyphPage != tc {
 		b.CommitGlyphs(ctx)
-		b.glyphBatch.GlyphPage = ss
+		b.glyphBatch.GlyphPage = tc
 	}
 	i := uint32(len(b.glyphBatch.DstRects)) / 2
 	clip := []float32{
@@ -254,11 +254,11 @@ func (b *Blitter) Commit(ctx *Context) {
 }
 
 func (b *Blitter) CommitGlyphs(ctx *Context) {
-	ss := b.glyphBatch.GlyphPage
-	if ss == nil {
+	tc := b.glyphBatch.GlyphPage
+	if tc == nil {
 		return
 	}
-	sw, sh := ss.SizePixels().WH()
+	sw, sh := tc.sizePixels.WH()
 	dw, dh := ctx.RenderTargetSizePixels().WH()
 
 	mSrc := math.CreateMat3(
@@ -281,7 +281,7 @@ func (b *Blitter) CommitGlyphs(ctx *Context) {
 	s := CreateShape(vb, ib, TRIANGLES)
 	gl.Disable(gl.SCISSOR_TEST)
 	s.Draw(ctx, b.fontShader, UniformBindings{
-		"source": ss,
+		"source": tc,
 		"mDst":   mDst,
 		"mSrc":   mSrc,
 	})
