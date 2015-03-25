@@ -83,7 +83,7 @@ func (t *DefaultTextBoxLine) PaintText(c gxui.Canvas) {
 		H:         gxui.AlignLeft,
 		V:         gxui.AlignBottom,
 	})
-	c.DrawRunes(f, runes, t.textbox.textColor, offsets, math.Point{})
+	c.DrawRunes(f, runes, offsets, t.textbox.textColor)
 }
 
 func (t *DefaultTextBoxLine) PaintCarets(c gxui.Canvas) {

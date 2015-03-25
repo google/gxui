@@ -121,6 +121,5 @@ func (l *Label) Paint(c gxui.Canvas) {
 		H:         l.horizontalAlignment,
 		V:         l.verticalAlignment,
 	})
-	origin := math.Point{}
-	c.DrawRunes(l.font, runes, l.color, offsets, origin)
+	c.DrawRunes(l.font, runes, offsets, l.color)
 }

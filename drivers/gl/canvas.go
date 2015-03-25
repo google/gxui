@@ -145,14 +145,14 @@ func (c *Canvas) DrawCanvas(canvas gxui.Canvas, offsetDips math.Point) {
 	c.appendResource(childCanvas)
 }
 
-func (c *Canvas) DrawRunes(f gxui.Font, r []rune, col gxui.Color, p []math.Point, o math.Point) {
+func (c *Canvas) DrawRunes(f gxui.Font, r []rune, p []math.Point, col gxui.Color) {
 	if f == nil {
 		panic("Font cannot be nil")
 	}
 	runes := append([]rune{}, r...)
 	points := append([]math.Point{}, p...)
 	c.appendOp("DrawRunes", func(ctx *Context, dss *DrawStateStack) {
-		f.(*Font).DrawRunes(ctx, runes, col, points, o, dss.Head())
+		f.(*Font).DrawRunes(ctx, runes, points, col, dss.Head())
 	})
 }
 

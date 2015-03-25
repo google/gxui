@@ -101,7 +101,7 @@ func (f *Font) align(rect math.Rect, size math.Size, ascent int, h gxui.Horizont
 	return origin
 }
 
-func (f *Font) DrawRunes(ctx *Context, runes []rune, col gxui.Color, offsets []math.Point, origin math.Point, ds *DrawState) {
+func (f *Font) DrawRunes(ctx *Context, runes []rune, offsets []math.Point, col gxui.Color, ds *DrawState) {
 	if len(runes) != len(offsets) {
 		panic(fmt.Errorf("There must be the same number of runes to offsets. Got %d runes and %d offsets",
 			len(runes), len(offsets)))
@@ -117,9 +117,7 @@ func (f *Font) DrawRunes(ctx *Context, runes []rune, col gxui.Color, offsets []m
 		page := table.get(r, glyph)
 		texture := page.texture()
 		srcRect := glyph.size(resolution).Rect().Offset(page.offset(r))
-		dstRect := glyph.rect(resolution).
-			Offset(resolution.PointDipsToPixels(offsets[i])).
-			Offset(origin)
+		dstRect := glyph.rect(resolution).Offset(resolution.PointDipsToPixels(offsets[i]))
 		tc := ctx.GetOrCreateTextureContext(texture)
 		ctx.Blitter.BlitGlyph(ctx, tc, col, srcRect, dstRect, ds)
 	}
