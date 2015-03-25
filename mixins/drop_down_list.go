@@ -154,11 +154,11 @@ func (l *DropDownList) BubbleOverlay() gxui.BubbleOverlay {
 	return l.overlay
 }
 
-func (l *DropDownList) Adapter() gxui.Adapter {
+func (l *DropDownList) Adapter() gxui.ListAdapter {
 	return l.list.Adapter()
 }
 
-func (l *DropDownList) SetAdapter(adapter gxui.Adapter) {
+func (l *DropDownList) SetAdapter(adapter gxui.ListAdapter) {
 	if l.list.Adapter() != adapter {
 		l.list.SetAdapter(adapter)
 		if adapter != nil {

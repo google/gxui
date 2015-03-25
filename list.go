@@ -4,11 +4,13 @@
 
 package gxui
 
+import "github.com/google/gxui/math"
+
 type List interface {
 	Focusable
 	Parent
-	Adapter() Adapter
-	SetAdapter(Adapter)
+	Adapter() ListAdapter
+	SetAdapter(ListAdapter)
 	SetOrientation(Orientation)
 	Orientation() Orientation
 	BorderPen() Pen
@@ -19,7 +21,40 @@ type List interface {
 	IsItemVisible(AdapterItem) bool
 	ItemControl(AdapterItem) Control
 	Selected() AdapterItem
-	Select(AdapterItem)
+	Select(AdapterItem) bool
 	OnSelectionChanged(func(AdapterItem)) EventSubscription
 	OnItemClicked(func(MouseEvent, AdapterItem)) EventSubscription
+}
+
+// ListAdapter is an interface used to visualize a flat set of items.
+// Users of the ListAdapter should presume the data is unchanged until the
+// OnDataChanged or OnDataReplaced events are fired.
+type ListAdapter interface {
+	// Count returns the total number of items.
+	Count() int
+
+	// ItemAt returns the AdapterItem for the item at index i. It is important
+	// for the Adapter to return consistent AdapterItems for the same data, so
+	// that selections can be persisted, or re-ordering animations can be played
+	// when the dataset changes.
+	// The AdapterItem returned must be equality-unique across all indices.
+	ItemAt(index int) AdapterItem
+
+	// ItemIndex returns the index of item.
+	ItemIndex(item AdapterItem) int
+
+	// Create returns a Control visualizing the item at the specified index.
+	Create(theme Theme, index int) Control
+
+	// Size returns the size that each of the item's controls will be displayed
+	// at for the given theme.
+	Size(Theme) math.Size
+
+	// OnDataChanged registers f to be called when there is a partial change in
+	// the items of the adapter.
+	OnDataChanged(f func()) EventSubscription
+
+	// OnDataReplaced registers f to be called when there is a complete
+	// replacement of items in the adapter.
+	OnDataReplaced(f func()) EventSubscription
 }

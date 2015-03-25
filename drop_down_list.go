@@ -9,8 +9,8 @@ type DropDownList interface {
 	Container
 	SetBubbleOverlay(BubbleOverlay)
 	BubbleOverlay() BubbleOverlay
-	Adapter() Adapter
-	SetAdapter(Adapter)
+	Adapter() ListAdapter
+	SetAdapter(ListAdapter)
 	BorderPen() Pen
 	SetBorderPen(Pen)
 	BackgroundBrush() Brush

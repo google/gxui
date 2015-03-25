@@ -19,9 +19,9 @@ type TreeOuter interface {
 type Tree struct {
 	List
 	parts.Focusable
-	outer        TreeOuter
-	adapterInner gxui.TreeAdapter
-	adapterOuter *TreeToListAdapter
+	outer       TreeOuter
+	treeAdapter gxui.TreeAdapter
+	listAdapter *TreeToListAdapter
 }
 
 func (t *Tree) Init(outer TreeOuter, theme gxui.Theme) {
@@ -35,36 +35,36 @@ func (t *Tree) Init(outer TreeOuter, theme gxui.Theme) {
 
 // gxui.Tree complaince
 func (t *Tree) SetAdapter(adapter gxui.TreeAdapter) {
-	if t.adapterInner == adapter {
+	if t.treeAdapter == adapter {
 		return
 	}
 	if adapter != nil {
-		t.adapterInner = adapter
-		t.adapterOuter = CreateTreeToListAdapter(adapter, t.outer.CreateExpandButton)
-		t.List.SetAdapter(t.adapterOuter)
+		t.treeAdapter = adapter
+		t.listAdapter = CreateTreeToListAdapter(adapter, t.outer.CreateExpandButton)
+		t.List.SetAdapter(t.listAdapter)
 	} else {
-		t.adapterOuter = nil
-		t.adapterInner = nil
+		t.listAdapter = nil
+		t.treeAdapter = nil
 		t.List.SetAdapter(nil)
 	}
 }
 
 func (t *Tree) Adapter() gxui.TreeAdapter {
-	return t.adapterInner
+	return t.treeAdapter
 }
 
 func (t *Tree) Show(item gxui.AdapterItem) {
-	t.adapterOuter.ExpandAllParents(item)
+	t.listAdapter.ExpandAllParents(item)
 	t.List.ScrollTo(item)
 }
 
 func (t *Tree) ExpandAll() {
-	t.adapterOuter.root.ExpandAll()
+	t.listAdapter.root.ExpandAll()
 	t.DataChanged()
 }
 
 func (t *Tree) CollapseAll() {
-	t.adapterOuter.root.CollapseAll()
+	t.listAdapter.root.CollapseAll()
 	t.DataChanged()
 }
 
@@ -103,7 +103,7 @@ func (t *Tree) PaintUnexpandedSelection(c gxui.Canvas, r math.Rect) {
 func (t *Tree) PaintChild(c gxui.Canvas, child gxui.Control, idx int) {
 	t.List.PaintChild(c, child, idx)
 	if t.selectedItem != nil {
-		item := t.adapterOuter.DeepestVisibleAncestor(t.selectedItem)
+		item := t.listAdapter.DeepestVisibleAncestor(t.selectedItem)
 		if item != t.selectedItem {
 			// The selected item is hidden by an unexpanded node.
 			// Highlight the deepest visible node instead.
@@ -122,13 +122,13 @@ func (t *Tree) KeyPress(ev gxui.KeyboardEvent) (consume bool) {
 	item := t.Selected()
 	switch ev.Key {
 	case gxui.KeyLeft:
-		newItem := t.adapterOuter.Collapse(item)
+		newItem := t.listAdapter.Collapse(item)
 		if newItem != item {
 			t.Select(newItem)
 			return true
 		}
 	case gxui.KeyRight:
-		if t.adapterOuter.Expand(item) {
+		if t.listAdapter.Expand(item) {
 			return true
 		}
 	}
