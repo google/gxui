@@ -75,11 +75,12 @@ func (c *context) beginDraw(sizeDips, sizePixels math.Size) {
 		}
 	}
 
-	dipsToPixels := float32(c.sizePixels.W) / float32(c.sizeDips.W)
+	dipsToPixels := float32(sizePixels.W) / float32(sizeDips.W)
 
 	c.sizeDips = sizeDips
 	c.sizePixels = sizePixels
-	c.resolution = resolution(dipsToPixels*0xffff + 0.5)
+	c.resolution = resolution(dipsToPixels*65536 + 0.5)
+
 	c.stats.drawCallCount = 0
 	c.stats.timer("Frame").start()
 }
