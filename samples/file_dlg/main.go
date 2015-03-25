@@ -166,6 +166,8 @@ func (a directoryAdapter) Create(theme gxui.Theme, index int) gxui.Control {
 func appMain(driver gxui.Driver) {
 	theme := dark.CreateTheme(driver)
 
+	window := theme.CreateWindow(800, 600, "Open file...")
+
 	// fullpath is the textbox at the top of the window holding the current
 	// selection's absolute file path.
 	fullpath := theme.CreateTextBox()
@@ -190,6 +192,13 @@ func appMain(driver gxui.Driver) {
 	// window.
 	files := theme.CreateList()
 	files.SetAdapter(filesAdapter)
+
+	open := theme.CreateButton()
+	open.SetText("Open...")
+	open.OnClick(func(gxui.MouseEvent) {
+		fmt.Printf("File '%s' selected!\n", files.Selected())
+		window.Close()
+	})
 
 	// If the user hits the enter key while the fullpath control has focus,
 	// attempt to select the directory.
@@ -224,6 +233,7 @@ func appMain(driver gxui.Driver) {
 			}
 		} else {
 			fmt.Printf("File '%s' selected!\n", path)
+			window.Close()
 		}
 	})
 
@@ -239,12 +249,18 @@ func appMain(driver gxui.Driver) {
 	splitter.AddChild(directories)
 	splitter.AddChild(files)
 
-	layout := theme.CreateLinearLayout()
-	layout.AddChild(fullpath)
-	layout.AddChild(splitter)
+	topLayout := theme.CreateLinearLayout()
+	topLayout.SetDirection(gxui.TopToBottom)
+	topLayout.AddChild(fullpath)
+	topLayout.AddChild(splitter)
 
-	window := theme.CreateWindow(800, 600, "Open file...")
-	window.AddChild(layout)
+	btmLayout := theme.CreateLinearLayout()
+	btmLayout.SetDirection(gxui.BottomToTop)
+	btmLayout.SetHorizontalAlignment(gxui.AlignRight)
+	btmLayout.AddChild(open)
+	btmLayout.AddChild(topLayout)
+
+	window.AddChild(btmLayout)
 	window.OnClose(driver.Terminate)
 	window.SetPadding(math.Spacing{L: 10, T: 10, R: 10, B: 10})
 	gxui.EventLoop(driver)
