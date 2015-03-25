@@ -31,18 +31,15 @@ func (l *LinearLayout) LayoutChildren() {
 	s := l.outer.Bounds().Size().Contract(l.outer.Padding())
 	o := l.outer.Padding().LT()
 	children := l.outer.Children()
-	start, end, step, major := 0, len(children), 1, 0
+	major := 0
 	if l.direction.RightToLeft() || l.direction.BottomToTop() {
-		// reverse layout
-		start, end, step = end-1, -1, -1
 		if l.direction.RightToLeft() {
 			major = s.W
 		} else {
 			major = s.H
 		}
 	}
-	for i := start; i != end; i += step {
-		c := children[i]
+	for _, c := range children {
 		cm := c.Margin()
 		cs := c.DesiredSize(math.ZeroSize, s.Contract(cm).Max(math.ZeroSize))
 
