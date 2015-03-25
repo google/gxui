@@ -5,16 +5,17 @@
 package dark
 
 import (
+	"time"
+
 	"github.com/google/gxui"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/mixins"
-	"time"
 )
 
 type ProgressBar struct {
 	mixins.ProgressBar
 	theme        *Theme
-	timer        *time.Timer
+	ticker       *time.Ticker
 	chevrons     gxui.Canvas
 	chevronWidth int
 	scroll       int
@@ -24,25 +25,39 @@ func CreateProgressBar(theme *Theme) gxui.ProgressBar {
 	b := &ProgressBar{}
 	b.Init(b, theme)
 	b.theme = theme
+
 	b.OnAttach(func() {
 		events := theme.Driver().Events()
-		b.timer = time.AfterFunc(time.Millisecond*50, func() {
-			b.scroll = (b.scroll + 1) % (b.chevronWidth * 2)
-			events <- b.Redraw
-			b.timer.Reset(time.Millisecond * 50)
-		})
+		b.ticker = time.NewTicker(time.Millisecond * 50)
+		go func() {
+			for range b.ticker.C {
+				select {
+				case events <- b.animationTick:
+				default:
+					// Don't block if the event channel is saturated.
+				}
+			}
+		}()
 	})
+
 	b.OnDetach(func() {
 		if b.chevrons != nil {
 			b.chevrons.Release()
 			b.chevrons = nil
-			b.timer.Stop()
-			b.timer = nil
+			b.ticker.Stop()
+			b.ticker = nil
 		}
 	})
 	b.SetBackgroundBrush(gxui.CreateBrush(gxui.Gray10))
 	b.SetBorderPen(gxui.CreatePen(1, gxui.Gray40))
 	return b
+}
+
+func (b *ProgressBar) animationTick() {
+	if b.Attached() {
+		b.scroll = (b.scroll + 1) % (b.chevronWidth * 2)
+		b.Redraw()
+	}
 }
 
 func (b *ProgressBar) Layout(r math.Rect) {
