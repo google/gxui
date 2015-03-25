@@ -77,7 +77,6 @@ func newViewport(driver *driver, width, height int, title string) *viewport {
 		return math.Point{X: int(x), Y: int(y)}
 	}
 	wnd.SetCloseCallback(func(*glfw.Window) {
-		v.onClose.Fire()
 		v.Close()
 	})
 	wnd.SetSizeCallback(func(_ *glfw.Window, w, h int) {
@@ -339,6 +338,7 @@ func (v *viewport) Hide() {
 }
 
 func (v *viewport) Close() {
+	v.onClose.Fire()
 	v.Destroy()
 }
 

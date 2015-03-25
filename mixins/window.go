@@ -49,6 +49,13 @@ func (w *Window) requestUpdate() {
 }
 
 func (w *Window) update() {
+	if !w.Attached() {
+		// Window was detached between requestUpdate() and update()
+		w.updatePending = false
+		w.layoutPending = false
+		w.drawPending = false
+		return
+	}
 	w.updatePending = false
 	if w.layoutPending {
 		w.layoutPending = false
