@@ -231,7 +231,7 @@ func (t *CodeEditor) CreateLine(theme gxui.Theme, index int) (TextBoxLine, gxui.
 	line.Init(line, theme, t, index)
 
 	layout := theme.CreateLinearLayout()
-	layout.SetOrientation(gxui.Horizontal)
+	layout.SetDirection(gxui.LeftToRight)
 	layout.AddChild(lineNumber)
 	layout.AddChild(line)
 

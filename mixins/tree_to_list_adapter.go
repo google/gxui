@@ -93,7 +93,7 @@ func (a TreeToListAdapter) Create(theme gxui.Theme, index int) gxui.Control {
 
 	layout := theme.CreateLinearLayout()
 	layout.SetPadding(math.Spacing{L: d * 16, T: 0, R: 0, B: 0})
-	layout.SetOrientation(gxui.Horizontal)
+	layout.SetDirection(gxui.LeftToRight)
 	layout.AddChild(toggle)
 	layout.AddChild(control)
 	return layout

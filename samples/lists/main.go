@@ -26,7 +26,7 @@ func numberPicker(theme gxui.Theme, overlay gxui.BubbleOverlay) gxui.Control {
 	adapter.SetItems(items)
 
 	layout := theme.CreateLinearLayout()
-	layout.SetOrientation(gxui.Vertical)
+	layout.SetDirection(gxui.TopToBottom)
 
 	label0 := theme.CreateLabel()
 	label0.SetText("Numbers:")
@@ -115,7 +115,7 @@ func (a *customAdapter) Create(theme gxui.Theme, index int) gxui.Control {
 // Color picker uses the customAdapter for driving a list
 func colorPicker(theme gxui.Theme) gxui.Control {
 	layout := theme.CreateLinearLayout()
-	layout.SetOrientation(gxui.Vertical)
+	layout.SetDirection(gxui.TopToBottom)
 
 	label0 := theme.CreateLabel()
 	label0.SetText("Color palette:")

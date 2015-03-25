@@ -7,8 +7,10 @@ package gxui
 type LinearLayout interface {
 	Control
 	Container
-	Orientation() Orientation
-	SetOrientation(Orientation)
+	Direction() Direction
+	SetDirection(Direction)
+	SizeMode() SizeMode
+	SetSizeMode(SizeMode)
 	HorizontalAlignment() HorizontalAlignment
 	SetHorizontalAlignment(HorizontalAlignment)
 	VerticalAlignment() VerticalAlignment

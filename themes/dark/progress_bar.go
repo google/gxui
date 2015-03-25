@@ -25,6 +25,7 @@ func CreateProgressBar(theme *Theme) gxui.ProgressBar {
 	b := &ProgressBar{}
 	b.Init(b, theme)
 	b.theme = theme
+	b.chevronWidth = 10
 
 	b.OnAttach(func() {
 		events := theme.Driver().Events()

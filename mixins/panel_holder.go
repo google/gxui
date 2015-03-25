@@ -96,7 +96,7 @@ func (p *PanelHolder) Init(outer PanelHolderOuter, theme gxui.Theme) {
 	p.theme = theme
 
 	p.tabLayout = theme.CreateLinearLayout()
-	p.tabLayout.SetOrientation(gxui.Horizontal)
+	p.tabLayout.SetDirection(gxui.LeftToRight)
 	p.Container.AddChild(p.tabLayout)
 	p.SetMargin(math.Spacing{L: 1, T: 2, R: 1, B: 1})
 	p.SetMouseEventTarget(true) // For drag-drop targets

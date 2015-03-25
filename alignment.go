@@ -12,6 +12,10 @@ const (
 	AlignRight
 )
 
+func (a HorizontalAlignment) AlignLeft() bool   { return a == AlignLeft }
+func (a HorizontalAlignment) AlignCenter() bool { return a == AlignCenter }
+func (a HorizontalAlignment) AlignRight() bool  { return a == AlignRight }
+
 type VerticalAlignment int
 
 const (
@@ -19,3 +23,7 @@ const (
 	AlignMiddle
 	AlignBottom
 )
+
+func (a VerticalAlignment) AlignTop() bool    { return a == AlignTop }
+func (a VerticalAlignment) AlignMiddle() bool { return a == AlignMiddle }
+func (a VerticalAlignment) AlignBottom() bool { return a == AlignBottom }

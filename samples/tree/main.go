@@ -85,7 +85,7 @@ func appMain(driver gxui.Driver) {
 	}
 
 	layout := theme.CreateLinearLayout()
-	layout.SetOrientation(gxui.Vertical)
+	layout.SetDirection(gxui.TopToBottom)
 
 	adapter := treeAdapter{}
 	adapter.children = []treeAdapterNode{
@@ -135,7 +135,7 @@ func appMain(driver gxui.Driver) {
 	layout.AddChild(tree)
 
 	row := theme.CreateLinearLayout()
-	row.SetOrientation(gxui.Horizontal)
+	row.SetDirection(gxui.LeftToRight)
 	layout.AddChild(row)
 
 	expandAll := theme.CreateButton()

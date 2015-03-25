@@ -11,13 +11,8 @@ const (
 	Horizontal
 )
 
-func (o Orientation) Horizontal() bool {
-	return o == Horizontal
-}
-
-func (o Orientation) Vertical() bool {
-	return o == Vertical
-}
+func (o Orientation) Horizontal() bool { return o == Horizontal }
+func (o Orientation) Vertical() bool   { return o == Vertical }
 
 func (o Orientation) Flip() Orientation {
 	if o == Horizontal {
