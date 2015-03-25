@@ -13,6 +13,7 @@ import (
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
+	"github.com/google/gxui/samples/file_dlg/roots"
 	"github.com/google/gxui/themes/dark"
 )
 
@@ -121,20 +122,12 @@ func (d directory) ItemAt(index int) gxui.AdapterItem {
 
 func (d directory) ItemIndex(item gxui.AdapterItem) int {
 	path := item.(string)
-	if !strings.HasPrefix(path, d.path) {
-		return -1 // item is not a child of d
+	if !strings.HasSuffix(path, string(filepath.Separator)) {
+		path += string(filepath.Separator)
 	}
-
-	// Trim common part of path
-	path = strings.TrimLeft(path[len(d.path):], string(filepath.Separator))
-
-	// Take the part up to the first directory delimiter
-	path = strings.Split(path, string(filepath.Separator))[0]
-
-	// Scan for child match
-	for i, p := range d.subdirs {
-		_, name := filepath.Split(p)
-		if name == path {
+	for i, subpath := range d.subdirs {
+		subpath += string(filepath.Separator)
+		if strings.HasPrefix(path, subpath) {
 			return i
 		}
 	}
@@ -158,8 +151,16 @@ type directoryAdapter struct {
 	directory
 }
 
-func (directoryAdapter) Size(gxui.Theme) math.Size {
+func (a directoryAdapter) Size(gxui.Theme) math.Size {
 	return math.Size{W: math.MaxSize.W, H: 20}
+}
+
+// Override directory.Create so that the full root is shown, unaltered.
+func (a directoryAdapter) Create(theme gxui.Theme, index int) gxui.Control {
+	l := theme.CreateLabel()
+	l.SetText(a.subdirs[index])
+	l.SetColor(directoryColor)
+	return l
 }
 
 func appMain(driver gxui.Driver) {
@@ -176,7 +177,7 @@ func appMain(driver gxui.Driver) {
 	directories := theme.CreateTree()
 	directories.SetAdapter(&directoryAdapter{
 		directory: directory{
-			subdirs: filesAt("/"),
+			subdirs: roots.Roots(),
 		},
 	})
 
@@ -228,8 +229,9 @@ func appMain(driver gxui.Driver) {
 
 	// Start with the CWD selected and visible.
 	if cwd, err := os.Getwd(); err == nil {
-		directories.Select(cwd)
-		directories.Show(directories.Selected())
+		if directories.Select(cwd) {
+			directories.Show(directories.Selected())
+		}
 	}
 
 	splitter := theme.CreateSplitterLayout()
