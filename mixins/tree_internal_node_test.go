@@ -21,6 +21,10 @@ func (n *testTreeAdapterNode) Count() int {
 	return len(n.children)
 }
 
+func (n *testTreeAdapterNode) NodeAt(index int) gxui.TreeNode {
+	return n.children[index]
+}
+
 func (n *testTreeAdapterNode) ItemAt(index int) gxui.AdapterItem {
 	return n.children[index].item
 }
@@ -41,11 +45,7 @@ func (n *testTreeAdapterNode) Create(theme gxui.Theme, index int) gxui.Control {
 	return nil
 }
 
-func (n *testTreeAdapterNode) CreateNode(index int) gxui.TreeAdapterNode {
-	return n.children[index]
-}
-
-func (n *testTreeAdapterNode) ItemSize(gxui.Theme) math.Size {
+func (n *testTreeAdapterNode) Size(gxui.Theme) math.Size {
 	return math.ZeroSize
 }
 
@@ -57,7 +57,7 @@ func TestTINFlatSimple(t *testing.T) {
 	N := createTestTreeNode
 	root := CreateTreeInternalRoot(N(0, N(10), N(20), N(30)))
 
-	test.AssertEquals(t, 3, root.childCount)
+	test.AssertEquals(t, 3, root.descendants)
 	test.AssertEquals(t, gxui.AdapterItem(10), root.ItemAt(0))
 	test.AssertEquals(t, gxui.AdapterItem(20), root.ItemAt(1))
 	test.AssertEquals(t, gxui.AdapterItem(30), root.ItemAt(2))
@@ -74,7 +74,7 @@ func TestTINDeepNoExpand(t *testing.T) {
 			N(31), N(32), N(33), N(34)),
 	))
 
-	test.AssertEquals(t, 3, root.childCount)
+	test.AssertEquals(t, 3, root.descendants)
 	test.AssertEquals(t, gxui.AdapterItem(10), root.ItemAt(0))
 	test.AssertEquals(t, gxui.AdapterItem(20), root.ItemAt(1))
 	test.AssertEquals(t, gxui.AdapterItem(30), root.ItemAt(2))
@@ -95,7 +95,7 @@ func TestTINFindByIndex(t *testing.T) {
 				/*9*/ N(141)))))
 
 	root.ExpandAll()
-	test.AssertEquals(t, 10, root.childCount)
+	test.AssertEquals(t, 10, root.descendants)
 
 	n, i, d := root.FindByIndex(0)
 	test.AssertEquals(t, root, n)
@@ -128,7 +128,7 @@ func TestTINFindByItem(t *testing.T) {
 				/*9*/ N(141)))))
 
 	root.ExpandAll()
-	test.AssertEquals(t, 10, root.childCount)
+	test.AssertEquals(t, 10, root.descendants)
 
 	n, i, d := root.FindByItem(100)
 	test.AssertEquals(t, root, n)
@@ -158,7 +158,7 @@ func TestTINExpandExpandFirst(t *testing.T) {
 	))
 
 	root.Child(0).Expand()
-	test.AssertEquals(t, 7, root.childCount)
+	test.AssertEquals(t, 7, root.descendants)
 	test.AssertEquals(t, gxui.AdapterItem(10), root.ItemAt(0))
 	test.AssertEquals(t, gxui.AdapterItem(11), root.ItemAt(1))
 	test.AssertEquals(t, gxui.AdapterItem(12), root.ItemAt(2))
@@ -167,7 +167,7 @@ func TestTINExpandExpandFirst(t *testing.T) {
 	test.AssertEquals(t, gxui.AdapterItem(20), root.ItemAt(5))
 
 	root.Child(0).Collapse()
-	test.AssertEquals(t, 3, root.childCount)
+	test.AssertEquals(t, 3, root.descendants)
 	test.AssertEquals(t, gxui.AdapterItem(10), root.ItemAt(0))
 	test.AssertEquals(t, gxui.AdapterItem(20), root.ItemAt(1))
 	test.AssertEquals(t, gxui.AdapterItem(30), root.ItemAt(2))
@@ -185,7 +185,7 @@ func TestTINExpandCollapseOne(t *testing.T) {
 	))
 
 	root.Child(1).Expand()
-	test.AssertEquals(t, root.childCount, 7)
+	test.AssertEquals(t, root.descendants, 7)
 	test.AssertEquals(t, gxui.AdapterItem(10), root.ItemAt(0))
 	test.AssertEquals(t, gxui.AdapterItem(20), root.ItemAt(1))
 	test.AssertEquals(t, gxui.AdapterItem(21), root.ItemAt(2))
@@ -193,7 +193,7 @@ func TestTINExpandCollapseOne(t *testing.T) {
 	test.AssertEquals(t, gxui.AdapterItem(30), root.ItemAt(6))
 
 	root.Child(1).Collapse()
-	test.AssertEquals(t, root.childCount, 3)
+	test.AssertEquals(t, root.descendants, 3)
 	test.AssertEquals(t, gxui.AdapterItem(10), root.ItemAt(0))
 	test.AssertEquals(t, gxui.AdapterItem(20), root.ItemAt(1))
 	test.AssertEquals(t, gxui.AdapterItem(30), root.ItemAt(2))
@@ -214,7 +214,7 @@ func TestTINGExpandAll(t *testing.T) {
 				/*9*/ N(141)))))
 
 	root.ExpandAll()
-	test.AssertEquals(t, root.childCount, 10)
+	test.AssertEquals(t, root.descendants, 10)
 }
 
 func TestTINItemIndex(t *testing.T) {
