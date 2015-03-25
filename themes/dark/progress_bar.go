@@ -31,7 +31,7 @@ func CreateProgressBar(theme *Theme) gxui.ProgressBar {
 		events := theme.Driver().Events()
 		b.ticker = time.NewTicker(time.Millisecond * 50)
 		go func() {
-			for range b.ticker.C {
+			for _ = range b.ticker.C {
 				select {
 				case events <- b.animationTick:
 				default:
