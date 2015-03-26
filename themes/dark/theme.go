@@ -12,8 +12,9 @@ import (
 )
 
 type Theme struct {
-	driver      gxui.Driver
-	defaultFont gxui.Font
+	driver               gxui.Driver
+	defaultFont          gxui.Font
+	defaultMonospaceFont gxui.Font
 
 	WindowBackground gxui.Color
 
@@ -50,6 +51,13 @@ func CreateTheme(driver gxui.Driver) gxui.Theme {
 		fmt.Printf("Warning: Failed to load default font - %v\n", err)
 	}
 
+	defaultMonospaceFont, err := driver.CreateFont(gxfont.Monospace, 12)
+	if err == nil {
+		defaultFont.LoadGlyphs(32, 126)
+	} else {
+		fmt.Printf("Warning: Failed to load default monospace font - %v\n", err)
+	}
+
 	scrollBarRailDefaultBg := gxui.Black
 	scrollBarRailDefaultBg.A = 0.7
 
@@ -60,10 +68,10 @@ func CreateTheme(driver gxui.Driver) gxui.Theme {
 	focus := gxui.ColorFromHex(0xA0C4D6FF)
 
 	return &Theme{
-		driver:      driver,
-		defaultFont: defaultFont,
-
-		WindowBackground: gxui.Black,
+		driver:               driver,
+		defaultFont:          defaultFont,
+		defaultMonospaceFont: defaultMonospaceFont,
+		WindowBackground:     gxui.Black,
 
 		//                                   fontColor    brushColor   penColor
 		BubbleOverlayStyle:        CreateStyle(gxui.Gray80, gxui.Gray20, gxui.Gray40, 1.0),
