@@ -24,7 +24,7 @@ In order to build GXUI on linux, you will need the following packages installed:
 After setting up ```GOPATH``` (see [Go documentation](https://golang.org/doc/code.html)), you will first need to fetch the required dependencies:
 
     go get code.google.com/p/freetype-go/freetype
-    go get github.com/go-gl/gl/v3.2-core/gl
+    go get github.com/go-gl/gl/v2.1/gl
     go get github.com/go-gl/glfw/v3.1/glfw
 
 
