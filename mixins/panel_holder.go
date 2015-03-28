@@ -180,9 +180,9 @@ func (p *PanelHolder) RemovePanel(panel gxui.Control) {
 }
 
 func (p *PanelHolder) Select(index int) {
-	if index < 0 || index >= p.PanelCount() {
+	if index >= p.PanelCount() {
 		panic(fmt.Errorf("Index %d is out of bounds. Acceptable range: [%d - %d]",
-			index, 0, p.PanelCount()-1))
+			index, -1, p.PanelCount()-1))
 	}
 
 	if p.selected.Panel != nil {
