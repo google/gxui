@@ -28,7 +28,7 @@ func newVertexBuffer(streams ...*vertexStream) *vertexBuffer {
 		}
 		vb.streams[s.name] = s
 	}
-	globalStats.vertexBufferCount++
+	globalStats.vertexBufferCount.inc()
 	return vb
 }
 
@@ -39,6 +39,6 @@ func (vb *vertexBuffer) release() bool {
 	for _, s := range vb.streams {
 		s.release()
 	}
-	globalStats.vertexBufferCount--
+	globalStats.vertexBufferCount.dec()
 	return true
 }

@@ -36,14 +36,12 @@ func appMain(driver gxui.Driver) {
 	pause := time.Millisecond * 500
 	var timer *time.Timer
 	timer = time.AfterFunc(pause, func() {
-		driver.Events() <- func() {
+		driver.Call(func() {
 			progress = (progress + 3) % progressBar.Target()
 			progressBar.SetProgress(progress)
 			timer.Reset(pause)
-		}
+		})
 	})
-
-	gxui.EventLoop(driver)
 }
 
 func main() {

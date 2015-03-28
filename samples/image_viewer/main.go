@@ -52,7 +52,6 @@ func appMain(driver gxui.Driver) {
 	img.SetTexture(texture)
 
 	window.OnClose(driver.Terminate)
-	gxui.EventLoop(driver)
 }
 
 func main() {

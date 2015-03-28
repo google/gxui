@@ -19,7 +19,7 @@ type refCounted struct {
 }
 
 func verifyRefCountIsZero(r *refCounted) {
-	if r.refCount != 0 {
+	if r.alive() {
 		panic(fmt.Errorf("RefCounted object was garbage collected with a reference count of %d.\n%s",
 			r.refCount, strings.Join(r.history, "\n")))
 	}
@@ -59,7 +59,7 @@ func (r *refCounted) release() bool {
 }
 
 func (r *refCounted) alive() bool {
-	return r.refCount > 0
+	return atomic.LoadInt32(&r.refCount) > 0
 }
 
 func (r *refCounted) assertAlive(funcName string) {

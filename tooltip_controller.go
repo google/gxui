@@ -35,7 +35,7 @@ func (c *ToolTipController) beginTimer(tracker *toolTipTracker, timeout time.Dur
 	}
 	if timeout > 0 {
 		c.timer = time.AfterFunc(timeout, func() {
-			c.driver.Events() <- func() { c.showToolTipForTracker(tracker) }
+			c.driver.Call(func() { c.showToolTipForTracker(tracker) })
 		})
 	} else {
 		c.showToolTipForTracker(tracker)

@@ -42,7 +42,7 @@ func newVertexStream(name string, ty shaderDataType, data interface{}) *vertexSt
 		count: dataLen / ty.vectorElementCount(),
 	}
 	vs.init()
-	globalStats.vertexStreamCount++
+	globalStats.vertexStreamCount.inc()
 	return vs
 }
 
@@ -50,7 +50,7 @@ func (s *vertexStream) release() bool {
 	if !s.refCounted.release() {
 		return false
 	}
-	globalStats.vertexStreamCount--
+	globalStats.vertexStreamCount.dec()
 	return true
 }
 

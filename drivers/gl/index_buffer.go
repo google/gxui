@@ -38,7 +38,7 @@ func newIndexBuffer(ty primitiveType, data interface{}) *indexBuffer {
 		ty:   ty,
 	}
 	ib.init()
-	globalStats.indexBufferCount++
+	globalStats.indexBufferCount.inc()
 	return ib
 }
 
@@ -46,7 +46,7 @@ func (b *indexBuffer) release() bool {
 	if !b.refCounted.release() {
 		return false
 	}
-	globalStats.indexBufferCount--
+	globalStats.indexBufferCount.dec()
 	return true
 }
 

@@ -157,7 +157,6 @@ func appMain(driver gxui.Driver) {
 			}
 		}
 	})
-	gxui.EventLoop(driver)
 }
 
 func main() {

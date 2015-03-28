@@ -54,7 +54,7 @@ func newCanvas(sizeDips math.Size) *canvas {
 		sizeDips: sizeDips,
 	}
 	c.init()
-	globalStats.canvasCount++
+	globalStats.canvasCount.inc()
 	return c
 }
 
@@ -90,7 +90,7 @@ func (c *canvas) release() bool {
 	}
 	c.ops = nil
 	c.resources = nil
-	globalStats.canvasCount--
+	globalStats.canvasCount.dec()
 	return true
 }
 

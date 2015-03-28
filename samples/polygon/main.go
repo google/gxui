@@ -76,7 +76,6 @@ func appMain(driver gxui.Driver) {
 	window.AddChild(buildMoon(theme, math.Point{X: 400, Y: 300}, 200))
 
 	window.OnClose(driver.Terminate)
-	gxui.EventLoop(driver)
 }
 
 func main() {

@@ -24,7 +24,7 @@ func newShape(vb *vertexBuffer, ib *indexBuffer, drawMode drawMode) *shape {
 		drawMode: drawMode,
 	}
 	s.init()
-	globalStats.shapeCount++
+	globalStats.shapeCount.inc()
 	return s
 }
 
@@ -40,7 +40,7 @@ func (s *shape) release() bool {
 		s.ib.release()
 		s.ib = nil
 	}
-	globalStats.shapeCount--
+	globalStats.shapeCount.dec()
 	return true
 }
 

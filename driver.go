@@ -11,11 +11,11 @@ import (
 )
 
 type Driver interface {
-	// Events returns the event queue for the UI. The application should pull each
-	// func from the returned chan and execute it on the main UI go-routine. The
-	// application is free to write additional funcs to this chan in order for
-	// them to be executed on the main UI go-routine.
-	Events() chan func()
+	// Call queues f to be run on the UI go-routine, returning before f may have
+	// been called. Call returns false if the driver has been terminated, in which
+	// case f may not be called.
+	Call(f func()) bool
+
 	Terminate()
 	SetClipboard(str string)
 	GetClipboard() (string, error)

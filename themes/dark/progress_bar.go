@@ -28,14 +28,12 @@ func CreateProgressBar(theme *Theme) gxui.ProgressBar {
 	b.chevronWidth = 10
 
 	b.OnAttach(func() {
-		events := theme.Driver().Events()
+		driver := theme.Driver()
 		b.ticker = time.NewTicker(time.Millisecond * 50)
 		go func() {
 			for _ = range b.ticker.C {
-				select {
-				case events <- b.animationTick:
-				default:
-					// Don't block if the event channel is saturated.
+				if !driver.Call(b.animationTick) {
+					return
 				}
 			}
 		}()

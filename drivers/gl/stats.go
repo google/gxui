@@ -7,17 +7,30 @@ package gl
 import (
 	"bytes"
 	"fmt"
+	"sync/atomic"
 	"time"
 )
 
 const historySize = 100
 
+type count int32
+
+func (c *count) inc() {
+	atomic.AddInt32((*int32)(c), 1)
+}
+
+func (c *count) dec() {
+	if atomic.AddInt32((*int32)(c), -1) < 0 {
+		panic("Count has gone negative")
+	}
+}
+
 type globalDriverStats struct {
-	canvasCount       int
-	shapeCount        int
-	vertexBufferCount int
-	vertexStreamCount int
-	indexBufferCount  int
+	canvasCount       count
+	shapeCount        count
+	vertexBufferCount count
+	vertexStreamCount count
+	indexBufferCount  count
 }
 
 func (s globalDriverStats) String() string {

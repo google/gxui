@@ -58,7 +58,6 @@ func appMain(driver gxui.Driver) {
 	window := theme.CreateWindow(800, 600, "Panels")
 	window.AddChild(vSplitter)
 	window.OnClose(driver.Terminate)
-	gxui.EventLoop(driver)
 }
 
 func main() {

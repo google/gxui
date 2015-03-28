@@ -44,7 +44,7 @@ type Window struct {
 func (w *Window) requestUpdate() {
 	if !w.updatePending {
 		w.updatePending = true
-		w.driver.Events() <- w.update
+		w.driver.Call(w.update)
 	}
 }
 

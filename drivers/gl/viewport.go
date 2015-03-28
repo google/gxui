@@ -7,6 +7,7 @@ package gl
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"unicode"
 
 	"github.com/go-gl/gl/v3.2-core/gl"
@@ -15,6 +16,8 @@ import (
 	"github.com/google/gxui/drivers/gl/platform"
 	"github.com/google/gxui/math"
 )
+
+const viewportDebugEnabled = false
 
 const kClearColorR = 0.5
 const kClearColorG = 0.5
@@ -34,7 +37,7 @@ type viewport struct {
 	scrollAccumX            float64
 	scrollAccumY            float64
 	destroyed               bool
-	redrawCount             int
+	redrawCount             uint32
 
 	// Broadcasts to application thread
 	onClose       gxui.Event // ()
@@ -98,12 +101,12 @@ func newViewport(driver *driver, width, height int, title string) *viewport {
 		v.Lock()
 		if v.pendingMouseMoveEvent == nil {
 			v.pendingMouseMoveEvent = &gxui.MouseEvent{}
-			driver.Events() <- func() {
+			driver.Call(func() {
 				v.Lock()
 				v.onMouseMove.Fire(*v.pendingMouseMoveEvent)
 				v.pendingMouseMoveEvent = nil
 				v.Unlock()
-			}
+			})
 		}
 		v.pendingMouseMoveEvent.Point = p
 		v.Unlock()
@@ -124,7 +127,7 @@ func newViewport(driver *driver, width, height int, title string) *viewport {
 		v.Lock()
 		if v.pendingMouseScrollEvent == nil {
 			v.pendingMouseScrollEvent = &gxui.MouseEvent{}
-			driver.Events() <- func() {
+			driver.Call(func() {
 				v.Lock()
 				dx, dy := int(v.scrollAccumX), int(v.scrollAccumY)
 				if dx != 0 || dy != 0 {
@@ -136,7 +139,7 @@ func newViewport(driver *driver, width, height int, title string) *viewport {
 				}
 				v.pendingMouseScrollEvent = nil
 				v.Unlock()
-			}
+			})
 		}
 		v.pendingMouseScrollEvent.Point = p
 		v.scrollAccumX += xoff * platform.ScrollSpeed
@@ -259,7 +262,7 @@ func (v *viewport) render() {
 	ctx.apply(dss.head())
 	ctx.blitter.commit(ctx)
 
-	if v.driver.debugEnabled {
+	if viewportDebugEnabled {
 		v.drawFrameUpdate(ctx)
 	}
 
@@ -281,14 +284,14 @@ func (v *viewport) SetCanvas(cc gxui.Canvas) {
 	if v.destroyed {
 		panic("Attempting to set the canvas on a destroyed viewport")
 	}
-	v.redrawCount++
-	cnt := v.redrawCount
+	cnt := atomic.AddUint32(&v.redrawCount, 1)
 	c := cc.(*canvas)
 	if c != nil {
 		c.addRef()
 	}
 	v.driver.asyncDriver(func() {
-		if v.redrawCount == cnt {
+		// Only use the canvas of the most recent SetCanvas call.
+		if atomic.LoadUint32(&v.redrawCount) == cnt {
 			if v.canvas != nil {
 				v.canvas.Release()
 			}

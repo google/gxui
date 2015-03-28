@@ -8,11 +8,16 @@ import (
 	"container/list"
 	"image"
 	"runtime"
+	"sync/atomic"
+	"time"
 
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/google/gxui"
 	"github.com/google/gxui/math"
 )
+
+// Maximum time allowed for application to process events on termination.
+const maxFlushTime = time.Second * 3
 
 func init() {
 	runtime.LockOSThread()
@@ -21,8 +26,8 @@ func init() {
 type driver struct {
 	pendingDriver chan func()
 	pendingApp    chan func()
+	terminated    int32 // non-zero represents driver terminations
 	viewports     *list.List
-	debugEnabled  bool
 }
 
 func StartDriver(appRoutine func(driver gxui.Driver)) {
@@ -41,8 +46,9 @@ func StartDriver(appRoutine func(driver gxui.Driver)) {
 		viewports:     list.New(),
 	}
 
-	go appRoutine(driver)
-	driver.run()
+	driver.pendingApp <- func() { appRoutine(driver) }
+	go driver.applicationLoop()
+	driver.driverLoop()
 }
 
 func (d *driver) asyncDriver(f func()) {
@@ -64,25 +70,18 @@ func (d *driver) createAppEvent(signature interface{}) gxui.Event {
 	return gxui.CreateChanneledEvent(signature, d.pendingApp)
 }
 
-func (d *driver) flush() {
-	for {
-		select {
-		case ev := <-d.pendingDriver:
-			ev()
-		default:
-			return
-		}
-	}
-}
-
-func (d *driver) run() {
+// driverLoop pulls and executes funcs from the pendingDriver chan until chan
+// close. If there are no funcs enqueued, the driver routine calls and blocks on
+// glfw.WaitEvents. All sends on the pendingDriver chan should be paired with a
+// call to wake() so that glfw.WaitEvents can return.
+func (d *driver) driverLoop() {
 	for {
 		select {
 		case ev, open := <-d.pendingDriver:
 			if open {
 				ev()
 			} else {
-				return // closed channel represents driver shutdown
+				return // termintated
 			}
 		default:
 			glfw.WaitEvents()
@@ -94,24 +93,71 @@ func (d *driver) wake() {
 	glfw.PostEmptyEvent()
 }
 
-func (d *driver) EnableDebug(enabled bool) {
-	d.debugEnabled = enabled
+// applicationLoop pulls and executes funcs from the pendingApp chan until
+// the chan is closed.
+func (d *driver) applicationLoop() {
+	for ev := range d.pendingApp {
+		ev()
+	}
 }
 
 // gxui.Driver compliance
-func (d *driver) Events() chan func() {
-	return d.pendingApp
+func (d *driver) Call(f func()) bool {
+	if f == nil {
+		panic("Function must not be nil")
+	}
+	if atomic.LoadInt32(&d.terminated) != 0 {
+		return false // Driver.Terminate has been called
+	}
+	d.pendingApp <- f
+	return true
 }
 
 func (d *driver) Terminate() {
 	d.asyncDriver(func() {
+		// Close all viewports. This will notify the application.
 		for v := d.viewports.Front(); v != nil; v = v.Next() {
 			v.Value.(*viewport).Destroy()
 		}
-		d.flush()
-		close(d.pendingDriver)
+
+		// Flush all remaining events from the application and driver.
+		// This gives the application an opportunity to handle shutdown.
+		flushStart := time.Now()
+		for time.Since(flushStart) < maxFlushTime {
+			done := true
+
+			// Process any application events
+			sync := make(chan struct{})
+			d.Call(func() {
+				select {
+				case ev := <-d.pendingApp:
+					ev()
+					done = false
+				default:
+				}
+				close(sync)
+			})
+			<-sync
+
+			// Process any driver events
+			select {
+			case ev := <-d.pendingDriver:
+				ev()
+				done = false
+			default:
+			}
+
+			if done {
+				break
+			}
+		}
+
+		// All done.
+		atomic.StoreInt32(&d.terminated, 1)
 		close(d.pendingApp)
-		d.viewports.Init()
+		close(d.pendingDriver)
+
+		d.viewports = nil
 	})
 }
 

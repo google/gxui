@@ -263,7 +263,6 @@ func appMain(driver gxui.Driver) {
 	window.AddChild(btmLayout)
 	window.OnClose(driver.Terminate)
 	window.SetPadding(math.Spacing{L: 10, T: 10, R: 10, B: 10})
-	gxui.EventLoop(driver)
 }
 
 func main() {
