@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 	"unicode"
 
-	"github.com/go-gl/gl/v3.2-core/gl"
+	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl/platform"
