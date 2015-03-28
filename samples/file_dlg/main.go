@@ -14,6 +14,7 @@ import (
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/samples/file_dlg/roots"
+	"github.com/google/gxui/samples/flags"
 	"github.com/google/gxui/themes/dark"
 )
 
@@ -167,6 +168,7 @@ func appMain(driver gxui.Driver) {
 	theme := dark.CreateTheme(driver)
 
 	window := theme.CreateWindow(800, 600, "Open file...")
+	window.SetScale(flags.DefaultScaleFactor)
 
 	// fullpath is the textbox at the top of the window holding the current
 	// selection's absolute file path.

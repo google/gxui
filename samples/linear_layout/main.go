@@ -8,6 +8,7 @@ import (
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
+	"github.com/google/gxui/samples/flags"
 	"github.com/google/gxui/themes/dark"
 )
 
@@ -79,6 +80,7 @@ func appMain(driver gxui.Driver) {
 	update()
 
 	window := theme.CreateWindow(800, 600, "Linear layout")
+	window.SetScale(flags.DefaultScaleFactor)
 	window.AddChild(layout)
 	window.OnClose(driver.Terminate)
 	window.SetPadding(math.Spacing{L: 10, T: 10, R: 10, B: 10})

@@ -30,7 +30,10 @@ type viewport struct {
 	context                 *context
 	window                  *glfw.Window
 	canvas                  *canvas
-	sizeDips, sizePixels    math.Size
+	scaling                 float32
+	sizeDipsUnscaled        math.Size
+	sizeDips                math.Size
+	sizePixels              math.Size
 	title                   string
 	pendingMouseMoveEvent   *gxui.MouseEvent
 	pendingMouseScrollEvent *gxui.MouseEvent
@@ -71,20 +74,22 @@ func newViewport(driver *driver, width, height int, title string) *viewport {
 	}
 
 	v.context = newContext()
+	v.scaling = 1
 
 	cursorPoint := func(x, y float64) math.Point {
 		// HACK: xpos is off by 1 and ypos is off by 3 on OSX.
 		// Compensate until real fix is found.
 		x -= 1.0
 		y -= 3.0
-		return math.Point{X: int(x), Y: int(y)}
+		return math.Point{X: int(x), Y: int(y)}.ScaleS(1 / v.scaling)
 	}
 	wnd.SetCloseCallback(func(*glfw.Window) {
 		v.Close()
 	})
 	wnd.SetSizeCallback(func(_ *glfw.Window, w, h int) {
 		v.Lock()
-		v.sizeDips = math.Size{W: w, H: h}
+		v.sizeDipsUnscaled = math.Size{W: w, H: h}
+		v.sizeDips = v.sizeDipsUnscaled.ScaleS(1 / v.scaling)
 		v.Unlock()
 		v.onResize.Fire()
 	})
@@ -231,7 +236,8 @@ func newViewport(driver *driver, width, height int, title string) *viewport {
 	v.onKeyRepeat = driver.createAppEvent(func(gxui.KeyboardEvent) {})
 	v.onKeyStroke = driver.createAppEvent(func(gxui.KeyStrokeEvent) {})
 	v.onDestroy = driver.createDriverEvent(func() {})
-	v.sizeDips = math.Size{W: width, H: height}
+	v.sizeDipsUnscaled = math.Size{W: width, H: height}
+	v.sizeDips = v.sizeDipsUnscaled.ScaleS(1 / v.scaling)
 	v.sizePixels = math.Size{W: fw, H: fh}
 	v.title = title
 
@@ -303,6 +309,22 @@ func (v *viewport) SetCanvas(cc gxui.Canvas) {
 			c.Release()
 		}
 	})
+}
+
+func (v *viewport) Scale() float32 {
+	v.Lock()
+	defer v.Unlock()
+	return v.scaling
+}
+
+func (v *viewport) SetScale(s float32) {
+	v.Lock()
+	defer v.Unlock()
+	if s != v.scaling {
+		v.scaling = s
+		v.sizeDips = v.sizeDipsUnscaled.ScaleS(1 / s)
+		v.onResize.Fire()
+	}
 }
 
 func (v *viewport) SizeDips() math.Size {

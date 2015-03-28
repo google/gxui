@@ -15,6 +15,7 @@ import (
 
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
+	"github.com/google/gxui/samples/flags"
 	"github.com/google/gxui/themes/dark"
 )
 
@@ -43,6 +44,7 @@ func appMain(driver gxui.Driver) {
 
 	mx := source.Bounds().Max
 	window := theme.CreateWindow(mx.X, mx.Y, "Image viewer")
+	window.SetScale(flags.DefaultScaleFactor)
 	window.AddChild(img)
 
 	// Copy the image to a RGBA format before handing to a gxui.Texture

@@ -7,6 +7,7 @@ package main
 import (
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
+	"github.com/google/gxui/samples/flags"
 	"github.com/google/gxui/themes/dark"
 )
 
@@ -56,6 +57,7 @@ func appMain(driver gxui.Driver) {
 	vSplitter.AddChild(splitterCD)
 
 	window := theme.CreateWindow(800, 600, "Panels")
+	window.SetScale(flags.DefaultScaleFactor)
 	window.AddChild(vSplitter)
 	window.OnClose(driver.Terminate)
 }

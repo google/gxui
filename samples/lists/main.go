@@ -10,6 +10,7 @@ import (
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
+	"github.com/google/gxui/samples/flags"
 	"github.com/google/gxui/themes/dark"
 )
 
@@ -157,6 +158,7 @@ func appMain(driver gxui.Driver) {
 	holder.AddPanel(colorPicker(theme), "Custom adapter")
 
 	window := theme.CreateWindow(800, 600, "Lists")
+	window.SetScale(flags.DefaultScaleFactor)
 	window.AddChild(holder)
 	window.AddChild(overlay)
 	window.OnClose(driver.Terminate)

@@ -129,6 +129,14 @@ func (w *Window) SetTitle(t string) {
 	w.viewport.SetTitle(t)
 }
 
+func (w *Window) Scale() float32 {
+	return w.viewport.Scale()
+}
+
+func (w *Window) SetScale(scale float32) {
+	w.viewport.SetScale(scale)
+}
+
 func (w *Window) Show() {
 	w.Attach()
 	w.viewport.Show()

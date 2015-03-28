@@ -10,6 +10,15 @@ type Window interface {
 	Viewport() Viewport
 	Title() string
 	SetTitle(string)
+
+	// Scale returns the display scaling for this window.
+	// A scale of 1 is unscaled, 2 is twice the regular scaling.
+	Scale() float32
+
+	// SetScale alters the display scaling for this window.
+	// A scale of 1 is unscaled, 2 is twice the regular scaling.
+	SetScale(float32)
+
 	Show()
 	Hide()
 	Close()

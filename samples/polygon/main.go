@@ -8,6 +8,7 @@ import (
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
+	"github.com/google/gxui/samples/flags"
 	"github.com/google/gxui/themes/dark"
 )
 
@@ -65,6 +66,7 @@ func appMain(driver gxui.Driver) {
 	theme := dark.CreateTheme(driver)
 	image := theme.CreateImage()
 	window := theme.CreateWindow(800, 600, "Polygon")
+	window.SetScale(flags.DefaultScaleFactor)
 	window.AddChild(image)
 
 	window.AddChild(buildStar(theme, math.Point{X: 100, Y: 100}, 50, 0.2, 6))
