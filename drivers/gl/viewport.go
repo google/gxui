@@ -248,7 +248,7 @@ func newViewport(driver *driver, width, height int, title string) *viewport {
 // These methods are all called on the driver routine
 func (v *viewport) render() {
 	if v.destroyed {
-		panic("Attempting to render a destroyed viewport")
+		return
 	}
 
 	v.window.MakeContextCurrent()
@@ -287,9 +287,6 @@ func (v *viewport) drawFrameUpdate(ctx *context) {
 // gxui.viewport compliance
 // These methods are all called on the application routine
 func (v *viewport) SetCanvas(cc gxui.Canvas) {
-	if v.destroyed {
-		panic("Attempting to set the canvas on a destroyed viewport")
-	}
 	cnt := atomic.AddUint32(&v.redrawCount, 1)
 	c := cc.(*canvas)
 	if c != nil {
@@ -299,14 +296,14 @@ func (v *viewport) SetCanvas(cc gxui.Canvas) {
 		// Only use the canvas of the most recent SetCanvas call.
 		if atomic.LoadUint32(&v.redrawCount) == cnt {
 			if v.canvas != nil {
-				v.canvas.Release()
+				v.canvas.release()
 			}
 			v.canvas = c
 			if v.canvas != nil {
 				v.render()
 			}
 		} else if c != nil {
-			c.Release()
+			c.release()
 		}
 	})
 }
