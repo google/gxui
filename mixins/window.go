@@ -92,12 +92,16 @@ func (w *Window) Init(outer WindowOuter, driver gxui.Driver, width, height int, 
 }
 
 func (w *Window) Draw() gxui.Canvas {
-	c := w.driver.CreateCanvas(w.viewport.SizeDips())
-	w.outer.Paint(c)
-	c.Complete()
-	w.viewport.SetCanvas(c)
-	c.Release()
-	return c
+	if s := w.viewport.SizeDips(); s != math.ZeroSize {
+		c := w.driver.CreateCanvas(w.viewport.SizeDips())
+		w.outer.Paint(c)
+		c.Complete()
+		w.viewport.SetCanvas(c)
+		c.Release()
+		return c
+	} else {
+		return nil
+	}
 }
 
 func (w *Window) LayoutChildren() {
