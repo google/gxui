@@ -1,0 +1,24 @@
+sudo: false
+
+language: go
+
+addons:
+  apt_packages:
+    - libxi-dev
+    - libxcursor-dev
+    - libxrandr-dev
+    - libxinerama-dev
+    - mesa-common-dev
+    - libgl1-mesa-dev
+    - libxxf86vm-dev
+
+go:
+  - 1.4
+  - tip
+
+install:
+  - go get code.google.com/p/freetype-go/freetype
+  - go get github.com/go-gl/gl/v2.1/gl
+  - go get github.com/go-gl/glfw/v3.1/glfw
+
+script: go test -v ./...
