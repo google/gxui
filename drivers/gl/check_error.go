@@ -7,7 +7,7 @@ package gl
 import (
 	"fmt"
 
-	"github.com/go-gl/gl/v2.1/gl"
+	"golang.org/x/mobile/gl"
 )
 
 func checkError() {
@@ -17,8 +17,6 @@ func checkError() {
 			panic("GL returned error GL_INVALID_ENUM")
 		case gl.INVALID_FRAMEBUFFER_OPERATION:
 			panic("GL returned error GL_INVALID_FRAMEBUFFER_OPERATION")
-		case gl.INVALID_INDEX:
-			panic("GL returned error GL_INVALID_INDEX")
 		case gl.INVALID_OPERATION:
 			panic("GL returned error GL_INVALID_OPERATION")
 		case gl.INVALID_VALUE:

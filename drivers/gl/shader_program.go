@@ -6,33 +6,25 @@ package gl
 
 import (
 	"fmt"
-	"strings"
 
-	"github.com/go-gl/gl/v2.1/gl"
+	"golang.org/x/mobile/gl"
 )
 
 type uniformBindings map[string]interface{}
 
 type shaderProgram struct {
-	program    uint32
+	program    gl.Program
 	uniforms   []shaderUniform
 	attributes []shaderAttribute
 }
 
-func compile(source string, ty uint32) uint32 {
-	shader := gl.CreateShader(ty)
-	c := gl.Str(source + "\x00")
-	gl.ShaderSource(shader, 1, &c, nil)
+func compile(source string, ty int) gl.Shader {
+	shader := gl.CreateShader(gl.Enum(ty))
+	gl.ShaderSource(shader, source)
 
-	var status int32
 	gl.CompileShader(shader)
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
-	if status != gl.TRUE {
-		var l int32
-		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &l)
-		log := strings.Repeat("\x00", int(l+1))
-		gl.GetShaderInfoLog(shader, l, nil, gl.Str(log))
-		panic(log)
+	if gl.GetShaderi(shader, gl.COMPILE_STATUS) != gl.TRUE {
+		panic(gl.GetShaderInfoLog(shader))
 	}
 	checkError()
 
@@ -48,34 +40,22 @@ func newShaderProgram(ctx *context, vsSource, fsSource string) *shaderProgram {
 	gl.AttachShader(program, fs)
 	gl.LinkProgram(program)
 
-	var status int32
-	gl.GetProgramiv(program, gl.LINK_STATUS, &status)
-	if status != gl.TRUE {
-		var l int32
-		gl.GetProgramiv(program, gl.INFO_LOG_LENGTH, &l)
-		log := strings.Repeat("\x00", int(l+1))
-		gl.GetProgramInfoLog(program, l, nil, gl.Str(log))
-		panic(log)
+	if gl.GetProgrami(program, gl.LINK_STATUS) != gl.TRUE {
+		panic(gl.GetProgramInfoLog(program))
 	}
 
 	gl.UseProgram(program)
 	checkError()
 
-	var uniformCount int32
-	gl.GetProgramiv(program, gl.ACTIVE_UNIFORMS, &uniformCount)
+	uniformCount := gl.GetProgrami(program, gl.ACTIVE_UNIFORMS)
 	uniforms := make([]shaderUniform, uniformCount)
 	textureUnit := 0
 	for i := range uniforms {
-		var length, size int32
-		var ty uint32
-		name := strings.Repeat("\x00", 256)
-		cname := gl.Str(name)
-		gl.GetActiveUniform(program, uint32(i), int32(len(name)-1), &length, &size, &ty, cname)
-		location := gl.GetUniformLocation(program, cname)
-		name = name[:strings.IndexRune(name, 0)]
+		name, size, ty := gl.GetActiveUniform(program, uint32(i))
+		location := gl.GetUniformLocation(program, name)
 		uniforms[i] = shaderUniform{
 			name:        name,
-			size:        int(size),
+			size:        size,
 			ty:          shaderDataType(ty),
 			location:    location,
 			textureUnit: textureUnit,
@@ -85,22 +65,16 @@ func newShaderProgram(ctx *context, vsSource, fsSource string) *shaderProgram {
 		}
 	}
 
-	var attributeCount int32
-	gl.GetProgramiv(program, gl.ACTIVE_ATTRIBUTES, &attributeCount)
+	attributeCount := gl.GetProgrami(program, gl.ACTIVE_ATTRIBUTES)
 	attributes := make([]shaderAttribute, attributeCount)
 	for i := range attributes {
-		var length, size int32
-		var ty uint32
-		name := strings.Repeat("\x00", 256)
-		cname := gl.Str(name)
-		gl.GetActiveAttrib(program, uint32(i), int32(len(name)-1), &length, &size, &ty, cname)
-		name = name[:strings.IndexRune(name, 0)]
-		location := gl.GetAttribLocation(program, cname)
+		name, size, ty := gl.GetActiveAttrib(program, uint32(i))
+		location := gl.GetAttribLocation(program, name)
 		attributes[i] = shaderAttribute{
 			name:     name,
-			size:     int(size),
+			size:     size,
 			ty:       shaderDataType(ty),
-			location: uint32(location),
+			location: location,
 		}
 	}
 
@@ -115,7 +89,7 @@ func newShaderProgram(ctx *context, vsSource, fsSource string) *shaderProgram {
 
 func (s *shaderProgram) destroy(ctx *context) {
 	gl.DeleteProgram(s.program)
-	s.program = 0
+	s.program = gl.Program{}
 	// TODO: Delete shaders.
 	ctx.stats.shaderProgramCount--
 }
@@ -135,7 +109,7 @@ func (s *shaderProgram) bind(ctx *context, vb *vertexBuffer, uniforms uniformBin
 		elementTy := a.ty.vectorElementType()
 		ctx.getOrCreateVertexStreamContext(vs).bind()
 		a.enableArray()
-		a.attribPointer(int32(elementCount), uint32(elementTy), false, 0, nil)
+		a.attribPointer(int32(elementCount), uint32(elementTy), false, 0, 0)
 	}
 	for _, u := range s.uniforms {
 		v, found := uniforms[u.name]

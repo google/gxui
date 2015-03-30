@@ -4,13 +4,13 @@
 
 package gl
 
-import "github.com/go-gl/gl/v2.1/gl"
+import "golang.org/x/mobile/gl"
 
 type shaderAttribute struct {
 	name     string
 	size     int
 	ty       shaderDataType
-	location uint32
+	location gl.Attrib
 }
 
 func (a shaderAttribute) enableArray() {
@@ -21,6 +21,6 @@ func (a shaderAttribute) disableArray() {
 	gl.DisableVertexAttribArray(a.location)
 }
 
-func (a shaderAttribute) attribPointer(size int32, ty uint32, normalized bool, stride int32, data interface{}) {
-	gl.VertexAttribPointer(a.location, size, ty, normalized, stride, gl.Ptr(data))
+func (a shaderAttribute) attribPointer(size int32, ty uint32, normalized bool, stride int32, offset int) {
+	gl.VertexAttribPointer(a.location, int(size), gl.Enum(ty), normalized, int(stride), offset)
 }

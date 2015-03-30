@@ -8,29 +8,36 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/go-gl/gl/v2.1/gl"
+	"golang.org/x/mobile/gl"
 )
 
 type indexBuffer struct {
 	refCounted
-	data interface{}
+	data []byte
 	ty   primitiveType
 }
 
 type indexBufferContext struct {
-	buffer uint32
+	buffer gl.Buffer
 	ty     primitiveType
 	length int
 }
 
-func newIndexBuffer(ty primitiveType, data interface{}) *indexBuffer {
+func newIndexBuffer(ty primitiveType, data16 []uint16) *indexBuffer {
 	switch ty {
 	case ptUbyte, ptUshort, ptUint:
-		if !ty.isArrayOfType(data) {
+		if !ty.isArrayOfType(data16) {
 			panic(fmt.Errorf("Index data is not of type %v", ty))
 		}
 	default:
 		panic(fmt.Errorf("Index type must be either UBYTE, USHORT or UINT. Got: %v", ty))
+	}
+
+	// HACK: Hardcode support for only ptUshort.
+	data := make([]byte, len(data16)*2)
+	for i, v := range data16 {
+		data[2*i+0] = byte(v >> 0)
+		data[2*i+1] = byte(v >> 8)
 	}
 
 	ib := &indexBuffer{
@@ -52,14 +59,12 @@ func (b *indexBuffer) release() bool {
 
 func (b *indexBuffer) newContext() *indexBufferContext {
 	dataVal := reflect.ValueOf(b.data)
-	length := dataVal.Len()
-	size := length * b.ty.sizeInBytes()
+	length := dataVal.Len() / 2 // HACK: Hardcode support for only ptUshort.
 
-	var buffer uint32
-	gl.GenBuffers(1, &buffer)
+	buffer := gl.CreateBuffer()
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, size, gl.Ptr(b.data), gl.STATIC_DRAW)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, b.data, gl.STATIC_DRAW)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.Buffer{})
 	checkError()
 
 	return &indexBufferContext{
@@ -70,13 +75,13 @@ func (b *indexBuffer) newContext() *indexBufferContext {
 }
 
 func (c *indexBufferContext) destroy() {
-	gl.DeleteBuffers(1, &c.buffer)
-	c.buffer = 0
+	gl.DeleteBuffer(c.buffer)
+	c.buffer = gl.Buffer{}
 }
 
 func (c *indexBufferContext) render(drawMode drawMode) {
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, c.buffer)
-	gl.DrawElements(uint32(drawMode), int32(c.length), uint32(c.ty), nil)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
+	gl.DrawElements(gl.Enum(drawMode), c.length, gl.Enum(c.ty), 0)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.Buffer{})
 	checkError()
 }
