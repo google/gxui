@@ -15,6 +15,7 @@ import (
 
 type ListOuter interface {
 	base.ContainerOuter
+	ContainsItem(gxui.AdapterItem) bool
 	PaintBackground(c gxui.Canvas, r math.Rect)
 	PaintMouseOverBackground(c gxui.Canvas, r math.Rect)
 	PaintSelection(c gxui.Canvas, r math.Rect)
@@ -327,6 +328,10 @@ func (l *List) SelectNext() {
 	}
 }
 
+func (l *List) ContainsItem(item gxui.AdapterItem) bool {
+	return l.adapter != nil && l.adapter.ItemIndex(item) >= 0
+}
+
 // PaintChildren overrides
 func (l *List) PaintChild(c gxui.Canvas, child gxui.Control, idx int) {
 	if child == l.itemMouseOver {
@@ -489,8 +494,8 @@ func (l *List) Selected() gxui.AdapterItem {
 
 func (l *List) Select(item gxui.AdapterItem) bool {
 	if l.selectedItem != item {
-		if l.adapter.ItemIndex(item) < 0 {
-			return false // Adapter does not contain the item
+		if !l.outer.ContainsItem(item) {
+			return false
 		}
 		l.selectedItem = item
 		if l.onSelectionChanged != nil {

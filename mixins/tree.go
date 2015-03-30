@@ -58,6 +58,10 @@ func (t *Tree) Show(item gxui.AdapterItem) {
 	t.List.ScrollTo(item)
 }
 
+func (t *Tree) ContainsItem(item gxui.AdapterItem) bool {
+	return t.listAdapter != nil && t.listAdapter.Contains(item)
+}
+
 func (t *Tree) ExpandAll() {
 	t.listAdapter.root.ExpandAll()
 	t.DataChanged()

@@ -33,6 +33,23 @@ func CreateTreeToListAdapter(adapter gxui.TreeAdapter, ceb CreateExpandButton) *
 	return outer
 }
 
+// Contains returns true if the TreeAdapter contains the specified item,
+// regardless of whether the item is part of the expanded tree or not.
+func (a TreeToListAdapter) Contains(item gxui.AdapterItem) bool {
+	node := gxui.TreeNode(a.adapter)
+	for node != nil {
+		idx := node.ItemIndex(item)
+		if idx < 0 {
+			return false
+		}
+		if node.ItemAt(idx) == item {
+			return true
+		}
+		node = node.NodeAt(idx)
+	}
+	return false
+}
+
 func (a TreeToListAdapter) Collapse(item gxui.AdapterItem) gxui.AdapterItem {
 	n, i, _ := a.root.FindByItem(item)
 	if n.Child(i).Collapse() {
