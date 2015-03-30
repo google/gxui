@@ -105,7 +105,7 @@ func (w *Window) Draw() gxui.Canvas {
 }
 
 func (w *Window) LayoutChildren() {
-	s := w.Bounds().Size().Contract(w.Padding())
+	s := w.Bounds().Size().Contract(w.Padding()).Max(math.ZeroSize)
 	o := w.Padding().LT()
 	for _, c := range w.outer.Children() {
 		c.Layout(c.DesiredSize(math.ZeroSize, s).Rect().Offset(o))
