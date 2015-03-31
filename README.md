@@ -19,24 +19,17 @@ Dependencies
 
 In order to build GXUI on linux, you will need the following packages installed:
 
-    sudo apt-get install libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev mesa-common-dev libgl1-mesa-dev libxxf86vm-dev
+    sudo apt-get install libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev mesa-common-dev libgles2-mesa-dev libxxf86vm-dev
 
 ### Common:
 
-After setting up ```GOPATH``` (see [Go documentation](https://golang.org/doc/code.html)), you will first need to fetch the required dependencies:
+After setting up ```GOPATH``` (see [Go documentation](https://golang.org/doc/code.html)), you can then fetch the GXUI library and its dependencies:
 
-    go get code.google.com/p/freetype-go/freetype
-    go get github.com/go-gl/gl/v2.1/gl
-    go get github.com/go-gl/glfw/v3.1/glfw
-
-
-Once these have been fetched, you can then fetch the GXUI library:
-
-    go get github.com/google/gxui
+    go get -u github.com/google/gxui/...
 
 Samples
 ---
-Samples can be found in [`gxui/samples`](https://github.com/google/gxui/tree/master/samples). 
+Samples can be found in [`gxui/samples`](https://github.com/google/gxui/tree/master/samples).
 
 To build all samples run:
 
@@ -44,7 +37,7 @@ To build all samples run:
 
 And they will be built into ```GOPATH/bin```.
 
-If you add ```GOPATH/bin``` to your PATH, you can simply type the name of a sample to run it. For example: ```image_viewer```. 
+If you add ```GOPATH/bin``` to your PATH, you can simply type the name of a sample to run it. For example: ```image_viewer```.
 
 Fonts
 ---
