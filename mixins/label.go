@@ -53,6 +53,17 @@ func (l *Label) SetText(text string) {
 	}
 }
 
+func (l *Label) Font() gxui.Font {
+	return l.font
+}
+
+func (l *Label) SetFont(font gxui.Font) {
+	if l.font != font {
+		l.font = font
+		l.Relayout()
+	}
+}
+
 func (l *Label) Color() gxui.Color {
 	return l.color
 }

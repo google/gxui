@@ -8,6 +8,8 @@ type Label interface {
 	Control
 	Text() string
 	SetText(string)
+	Font() Font
+	SetFont(Font)
 	Color() Color
 	SetColor(Color)
 	Multiline() bool
