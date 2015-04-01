@@ -156,14 +156,21 @@ func TransformCoordinate(coord math.Point, from, to Control) math.Point {
 	return coord
 }
 
-func FindControl(root Control, test func(Control) bool) Control {
-	if test(root) {
-		return root
+// FindControl performs a depth-first search of the controls starting from root,
+// calling test with each visited control. If test returns true then the search
+// is stopped and FindControl returns the Control passed to test. If no call to
+// test returns true then FindControl returns nil.
+func FindControl(root Parent, test func(Control) (found bool)) Control {
+	if c, ok := root.(Control); ok && test(c) {
+		return c
 	}
-	if container, _ := root.(Container); container != nil {
-		for _, child := range container.Children() {
-			c := FindControl(child, test)
-			if c != nil {
+
+	for _, child := range root.Children() {
+		if test(child) {
+			return child
+		}
+		if parent, ok := child.(Parent); ok {
+			if c := FindControl(parent, test); c != nil {
 				return c
 			}
 		}

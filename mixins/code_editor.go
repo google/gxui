@@ -137,7 +137,7 @@ func (t *CodeEditor) HideSuggestionList() {
 }
 
 func (t *CodeEditor) Line(idx int) TextBoxLine {
-	return gxui.FindControl(t.ItemControl(idx), func(c gxui.Control) bool {
+	return gxui.FindControl(t.ItemControl(idx).(gxui.Parent), func(c gxui.Control) bool {
 		_, b := c.(TextBoxLine)
 		return b
 	}).(TextBoxLine)
