@@ -108,9 +108,10 @@ func newViewport(driver *driver, width, height int, title string) *viewport {
 			v.pendingMouseMoveEvent = &gxui.MouseEvent{}
 			driver.Call(func() {
 				v.Lock()
-				v.onMouseMove.Fire(*v.pendingMouseMoveEvent)
+				ev := *v.pendingMouseMoveEvent
 				v.pendingMouseMoveEvent = nil
 				v.Unlock()
+				v.onMouseMove.Fire(ev)
 			})
 		}
 		v.pendingMouseMoveEvent.Point = p
@@ -134,16 +135,17 @@ func newViewport(driver *driver, width, height int, title string) *viewport {
 			v.pendingMouseScrollEvent = &gxui.MouseEvent{}
 			driver.Call(func() {
 				v.Lock()
-				dx, dy := int(v.scrollAccumX), int(v.scrollAccumY)
-				if dx != 0 || dy != 0 {
-					v.pendingMouseScrollEvent.ScrollX = dx
-					v.pendingMouseScrollEvent.ScrollY = dy
-					v.onMouseScroll.Fire(*v.pendingMouseScrollEvent)
-					v.scrollAccumX -= float64(dx)
-					v.scrollAccumY -= float64(dy)
-				}
+				ev := *v.pendingMouseScrollEvent
 				v.pendingMouseScrollEvent = nil
-				v.Unlock()
+				ev.ScrollX, ev.ScrollY = int(v.scrollAccumX), int(v.scrollAccumY)
+				if ev.ScrollX != 0 || ev.ScrollY != 0 {
+					v.scrollAccumX -= float64(ev.ScrollX)
+					v.scrollAccumY -= float64(ev.ScrollY)
+					v.Unlock()
+					v.onMouseScroll.Fire(ev)
+				} else {
+					v.Unlock()
+				}
 			})
 		}
 		v.pendingMouseScrollEvent.Point = p
