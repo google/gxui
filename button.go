@@ -4,12 +4,7 @@
 
 package gxui
 
-type ButtonType int
-
-const (
-	PushButton ButtonType = iota
-	ToggleButton
-)
+import "fmt"
 
 type Button interface {
 	LinearLayout
@@ -19,4 +14,22 @@ type Button interface {
 	SetType(ButtonType)
 	IsChecked() bool
 	SetChecked(bool)
+}
+
+type ButtonType int
+
+const (
+	PushButton ButtonType = iota
+	ToggleButton
+)
+
+func (t ButtonType) String() string {
+	switch t {
+	case PushButton:
+		return "Push Button"
+	case ToggleButton:
+		return "Toggle Button"
+	default:
+		return fmt.Sprintf("ButtonType<%d>", t)
+	}
 }

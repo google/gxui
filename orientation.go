@@ -4,6 +4,8 @@
 
 package gxui
 
+import "fmt"
+
 type Orientation int
 
 const (
@@ -35,5 +37,16 @@ func (o Orientation) Minor(x, y int) int {
 		return y
 	} else {
 		return x
+	}
+}
+
+func (o Orientation) String() string {
+	switch o {
+	case Vertical:
+		return "Vertical"
+	case Horizontal:
+		return "Horizontal"
+	default:
+		return fmt.Sprintf("Orientation<%s>", o)
 	}
 }

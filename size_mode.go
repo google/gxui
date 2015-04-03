@@ -4,6 +4,8 @@
 
 package gxui
 
+import "fmt"
+
 type SizeMode int
 
 const (
@@ -17,4 +19,15 @@ func (s SizeMode) ExpandToContent() bool {
 
 func (s SizeMode) Fill() bool {
 	return s == Fill
+}
+
+func (s SizeMode) String() string {
+	switch s {
+	case ExpandToContent:
+		return "Expand To Content"
+	case Fill:
+		return "Fill"
+	default:
+		return fmt.Sprintf("SizeMode<%d>", s)
+	}
 }

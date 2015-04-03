@@ -60,7 +60,7 @@ func (l *Label) Font() gxui.Font {
 func (l *Label) SetFont(font gxui.Font) {
 	if l.font != font {
 		l.font = font
-		l.Relayout()
+		l.outer.Relayout()
 	}
 }
 

@@ -45,3 +45,18 @@ func (d Direction) Orientation() Orientation {
 		panic(fmt.Errorf("Unknown direction %d", d))
 	}
 }
+
+func (d Direction) String() string {
+	switch d {
+	case TopToBottom:
+		return "Top to Bottom"
+	case LeftToRight:
+		return "Left to Right"
+	case BottomToTop:
+		return "Bottom to Top"
+	case RightToLeft:
+		return "Right to Left"
+	default:
+		return fmt.Sprintf("Direction<%s>", d)
+	}
+}
