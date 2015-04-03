@@ -278,13 +278,38 @@ func (a *adapter) Size(gxui.Theme) math.Size {
 	return math.Size{W: math.MaxSize.W, H: 20}
 }
 
+func propertyPanel(theme gxui.Theme, overlay gxui.BubbleOverlay, onTargetChanged gxui.Event) gxui.Control {
+	selected := theme.CreateLabel()
+
+	layout := theme.CreateLinearLayout()
+	layout.SetDirection(gxui.TopToBottom)
+
+	tree := theme.CreateTree()
+	onTargetChanged.Listen(func(target gxui.Control) {
+		selected.SetText(fmt.Sprintf("%T", target))
+		tree.SetAdapter(&adapter{
+			node: node{
+				properties: property.Properties(reflect.ValueOf(target)),
+				overlay:    overlay,
+			},
+		})
+	})
+
+	layout.AddChild(selected)
+	layout.AddChild(tree)
+
+	return layout
+}
+
 func appMain(driver gxui.Driver) {
 	theme := dark.CreateTheme(driver)
+
+	onTargetChanged := gxui.CreateEvent(func(target gxui.Control) {})
 
 	window := theme.CreateWindow(800, 600, "Inspector")
 	window.OnClose(driver.Terminate)
 
-	tree := theme.CreateTree()
+	overlay := theme.CreateBubbleOverlay()
 
 	layout := theme.CreateLinearLayout()
 	layout.SetDirection(gxui.TopToBottom)
@@ -301,22 +326,26 @@ func appMain(driver gxui.Driver) {
 	progressbar.SetDesiredSize(math.Size{W: 100, H: 20})
 	layout.AddChild(progressbar)
 
+	panels := theme.CreatePanelHolder()
+	panels.AddPanel(propertyPanel(theme, overlay, onTargetChanged), "Properties")
+
 	splitter := theme.CreateSplitterLayout()
 	splitter.SetOrientation(gxui.Horizontal)
-	splitter.AddChild(tree)
+	splitter.AddChild(panels)
 	splitter.AddChild(layout)
-
-	overlay := theme.CreateBubbleOverlay()
 
 	window.AddChild(splitter)
 	window.AddChild(overlay)
 
-	tree.SetAdapter(&adapter{
-		node: node{
-			properties: property.Properties(reflect.ValueOf(window)),
-			overlay:    overlay,
-		},
+	onTargetChanged.Fire(layout)
+
+	gxui.FindControl(layout, func(c gxui.Control) bool {
+		c.OnClick(func(gxui.MouseEvent) {
+			onTargetChanged.Fire(c)
+		})
+		return false // traverse all
 	})
+
 }
 
 func main() {
