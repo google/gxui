@@ -41,9 +41,11 @@ func (l *DropDownList) Init(outer DropDownListOuter, theme gxui.Theme) {
 	l.theme = theme
 	l.list = theme.CreateList()
 	l.list.OnSelectionChanged(func(item gxui.AdapterItem) {
+		l.outer.RemoveAll()
 		adapter := l.list.Adapter()
 		if item != nil && adapter != nil {
 			l.selected = adapter.Create(l.theme, adapter.ItemIndex(item))
+			l.AddChild(l.selected)
 		} else {
 			l.selected = nil
 		}
@@ -73,13 +75,10 @@ func (l *DropDownList) LayoutChildren() {
 		defer l.SetRelayoutSuspended(false)
 	}
 
-	l.outer.RemoveAll()
-
 	if l.selected != nil {
 		s := l.outer.Bounds().Size().Contract(l.Padding()).Max(math.ZeroSize)
 		o := l.Padding().LT()
 		l.selected.Layout(s.Rect().Offset(o))
-		l.AddChild(l.selected)
 	}
 }
 
