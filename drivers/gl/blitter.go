@@ -189,6 +189,7 @@ func (b *blitter) blitGlyph(ctx *context, tc *textureContext, c gxui.Color, srcR
 		clip[0], clip[1], clip[2], clip[3],
 	)
 
+	c = c.MulRGB(c.A) // PMA
 	b.glyphBatch.Colors = append(b.glyphBatch.Colors,
 		c.R, c.G, c.B, c.A,
 		c.R, c.G, c.B, c.A,
