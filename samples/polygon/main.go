@@ -12,7 +12,7 @@ import (
 	"github.com/google/gxui/themes/dark"
 )
 
-func buildStar(theme gxui.Theme, center math.Point, radius, rotation float32, points int) gxui.Image {
+func drawStar(canvas gxui.Canvas, center math.Point, radius, rotation float32, points int) {
 	p := make(gxui.Polygon, points*2)
 	for i := 0; i < points*2; i++ {
 		frac := float32(i) / float32(points*2)
@@ -26,12 +26,10 @@ func buildStar(theme gxui.Theme, center math.Point, radius, rotation float32, po
 			RoundedRadius: []float32{0, 50}[i&1],
 		}
 	}
-	image := theme.CreateImage()
-	image.SetPolygon(p, gxui.CreatePen(3, gxui.Red), gxui.CreateBrush(gxui.Yellow))
-	return image
+	canvas.DrawPolygon(p, gxui.CreatePen(3, gxui.Red), gxui.CreateBrush(gxui.Yellow))
 }
 
-func buildMoon(theme gxui.Theme, center math.Point, radius float32) gxui.Image {
+func drawMoon(canvas gxui.Canvas, center math.Point, radius float32) {
 	c := 40
 	p := make(gxui.Polygon, c*2)
 	for i := 0; i < c; i++ {
@@ -57,25 +55,27 @@ func buildMoon(theme gxui.Theme, center math.Point, radius float32) gxui.Image {
 			RoundedRadius: 0,
 		}
 	}
-	image := theme.CreateImage()
-	image.SetPolygon(p, gxui.CreatePen(3, gxui.Gray80), gxui.CreateBrush(gxui.Gray40))
-	return image
+	canvas.DrawPolygon(p, gxui.CreatePen(3, gxui.Gray80), gxui.CreateBrush(gxui.Gray40))
 }
 
 func appMain(driver gxui.Driver) {
 	theme := dark.CreateTheme(driver)
-	image := theme.CreateImage()
 	window := theme.CreateWindow(800, 600, "Polygon")
 	window.SetScale(flags.DefaultScaleFactor)
+
+	canvas := driver.CreateCanvas(math.Size{W: 1000, H: 1000})
+	drawStar(canvas, math.Point{X: 100, Y: 100}, 50, 0.2, 6)
+	drawStar(canvas, math.Point{X: 650, Y: 170}, 70, 0.5, 7)
+	drawStar(canvas, math.Point{X: 40, Y: 300}, 20, 0, 5)
+	drawStar(canvas, math.Point{X: 410, Y: 320}, 25, 0.9, 5)
+	drawStar(canvas, math.Point{X: 220, Y: 520}, 45, 0, 6)
+
+	drawMoon(canvas, math.Point{X: 400, Y: 300}, 200)
+	canvas.Complete()
+
+	image := theme.CreateImage()
+	image.SetCanvas(canvas)
 	window.AddChild(image)
-
-	window.AddChild(buildStar(theme, math.Point{X: 100, Y: 100}, 50, 0.2, 6))
-	window.AddChild(buildStar(theme, math.Point{X: 650, Y: 170}, 70, 0.5, 7))
-	window.AddChild(buildStar(theme, math.Point{X: 40, Y: 300}, 20, 0, 5))
-	window.AddChild(buildStar(theme, math.Point{X: 410, Y: 320}, 25, 0.9, 5))
-	window.AddChild(buildStar(theme, math.Point{X: 220, Y: 520}, 45, 0, 6))
-
-	window.AddChild(buildMoon(theme, math.Point{X: 400, Y: 300}, 200))
 
 	window.OnClose(driver.Terminate)
 }

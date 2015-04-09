@@ -21,9 +21,7 @@ type Image struct {
 
 	outer        ImageOuter
 	texture      gxui.Texture
-	polygon      gxui.Polygon
-	polygonPen   gxui.Pen
-	polygonBrush gxui.Brush
+	canvas       gxui.Canvas
 	scalingMode  gxui.ScalingMode
 	aspectMode   gxui.AspectMode
 	explicitSize math.Size
@@ -65,21 +63,25 @@ func (i *Image) Texture() gxui.Texture {
 func (i *Image) SetTexture(tex gxui.Texture) {
 	if i.texture != tex {
 		i.texture = tex
-		i.polygon = nil
+		i.canvas = nil
 		i.outer.Relayout()
 	}
 }
 
-func (i *Image) Polygon() (gxui.Polygon, gxui.Pen, gxui.Brush) {
-	return i.polygon, i.polygonPen, i.polygonBrush
+func (i *Image) Canvas() gxui.Canvas {
+	return i.canvas
 }
 
-func (i *Image) SetPolygon(poly gxui.Polygon, pen gxui.Pen, brush gxui.Brush) {
-	i.polygon = poly
-	i.polygonPen = pen
-	i.polygonBrush = brush
-	i.texture = nil
-	i.outer.Relayout()
+func (i *Image) SetCanvas(canvas gxui.Canvas) {
+	if !canvas.IsComplete() {
+		panic("SetCanvas() called with an incomplete canvas")
+	}
+
+	if i.canvas != canvas {
+		i.canvas = canvas
+		i.texture = nil
+		i.outer.Relayout()
+	}
 }
 
 func (i *Image) ScalingMode() gxui.ScalingMode {
@@ -132,8 +134,11 @@ func (i *Image) DesiredSize(min, max math.Size) math.Size {
 	case gxui.ScalingExplicitSize:
 		s = i.explicitSize
 	case gxui.Scaling1to1:
-		if i.texture != nil {
+		switch {
+		case i.texture != nil:
 			s = i.texture.Size()
+		case i.canvas != nil:
+			s = i.canvas.Size()
 		}
 	}
 	return s.Expand(math.CreateSpacing(int(i.BorderPen().Width))).Clamp(min, max)
@@ -144,10 +149,9 @@ func (i *Image) Paint(c gxui.Canvas) {
 	i.PaintBackground(c, r)
 	switch {
 	case i.texture != nil:
-		ir := i.calculateDrawRect()
-		c.DrawTexture(i.texture, ir)
-	case len(i.polygon) > 0:
-		c.DrawPolygon(i.polygon, i.polygonPen, i.polygonBrush)
+		c.DrawTexture(i.texture, i.calculateDrawRect())
+	case i.canvas != nil:
+		c.DrawCanvas(i.canvas, math.ZeroPoint)
 	}
 	i.PaintBorder(c, r)
 }

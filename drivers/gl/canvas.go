@@ -99,6 +99,10 @@ func (c *canvas) Size() math.Size {
 	return c.sizeDips
 }
 
+func (c *canvas) IsComplete() bool {
+	return c.built
+}
+
 func (c *canvas) Complete() {
 	if c.built {
 		panic("Complete() called twice")

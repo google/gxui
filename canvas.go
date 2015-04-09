@@ -10,6 +10,7 @@ import (
 
 type Canvas interface {
 	Size() math.Size
+	IsComplete() bool
 	Complete()
 	Push()
 	Pop()

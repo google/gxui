@@ -55,7 +55,7 @@ func (t *Tree) PaintMouseOverBackground(c gxui.Canvas, r math.Rect) {
 
 func (t *Tree) CreateExpandButton(theme gxui.Theme, node *mixins.TreeInternalNode) gxui.Button {
 	img := theme.CreateImage()
-	img.SetExplicitSize(math.Size{W: 10, H: 10})
+	imgSize := math.Size{W: 10, H: 10}
 
 	btn := theme.CreateButton()
 	btn.SetBackgroundBrush(gxui.TransparentBrush)
@@ -73,16 +73,19 @@ func (t *Tree) CreateExpandButton(theme gxui.Theme, node *mixins.TreeInternalNod
 	btn.AddChild(img)
 
 	updateStyle := func() {
+		canvas := theme.Driver().CreateCanvas(imgSize)
 		switch {
 		case !btn.IsMouseDown(gxui.MouseButtonLeft) && node.IsExpanded():
-			img.SetPolygon(expandedPoly, gxui.TransparentPen, gxui.CreateBrush(gxui.Gray70))
+			canvas.DrawPolygon(expandedPoly, gxui.TransparentPen, gxui.CreateBrush(gxui.Gray70))
 		case !btn.IsMouseDown(gxui.MouseButtonLeft) && !node.IsExpanded():
-			img.SetPolygon(collapsedPoly, gxui.TransparentPen, gxui.CreateBrush(gxui.Gray70))
+			canvas.DrawPolygon(collapsedPoly, gxui.TransparentPen, gxui.CreateBrush(gxui.Gray70))
 		case node.IsExpanded():
-			img.SetPolygon(expandedPoly, gxui.TransparentPen, gxui.CreateBrush(gxui.Gray30))
+			canvas.DrawPolygon(expandedPoly, gxui.TransparentPen, gxui.CreateBrush(gxui.Gray30))
 		case !node.IsExpanded():
-			img.SetPolygon(collapsedPoly, gxui.TransparentPen, gxui.CreateBrush(gxui.Gray30))
+			canvas.DrawPolygon(collapsedPoly, gxui.TransparentPen, gxui.CreateBrush(gxui.Gray30))
 		}
+		canvas.Complete()
+		img.SetCanvas(canvas)
 	}
 	btn.OnMouseDown(func(gxui.MouseEvent) { updateStyle() })
 	btn.OnMouseUp(func(gxui.MouseEvent) { updateStyle() })

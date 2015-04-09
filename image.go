@@ -28,8 +28,8 @@ type Image interface {
 	Control
 	Texture() Texture
 	SetTexture(Texture)
-	Polygon() (Polygon, Pen, Brush)
-	SetPolygon(Polygon, Pen, Brush)
+	Canvas() Canvas
+	SetCanvas(Canvas)
 	BorderPen() Pen
 	SetBorderPen(Pen)
 	BackgroundBrush() Brush
@@ -39,5 +39,5 @@ type Image interface {
 	SetExplicitSize(math.Size)
 	AspectMode() AspectMode
 	SetAspectMode(AspectMode)
-	PixelAt(math.Point) (math.Point, bool)
+	PixelAt(math.Point) (math.Point, bool) // TODO: Remove
 }
