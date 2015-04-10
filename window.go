@@ -19,12 +19,34 @@ type Window interface {
 	// A scale of 1 is unscaled, 2 is twice the regular scaling.
 	SetScale(float32)
 
+	// Fullscreen returns true if the window is currently full-screen.
+	Fullscreen() bool
+
+	// SetFullscreen makes the window either full-screen or windowed.
+	SetFullscreen(bool)
+
 	Show()
 	Hide()
 	Close()
 
+	// Focus returns the child Focusable control.
 	Focus() Focusable
+
+	// SetFocus gives the specified control Focus, returning true on success or
+	// false if the control cannot be given focus.
 	SetFocus(Control) bool
+
+	// BackgroundBrush returns the brush used to draw the window background.
+	BackgroundBrush() Brush
+
+	// SetBackgroundBrush sets the brush used to draw the window background.
+	SetBackgroundBrush(Brush)
+
+	// BorderPen returns the pen used to draw the window border.
+	BorderPen() Pen
+
+	// SetBorderPen sets the pen used to draw the window border.
+	SetBorderPen(Pen)
 
 	Click(MouseEvent)
 	DoubleClick(MouseEvent)
@@ -34,6 +56,8 @@ type Window interface {
 	// Events
 	OnClose(func()) EventSubscription
 	OnResize(func()) EventSubscription
+	OnClick(func(MouseEvent)) EventSubscription
+	OnDoubleClick(func(MouseEvent)) EventSubscription
 	OnMouseMove(func(MouseEvent)) EventSubscription
 	OnMouseEnter(func(MouseEvent)) EventSubscription
 	OnMouseExit(func(MouseEvent)) EventSubscription

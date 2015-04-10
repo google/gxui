@@ -30,6 +30,7 @@ type viewport struct {
 	context                 *context
 	window                  *glfw.Window
 	canvas                  *canvas
+	fullscreen              bool
 	scaling                 float32
 	sizeDipsUnscaled        math.Size
 	sizeDips                math.Size
@@ -50,7 +51,7 @@ type viewport struct {
 	onMouseExit   gxui.Event // (gxui.MouseEvent)
 	onMouseDown   gxui.Event // (gxui.MouseEvent)
 	onMouseUp     gxui.Event // (gxui.MouseEvent)
-	onMouseScroll gxui.Event // (dx, dy int, p math.Point)
+	onMouseScroll gxui.Event // (gxui.MouseEvent)
 	onKeyDown     gxui.Event // (gxui.KeyboardEvent)
 	onKeyUp       gxui.Event // (gxui.KeyboardEvent)
 	onKeyRepeat   gxui.Event // (gxui.KeyboardEvent)
@@ -59,12 +60,24 @@ type viewport struct {
 	onDestroy gxui.Event
 }
 
-func newViewport(driver *driver, width, height int, title string) *viewport {
-	v := &viewport{}
+func newViewport(driver *driver, width, height int, title string, fullscreen bool) *viewport {
+	v := &viewport{
+		fullscreen: fullscreen,
+		scaling:    1,
+		title:      title,
+	}
 
 	glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.Samples, 4)
-	wnd, err := glfw.CreateWindow(width, height, title, nil, nil)
+	var monitor *glfw.Monitor
+	if fullscreen {
+		monitor = glfw.GetPrimaryMonitor()
+		if width == 0 || height == 0 {
+			vm := monitor.GetVideoMode()
+			width, height = vm.Width, vm.Height
+		}
+	}
+	wnd, err := glfw.CreateWindow(width, height, v.title, monitor, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -74,7 +87,6 @@ func newViewport(driver *driver, width, height int, title string) *viewport {
 	}
 
 	v.context = newContext()
-	v.scaling = 1
 
 	cursorPoint := func(x, y float64) math.Point {
 		// HACK: xpos is off by 1 and ypos is off by 3 on OSX.
@@ -241,7 +253,6 @@ func newViewport(driver *driver, width, height int, title string) *viewport {
 	v.sizeDipsUnscaled = math.Size{W: width, H: height}
 	v.sizeDips = v.sizeDipsUnscaled.ScaleS(1 / v.scaling)
 	v.sizePixels = math.Size{W: fw, H: fh}
-	v.title = title
 
 	return v
 }
@@ -351,6 +362,10 @@ func (v *viewport) SetTitle(title string) {
 	v.driver.asyncDriver(func() {
 		v.window.SetTitle(title)
 	})
+}
+
+func (v *viewport) Fullscreen() bool {
+	return v.fullscreen
 }
 
 func (v *viewport) Show() {

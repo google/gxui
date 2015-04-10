@@ -28,15 +28,15 @@ func (b *BackgroundBorderPainter) Init(outer BackgroundBorderPainterOuter) {
 
 func (b *BackgroundBorderPainter) PaintBackground(c gxui.Canvas, r math.Rect) {
 	if b.brush.Color.A != 0 {
-		borderF32 := b.pen.Width
-		c.DrawRoundedRect(r, borderF32, borderF32, borderF32, borderF32, gxui.TransparentPen, b.brush)
+		w := b.pen.Width
+		c.DrawRoundedRect(r, w, w, w, w, gxui.TransparentPen, b.brush)
 	}
 }
 
 func (b *BackgroundBorderPainter) PaintBorder(c gxui.Canvas, r math.Rect) {
-	if b.pen.Color.A != 0 {
-		borderF32 := b.pen.Width
-		c.DrawRoundedRect(r, borderF32, borderF32, borderF32, borderF32, b.pen, gxui.TransparentBrush)
+	if b.pen.Color.A != 0 && b.pen.Width != 0 {
+		w := b.pen.Width
+		c.DrawRoundedRect(r, w, w, w, w, b.pen, gxui.TransparentBrush)
 	}
 }
 

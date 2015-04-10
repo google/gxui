@@ -11,17 +11,11 @@ import (
 
 type Window struct {
 	mixins.Window
-	theme *Theme
 }
 
 func CreateWindow(theme *Theme, width, height int, title string) gxui.Window {
 	w := &Window{}
 	w.Window.Init(w, theme.Driver(), width, height, title)
-	w.theme = theme
+	w.SetBackgroundBrush(gxui.CreateBrush(theme.WindowBackground))
 	return w
-}
-
-func (w *Window) Paint(c gxui.Canvas) {
-	c.Clear(w.theme.WindowBackground)
-	w.PaintChildren.Paint(c)
 }

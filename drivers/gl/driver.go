@@ -180,10 +180,22 @@ func (d *driver) CreateFont(data []byte, size int) (gxui.Font, error) {
 	return newFont(data, size)
 }
 
-func (d *driver) CreateViewport(width, height int, name string) gxui.Viewport {
+func (d *driver) CreateWindowedViewport(width, height int, name string) gxui.Viewport {
 	var v *viewport
 	d.syncDriver(func() {
-		v = newViewport(d, width, height, name)
+		v = newViewport(d, width, height, name, false)
+		e := d.viewports.PushBack(v)
+		v.onDestroy.Listen(func() {
+			d.viewports.Remove(e)
+		})
+	})
+	return v
+}
+
+func (d *driver) CreateFullscreenViewport(width, height int, name string) gxui.Viewport {
+	var v *viewport
+	d.syncDriver(func() {
+		v = newViewport(d, width, height, name, true)
 		e := d.viewports.PushBack(v)
 		v.onDestroy.Listen(func() {
 			d.viewports.Remove(e)

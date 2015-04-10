@@ -23,7 +23,15 @@ type Driver interface {
 	// CreateFont loads a font from the provided TrueType bytes.
 	CreateFont(data []byte, size int) (Font, error)
 
-	CreateViewport(width, height int, name string) Viewport
+	// CreateWindowedViewport creates a new windowed Viewport with the specified
+	// width and height in device independent pixels.
+	CreateWindowedViewport(width, height int, name string) Viewport
+
+	// CreateFullscreenViewport creates a new fullscreen Viewport with the
+	// specified width and height in device independent pixels. If width or
+	// height is 0, then the viewport adopts the current screen resolution.
+	CreateFullscreenViewport(width, height int, name string) Viewport
+
 	CreateCanvas(math.Size) Canvas
 	CreateTexture(img image.Image, pixelsPerDip float32) Texture
 }

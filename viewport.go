@@ -17,13 +17,16 @@ type Viewport interface {
 	// SizePixels returns the size of the viewport in pixels.
 	SizePixels() math.Size
 
-	// Scale returns the display scaling for this window.
+	// Scale returns the display scaling for this viewport.
 	// A scale of 1 is unscaled, 2 is twice the regular scaling.
 	Scale() float32
 
-	// SetScale alters the display scaling for this window.
+	// SetScale alters the display scaling for this viewport.
 	// A scale of 1 is unscaled, 2 is twice the regular scaling.
 	SetScale(float32)
+
+	// Fullscreen returns true if the viewport was created full-screen.
+	Fullscreen() bool
 
 	Title() string
 	SetTitle(string)

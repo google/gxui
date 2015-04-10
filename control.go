@@ -43,10 +43,10 @@ type Control interface {
 
 	OnAttach(func()) EventSubscription
 	OnDetach(func()) EventSubscription
-	OnClick(func(MouseEvent)) EventSubscription
-	OnDoubleClick(func(MouseEvent)) EventSubscription
 	OnKeyPress(func(KeyboardEvent)) EventSubscription
 	OnKeyStroke(func(KeyStrokeEvent)) EventSubscription
+	OnClick(func(MouseEvent)) EventSubscription
+	OnDoubleClick(func(MouseEvent)) EventSubscription
 	OnMouseMove(func(MouseEvent)) EventSubscription
 	OnMouseEnter(func(MouseEvent)) EventSubscription
 	OnMouseExit(func(MouseEvent)) EventSubscription
