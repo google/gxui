@@ -433,11 +433,13 @@ func (v *viewport) Destroy() {
 	v.driver.asyncDriver(func() {
 		if !v.destroyed {
 			v.window.MakeContextCurrent()
+			if v.canvas != nil {
+				v.canvas.Release()
+				v.canvas = nil
+			}
 			v.context.destroy()
 			v.window.Destroy()
 			v.onDestroy.Fire()
-			v.canvas.Release()
-			v.canvas = nil
 			v.destroyed = true
 		}
 	})
