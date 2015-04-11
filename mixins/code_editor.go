@@ -42,7 +42,6 @@ func (t *CodeEditor) Init(outer CodeEditorOuter, driver gxui.Driver, theme gxui.
 	t.suggestionAdapter = &SuggestionAdapter{}
 	t.suggestionList = t.outer.CreateSuggestionList()
 	t.suggestionList.SetAdapter(t.suggestionAdapter)
-	t.suggestionList.SetVisible(false)
 
 	t.TextBox.Init(outer, driver, theme, font)
 	t.controller.OnTextChanged(t.updateSpans)
@@ -93,7 +92,7 @@ func (t *CodeEditor) SetSuggestionProvider(provider gxui.CodeSuggestionProvider)
 }
 
 func (t *CodeEditor) IsSuggestionListShowing() bool {
-	return t.suggestionList.IsVisible()
+	return t.outer.Children().Find(t.suggestionList) != nil
 }
 
 func (t *CodeEditor) SortSuggestionList() {
@@ -103,7 +102,7 @@ func (t *CodeEditor) SortSuggestionList() {
 }
 
 func (t *CodeEditor) ShowSuggestionList() {
-	if t.suggestionProvider == nil {
+	if t.suggestionProvider == nil || t.IsSuggestionListShowing() {
 		return
 	}
 
@@ -118,22 +117,25 @@ func (t *CodeEditor) ShowSuggestionList() {
 
 	t.suggestionAdapter.SetSuggestions(suggestions)
 	t.SortSuggestionList()
+	child := t.AddChild(t.suggestionList)
 
 	// Position the suggestion list below the last caret
 	lineIdx := t.controller.LineIndex(caret)
 	// TODO: What if the last caret is not visible?
-	bounds := t.Bounds().Size().Rect().Contract(t.Padding())
+	bounds := t.Size().Rect().Contract(t.Padding())
 	line := t.Line(lineIdx)
 	lineOffset := gxui.ChildToParent(math.ZeroPoint, line, t.outer)
 	target := line.PositionAt(caret).Add(lineOffset)
 	cs := t.suggestionList.DesiredSize(math.ZeroSize, bounds.Size())
-	t.suggestionList.Layout(cs.Rect().Offset(target).Intersect(bounds))
 	t.suggestionList.Select(t.suggestionList.Adapter().ItemAt(0))
-	t.suggestionList.SetVisible(true)
+	t.suggestionList.SetSize(cs)
+	child.Layout(cs.Rect().Offset(target).Intersect(bounds))
 }
 
 func (t *CodeEditor) HideSuggestionList() {
-	t.suggestionList.SetVisible(false)
+	if t.IsSuggestionListShowing() {
+		t.RemoveChild(t.suggestionList)
+	}
 }
 
 func (t *CodeEditor) Line(idx int) TextBoxLine {
@@ -144,13 +146,6 @@ func (t *CodeEditor) Line(idx int) TextBoxLine {
 }
 
 // mixins.List overrides
-func (t *CodeEditor) LayoutChildren() {
-	t.List.LayoutChildren()
-	if t.suggestionList.Parent() != t.outer {
-		t.AddChild(t.suggestionList)
-	}
-}
-
 func (t *CodeEditor) Click(ev gxui.MouseEvent) (consume bool) {
 	t.HideSuggestionList()
 	return t.TextBox.Click(ev)

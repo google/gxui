@@ -30,7 +30,8 @@ func (p *PanelHolder) CreatePanelTab() mixins.PanelTab {
 func (p *PanelHolder) Paint(c gxui.Canvas) {
 	panel := p.SelectedPanel()
 	if panel != nil {
-		c.DrawRoundedRect(panel.Bounds(), 0.0, 0.0, 3.0, 3.0, p.theme.PanelBackgroundStyle.Pen, p.theme.PanelBackgroundStyle.Brush)
+		bounds := p.Children().Find(panel).Bounds()
+		c.DrawRoundedRect(bounds, 0.0, 0.0, 3.0, 3.0, p.theme.PanelBackgroundStyle.Pen, p.theme.PanelBackgroundStyle.Brush)
 	}
 	p.PanelHolder.Paint(c)
 }

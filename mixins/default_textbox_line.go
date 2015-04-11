@@ -79,7 +79,7 @@ func (t *DefaultTextBoxLine) PaintText(c gxui.Canvas) {
 	f := t.textbox.font
 	offsets := f.Layout(&gxui.TextBlock{
 		Runes:     runes,
-		AlignRect: t.Bounds().Size().Rect().OffsetX(t.caretWidth),
+		AlignRect: t.Size().Rect().OffsetX(t.caretWidth),
 		H:         gxui.AlignLeft,
 		V:         gxui.AlignBottom,
 	})
@@ -95,7 +95,7 @@ func (t *DefaultTextBoxLine) PaintCarets(c gxui.Canvas) {
 			s := controller.LineStart(l)
 			m := t.outer.MeasureRunes(s, e)
 			top := math.Point{X: t.caretWidth + m.W, Y: 0}
-			bottom := top.Add(math.Point{X: 0, Y: t.Bounds().H()})
+			bottom := top.Add(math.Point{X: 0, Y: t.Size().H})
 			t.outer.PaintCaret(c, top, bottom)
 		}
 	}

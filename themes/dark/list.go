@@ -30,7 +30,7 @@ func CreateList(theme *Theme) gxui.List {
 func (l *List) Paint(c gxui.Canvas) {
 	l.List.Paint(c)
 	if l.HasFocus() {
-		r := l.Bounds().Size().Rect().ContractI(1)
+		r := l.Size().Rect().ContractI(1)
 		c.DrawRoundedRect(r, 3.0, 3.0, 3.0, 3.0, l.theme.FocusedStyle.Pen, l.theme.FocusedStyle.Brush)
 	}
 }

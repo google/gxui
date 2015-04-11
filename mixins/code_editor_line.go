@@ -101,7 +101,7 @@ func (t *CodeEditorLine) PaintBorders(c gxui.Canvas, info CodeEditorLinePaintInf
 // DefaultTextBoxLine overrides
 func (t *CodeEditorLine) Paint(c gxui.Canvas) {
 	font := t.ce.font
-	rect := t.Bounds().Size().Rect().OffsetX(t.caretWidth)
+	rect := t.Size().Rect().OffsetX(t.caretWidth)
 	controller := t.ce.controller
 	runes := controller.LineRunes(t.lineIndex)
 	start := controller.LineStart(t.lineIndex)
@@ -110,7 +110,7 @@ func (t *CodeEditorLine) Paint(c gxui.Canvas) {
 	if start != end {
 		lineSpan := interval.CreateIntData(start, end, nil)
 
-		lineHeight := t.Bounds().Size().H
+		lineHeight := t.Size().H
 		glyphWidth := font.GlyphMaxSize().W
 		offsets := font.Layout(&gxui.TextBlock{
 			Runes:     runes,

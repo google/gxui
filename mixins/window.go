@@ -14,12 +14,12 @@ import (
 type WindowOuter interface {
 	gxui.Window
 	outer.Attachable
-	outer.Bounds
 	outer.IsVisibler
 	outer.LayoutChildren
 	outer.PaintChilder
 	outer.Painter
 	outer.Parenter
+	outer.Sized
 }
 
 type Window struct {
@@ -150,16 +150,19 @@ func (w *Window) Paint(c gxui.Canvas) {
 }
 
 func (w *Window) LayoutChildren() {
-	s := w.Bounds().Size().Contract(w.Padding()).Max(math.ZeroSize)
+	s := w.Size().Contract(w.Padding()).Max(math.ZeroSize)
 	o := w.Padding().LT()
 	for _, c := range w.outer.Children() {
-		c.Layout(c.DesiredSize(math.ZeroSize, s).Rect().Offset(o))
+		c.Layout(c.Control.DesiredSize(math.ZeroSize, s).Rect().Offset(o))
 	}
 }
 
-func (w *Window) Bounds() math.Rect {
-	s := w.viewport.SizeDips()
-	return math.CreateRect(0, 0, s.W, s.H)
+func (w *Window) Size() math.Size {
+	return w.viewport.SizeDips()
+}
+
+func (w *Window) SetSize(size math.Size) {
+	w.viewport.SetSizeDips(size)
 }
 
 func (w *Window) Parent() gxui.Container {

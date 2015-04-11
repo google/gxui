@@ -19,7 +19,7 @@ type ScrollBar struct {
 	outer ScrollBarOuter
 
 	orientation         gxui.Orientation
-	desiredWidth        int
+	thickness           int
 	minBarLength        int
 	scrollPositionFrom  int
 	scrollPositionTo    int
@@ -33,7 +33,7 @@ type ScrollBar struct {
 
 func (s *ScrollBar) positionAt(p math.Point) int {
 	o := s.orientation
-	frac := float32(o.Major(p.XY())) / float32(o.Major(s.Bounds().Size().WH()))
+	frac := float32(o.Major(p.XY())) / float32(o.Major(s.Size().WH()))
 	max := s.ScrollLimit()
 	return int(float32(max) * frac)
 }
@@ -47,7 +47,7 @@ func (s *ScrollBar) rangeAt(p math.Point) (from, to int) {
 
 func (s *ScrollBar) updateBarRect() {
 	sf, st := s.ScrollFraction()
-	size := s.Bounds().Size()
+	size := s.Size()
 	b := size.Rect()
 	halfMinLen := s.minBarLength / 2
 	if s.orientation.Horizontal() {
@@ -74,7 +74,7 @@ func (s *ScrollBar) Init(outer ScrollBarOuter, theme gxui.Theme) {
 	s.Control.Init(outer, theme)
 
 	s.outer = outer
-	s.desiredWidth = 10
+	s.thickness = 10
 	s.minBarLength = 10
 	s.scrollPositionFrom = 0
 	s.scrollPositionTo = 100
@@ -97,14 +97,14 @@ func (s *ScrollBar) ScrollFraction() (from, to float32) {
 
 func (s *ScrollBar) DesiredSize(min, max math.Size) math.Size {
 	if s.orientation.Horizontal() {
-		return math.Size{W: max.W, H: s.desiredWidth}.Clamp(min, max)
+		return math.Size{W: max.W, H: s.thickness}.Clamp(min, max)
 	} else {
-		return math.Size{W: s.desiredWidth, H: max.H}.Clamp(min, max)
+		return math.Size{W: s.thickness, H: max.H}.Clamp(min, max)
 	}
 }
 
 func (s *ScrollBar) Paint(c gxui.Canvas) {
-	c.DrawRoundedRect(s.outer.Bounds().Size().Rect(), 3, 3, 3, 3, s.railPen, s.railBrush)
+	c.DrawRoundedRect(s.outer.Size().Rect(), 3, 3, 3, 3, s.railPen, s.railBrush)
 	c.DrawRoundedRect(s.barRect, 3, 3, 3, 3, s.barPen, s.barBrush)
 }
 
@@ -230,7 +230,7 @@ func (s *ScrollBar) MouseDown(ev gxui.MouseEvent) {
 		initialOffset := ev.Point.Sub(s.barRect.Min)
 		var mms, mus gxui.EventSubscription
 		mms = ev.Window.OnMouseMove(func(we gxui.MouseEvent) {
-			p := gxui.WindowToChild(we.WindowPoint, s)
+			p := gxui.WindowToChild(we.WindowPoint, s.outer)
 			s.SetScrollPosition(s.rangeAt(p.Sub(initialOffset)))
 		})
 		mus = ev.Window.OnMouseUp(func(we gxui.MouseEvent) {

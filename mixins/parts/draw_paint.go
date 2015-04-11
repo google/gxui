@@ -16,9 +16,9 @@ const debugVerifyDetachOnGC = false
 
 type DrawPaintOuter interface {
 	outer.Attachable
-	outer.Bounds
 	outer.Painter
 	outer.Parenter
+	outer.Sized
 }
 
 type DrawPaint struct {
@@ -64,7 +64,7 @@ func (d *DrawPaint) Draw() gxui.Canvas {
 		panic(fmt.Errorf("Attempting to draw a non-attached control %T", d.outer))
 	}
 
-	s := d.outer.Bounds().Size()
+	s := d.outer.Size()
 	if s.Area() == 0 {
 		return nil // No area to draw in
 	}

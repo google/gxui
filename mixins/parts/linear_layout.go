@@ -12,7 +12,7 @@ import (
 
 type LinearLayoutOuter interface {
 	gxui.Container
-	outer.Bounds
+	outer.Sized
 }
 
 type LinearLayout struct {
@@ -28,7 +28,7 @@ func (l *LinearLayout) Init(outer LinearLayoutOuter) {
 }
 
 func (l *LinearLayout) LayoutChildren() {
-	s := l.outer.Bounds().Size().Contract(l.outer.Padding())
+	s := l.outer.Size().Contract(l.outer.Padding())
 	o := l.outer.Padding().LT()
 	children := l.outer.Children()
 	major := 0
@@ -40,8 +40,9 @@ func (l *LinearLayout) LayoutChildren() {
 		}
 	}
 	for _, c := range children {
-		cm := c.Margin()
-		cs := c.DesiredSize(math.ZeroSize, s.Contract(cm).Max(math.ZeroSize))
+		cm := c.Control.Margin()
+		cs := c.Control.DesiredSize(math.ZeroSize, s.Contract(cm).Max(math.ZeroSize))
+		c.Control.SetSize(cs)
 
 		// Calculate minor-axis alignment
 		var minor int
@@ -70,25 +71,25 @@ func (l *LinearLayout) LayoutChildren() {
 		switch l.direction {
 		case gxui.LeftToRight:
 			major += cm.L
-			c.Layout(math.CreateRect(major, minor, major+cs.W, minor+cs.H).Offset(o))
+			c.Offset = math.Point{X: major, Y: minor}.Add(o)
 			major += cs.W
 			major += cm.R
 			s.W -= cs.W + cm.W()
 		case gxui.RightToLeft:
 			major -= cm.R
-			c.Layout(math.CreateRect(major-cs.W, minor, major, minor+cs.H).Offset(o))
+			c.Offset = math.Point{X: major - cs.W, Y: minor}.Add(o)
 			major -= cs.W
 			major -= cm.L
 			s.W -= cs.W + cm.W()
 		case gxui.TopToBottom:
 			major += cm.T
-			c.Layout(math.CreateRect(minor, major, minor+cs.W, major+cs.H).Offset(o))
+			c.Offset = math.Point{X: minor, Y: major}.Add(o)
 			major += cs.H
 			major += cm.B
 			s.H -= cs.H + cm.H()
 		case gxui.BottomToTop:
 			major -= cm.B
-			c.Layout(math.CreateRect(minor, major-cs.H, minor+cs.W, major).Offset(o))
+			c.Offset = math.Point{X: minor, Y: major - cs.H}.Add(o)
 			major -= cs.H
 			major -= cm.T
 			s.H -= cs.H + cm.H()
@@ -107,8 +108,8 @@ func (l *LinearLayout) DesiredSize(min, max math.Size) math.Size {
 	horizontal := l.direction.Orientation().Horizontal()
 	offset := math.Point{X: 0, Y: 0}
 	for _, c := range children {
-		cs := c.DesiredSize(math.ZeroSize, max)
-		cm := c.Margin()
+		cs := c.Control.DesiredSize(math.ZeroSize, max)
+		cm := c.Control.Margin()
 		cb := cs.Expand(cm).Rect().Offset(offset)
 		if horizontal {
 			offset.X += cb.W()

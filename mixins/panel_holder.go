@@ -58,9 +58,11 @@ func insertIndex(holder gxui.PanelHolder, at math.Point) int {
 	}
 	for i := 0; i < holder.PanelCount(); i++ {
 		tab := holder.Tab(i)
-		bounds := tab.Bounds()
-		score(bounds.ML(), i)
-		score(bounds.MR(), i+1)
+		size := tab.Size()
+		ml := math.Point{Y: size.H / 2}
+		mr := math.Point{Y: size.H / 2, X: size.W}
+		score(gxui.TransformCoordinate(ml, tab, holder), i)
+		score(gxui.TransformCoordinate(mr, tab, holder), i+1)
 	}
 	return bestIndex
 }
@@ -106,16 +108,19 @@ func (p *PanelHolder) Init(outer PanelHolderOuter, theme gxui.Theme) {
 }
 
 func (p *PanelHolder) LayoutChildren() {
-	s := p.Bounds().Size()
+	s := p.Size()
 
 	tabHeight := p.tabLayout.DesiredSize(math.ZeroSize, s).H
 	panelRect := math.CreateRect(0, tabHeight, s.W, s.H).Contract(p.Padding())
 
-	for _, c := range p.Children() {
-		if c == p.tabLayout {
-			c.Layout(math.CreateRect(0, 0, s.W, tabHeight))
+	for _, child := range p.Children() {
+		if child.Control == p.tabLayout {
+			child.Control.SetSize(math.Size{W: s.W, H: tabHeight})
+			child.Offset = math.ZeroPoint
 		} else {
-			c.Layout(panelRect.Contract(c.Margin()))
+			rect := panelRect.Contract(child.Control.Margin())
+			child.Control.SetSize(rect.Size())
+			child.Offset = rect.Min
 		}
 	}
 }

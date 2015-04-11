@@ -90,11 +90,11 @@ func (t *TextBox) Init(outer TextBoxOuter, driver gxui.Driver, theme gxui.Theme,
 }
 
 func (t *TextBox) textRect() math.Rect {
-	return t.outer.Bounds().Size().Rect().Contract(t.Padding())
+	return t.outer.Size().Rect().Contract(t.Padding())
 }
 
 func (t *TextBox) pageLines() int {
-	return (t.outer.Bounds().H() - t.outer.Padding().H()) / t.MajorAxisItemSize()
+	return (t.outer.Size().H - t.outer.Padding().H()) / t.MajorAxisItemSize()
 }
 
 func (t *TextBox) OnRedrawLines(f func()) gxui.EventSubscription {

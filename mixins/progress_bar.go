@@ -38,7 +38,7 @@ func (b *ProgressBar) Init(outer ProgressBarOuter, theme gxui.Theme) {
 
 func (b *ProgressBar) Paint(c gxui.Canvas) {
 	frac := math.Saturate(float32(b.progress) / float32(b.target))
-	r := b.outer.Bounds().Size().Rect()
+	r := b.outer.Size().Rect()
 	b.PaintBackground(c, r)
 	b.outer.PaintProgress(c, r, frac)
 	b.PaintBorder(c, r)

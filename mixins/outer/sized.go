@@ -8,6 +8,7 @@ import (
 	"github.com/google/gxui/math"
 )
 
-type Bounds interface {
-	Bounds() math.Rect
+type Sized interface {
+	Size() math.Size
+	SetSize(math.Size)
 }

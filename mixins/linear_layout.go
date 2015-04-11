@@ -33,7 +33,7 @@ func (l *LinearLayout) Init(outer LinearLayoutOuter, theme gxui.Theme) {
 }
 
 func (l *LinearLayout) Paint(c gxui.Canvas) {
-	r := l.Bounds().Size().Rect()
+	r := l.Size().Rect()
 	l.BackgroundBorderPainter.PaintBackground(c, r)
 	l.PaintChildren.Paint(c)
 	l.BackgroundBorderPainter.PaintBorder(c, r)

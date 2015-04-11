@@ -23,13 +23,15 @@ func dump(c interface{}, depth int) string {
 	s := ""
 	switch t := c.(type) {
 	case Control:
-		s += fmt.Sprintf("%s Bounds: %+v Margin: %+v \n", reflect.TypeOf(t).String(), t.Bounds(), t.Margin())
+		s += fmt.Sprintf("(%p) %T Size: %+v Margin: %+v \n", t, t, t.Size(), t.Margin())
+	default:
+		s += fmt.Sprintf("%T\n", t)
 	}
 	switch t := c.(type) {
 	case Container:
 		for i, c := range t.Children() {
 			s += fmt.Sprintf("%s--- Child %d: ", indent(depth), i)
-			s += dump(c, depth+1)
+			s += dump(c.Control, depth+1)
 		}
 	}
 	return s
@@ -46,13 +48,13 @@ func FunctionName(i interface{}) string {
 func BreadcrumbsAt(p Container, pnt math.Point) string {
 	s := reflect.TypeOf(p).String()
 	for _, c := range p.Children() {
-		b := c.Bounds()
+		b := c.Control.Size().Rect().Offset(c.Offset)
 		if b.Contains(pnt) {
-			switch t := c.(type) {
+			switch t := c.Control.(type) {
 			case Container:
-				return s + " > " + BreadcrumbsAt(t, pnt.Sub(b.Min))
+				return s + " > " + BreadcrumbsAt(t, pnt.Sub(c.Offset))
 			default:
-				return s + " > " + reflect.TypeOf(c).String()
+				return s + " > " + reflect.TypeOf(c.Control).String()
 			}
 		}
 	}
