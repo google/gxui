@@ -148,8 +148,8 @@ func closedPolyToShape(p gxui.Polygon, penWidth float32) (fillShape, edgeShape *
 	vsEdgePos := []float32{}
 
 	for i, cnt := 0, len(p); i < cnt; i++ {
-		r := p[i%cnt].RoundedRadius
-		a := p[i%cnt].Position.Vec2()
+		r := p[i].RoundedRadius
+		a := p[i].Position.Vec2()
 		b := p[(i+cnt-1)%cnt].Position.Vec2()
 		c := p[(i+1)%cnt].Position.Vec2()
 		vsEdgePos, fillEdge = segment(penWidth, r, a, b, c, i == len(p), vsEdgePos, fillEdge)
@@ -195,7 +195,6 @@ func openPolyToShape(p gxui.Polygon, penWidth float32) *shape {
 		inner := a.Sub(caDir.Tangent().MulS(penWidth))
 		vsEdgePos = appendVec2(vsEdgePos, a, inner)
 	}
-
 	for i := 1; i < len(p)-1; i++ {
 		r := p[i].RoundedRadius
 		a := p[i].Position.Vec2()
@@ -203,14 +202,12 @@ func openPolyToShape(p gxui.Polygon, penWidth float32) *shape {
 		c := p[i+1].Position.Vec2()
 		vsEdgePos, _ = segment(penWidth, r, a, b, c, false, vsEdgePos, nil)
 	}
-
 	{ // p[N-2] -> p[N-1]
 		a, c := p[len(p)-2].Position.Vec2(), p[len(p)-1].Position.Vec2()
 		caDir := a.Sub(c).Normalize()
-		inner := a.Sub(caDir.Tangent().MulS(penWidth))
-		vsEdgePos = appendVec2(vsEdgePos, a, inner)
+		inner := c.Sub(caDir.Tangent().MulS(penWidth))
+		vsEdgePos = appendVec2(vsEdgePos, c, inner)
 	}
-
 	if len(vsEdgePos) > 0 {
 		return newShape(newVertexBuffer(
 			newVertexStream("aPosition", stFloatVec2, vsEdgePos),
