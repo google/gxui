@@ -38,7 +38,7 @@ func (l *SplitterLayout) Init(outer SplitterLayoutOuter, theme gxui.Theme) {
 }
 
 func (l *SplitterLayout) LayoutChildren() {
-	s := l.outer.Bounds().Size().Contract(l.Padding())
+	s := l.outer.Size().Contract(l.Padding())
 	o := l.Padding().LT()
 
 	children := l.outer.Children()
@@ -55,7 +55,7 @@ func (l *SplitterLayout) LayoutChildren() {
 	netWeight := float32(0.0)
 	for i, c := range children {
 		if isSplitter := (i & 1) == 1; !isSplitter {
-			netWeight += l.weights[c]
+			netWeight += l.weights[c.Control]
 		}
 	}
 
@@ -63,8 +63,8 @@ func (l *SplitterLayout) LayoutChildren() {
 	for i, c := range children {
 		var cr math.Rect
 		if isSplitter := (i & 1) == 1; !isSplitter {
-			cm := c.Margin()
-			frac := l.weights[c] / netWeight
+			cm := c.Control.Margin()
+			frac := l.weights[c.Control] / netWeight
 			if l.orientation.Horizontal() {
 				cw := int(float32(s.W) * frac)
 				cr = math.CreateRect(d+cm.L, cm.T, d+cw-cm.R, s.H-cm.B)
@@ -121,34 +121,36 @@ func (l *SplitterLayout) CreateSplitterBar() gxui.Control {
 
 func (l *SplitterLayout) SplitterDragged(splitter gxui.Control, wndPnt math.Point) {
 	o := l.orientation
-	p := gxui.WindowToChild(wndPnt, l)
-	splitterIndex := l.ChildIndex(splitter)
-	childA, childB := l.ChildAt(splitterIndex-1), l.ChildAt(splitterIndex+1)
+	p := gxui.WindowToChild(wndPnt, l.outer)
+	children := l.Container.Children()
+	splitterIndex := children.IndexOf(splitter)
+	childA, childB := children[splitterIndex-1], children[splitterIndex+1]
 	boundsA, boundsB := childA.Bounds(), childB.Bounds()
 
 	min, max := o.Major(boundsA.Min.XY()), o.Major(boundsB.Max.XY())
 	frac := math.RampSat(float32(o.Major(p.XY())), float32(min), float32(max))
 
-	netWeight := l.weights[childA] + l.weights[childB]
-	l.weights[childA] = netWeight * frac
-	l.weights[childB] = netWeight * (1.0 - frac)
+	netWeight := l.weights[childA.Control] + l.weights[childB.Control]
+	l.weights[childA.Control] = netWeight * frac
+	l.weights[childB.Control] = netWeight * (1.0 - frac)
 	l.LayoutChildren()
 }
 
 // parts.Container overrides
-func (l *SplitterLayout) AddChildAt(index int, child gxui.Control) {
-	l.weights[child] = 1.0
-	if l.Container.ChildCount() > 0 {
+func (l *SplitterLayout) AddChildAt(index int, control gxui.Control) *gxui.Child {
+	l.weights[control] = 1.0
+	if len(l.Container.Children()) > 0 {
 		l.Container.AddChildAt(index, l.outer.CreateSplitterBar())
 		index++
 	}
-	l.Container.AddChildAt(index, child)
+	return l.Container.AddChildAt(index, control)
 }
 
 func (l *SplitterLayout) RemoveChildAt(index int) {
-	if l.Container.ChildCount() > 1 {
+	children := l.Container.Children()
+	if len(children) > 1 {
 		l.Container.RemoveChildAt(index + 1)
 	}
-	delete(l.weights, l.ChildAt(index))
+	delete(l.weights, children[index].Control)
 	l.Container.RemoveChildAt(index)
 }

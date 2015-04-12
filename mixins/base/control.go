@@ -44,5 +44,5 @@ func (c *Control) DesiredSize(min, max math.Size) math.Size {
 }
 
 func (c *Control) ContainsPoint(p math.Point) bool {
-	return c.IsVisible() && c.Bounds().Size().Rect().Contains(p)
+	return c.IsVisible() && c.Size().Rect().Contains(p)
 }

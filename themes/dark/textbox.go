@@ -42,7 +42,7 @@ func (t *TextBox) Paint(c gxui.Canvas) {
 	t.TextBox.Paint(c)
 
 	if t.HasFocus() {
-		r := t.Bounds().Size().Rect()
+		r := t.Size().Rect()
 		s := t.theme.FocusedStyle
 		c.DrawRoundedRect(r, 3, 3, 3, 3, s.Pen, s.Brush)
 	}

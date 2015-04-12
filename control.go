@@ -9,9 +9,9 @@ import (
 )
 
 type Control interface {
-	Layout(math.Rect)
+	Size() math.Size
+	SetSize(math.Size)
 	Draw() Canvas
-	Bounds() math.Rect
 	Parent() Container
 	SetParent(Container)
 	Attached() bool

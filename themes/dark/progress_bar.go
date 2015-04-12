@@ -59,18 +59,18 @@ func (b *ProgressBar) animationTick() {
 	}
 }
 
-func (b *ProgressBar) Layout(r math.Rect) {
-	b.ProgressBar.Layout(r)
+func (b *ProgressBar) SetSize(size math.Size) {
+	b.ProgressBar.SetSize(size)
 
 	if b.chevrons != nil {
 		b.chevrons.Release()
 		b.chevrons = nil
 	}
-	if r.Size().Area() > 0 {
-		b.chevrons = b.theme.Driver().CreateCanvas(r.Size())
-		b.chevronWidth = r.H() / 2
+	if size.Area() > 0 {
+		b.chevrons = b.theme.Driver().CreateCanvas(size)
+		b.chevronWidth = size.H / 2
 		cw := b.chevronWidth
-		for x := -cw * 2; x < r.W(); x += cw * 2 {
+		for x := -cw * 2; x < size.W; x += cw * 2 {
 			// x0    x2
 			// |  x1 |  x3
 			//    |     |
@@ -81,7 +81,7 @@ func (b *ProgressBar) Layout(r math.Rect) {
 			//   /     /
 			//  /     /
 			// E-----D    - y2
-			y0, y1, y2 := 0, r.H()/2, r.H()
+			y0, y1, y2 := 0, size.H/2, size.H
 			x0, x1 := x, x+cw/2
 			x2, x3 := x0+cw, x1+cw
 			var chevron = gxui.Polygon{

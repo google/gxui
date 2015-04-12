@@ -19,7 +19,7 @@ type LayoutableOuter interface {
 type Layoutable struct {
 	outer             LayoutableOuter
 	margin            math.Spacing
-	rect              math.Rect
+	size              math.Size
 	relayoutRequested bool
 	inLayoutChildren  bool // True when calling LayoutChildren
 }
@@ -39,21 +39,21 @@ func (l *Layoutable) Margin() math.Spacing {
 	return l.margin
 }
 
-func (l *Layoutable) Bounds() math.Rect {
-	return l.rect
+func (l *Layoutable) Size() math.Size {
+	return l.size
 }
 
-func (l *Layoutable) Layout(rect math.Rect) {
-	if rect.W() < 0 {
-		panic(fmt.Errorf("Layout() called with a negative width. Rect: %v", rect))
+func (l *Layoutable) SetSize(size math.Size) {
+	if size.W < 0 {
+		panic(fmt.Errorf("SetSize() called with a negative width. Size: %v", size))
 	}
-	if rect.H() < 0 {
-		panic(fmt.Errorf("Layout() called with a negative height. Rect: %v", rect))
+	if size.H < 0 {
+		panic(fmt.Errorf("SetSize() called with a negative height. Size: %v", size))
 	}
 
-	boundsChanged := l.rect != rect
-	l.rect = rect
-	if l.relayoutRequested || boundsChanged {
+	sizeChanged := l.size != size
+	l.size = size
+	if l.relayoutRequested || sizeChanged {
 		l.relayoutRequested = false
 		l.inLayoutChildren = true
 		callLayoutChildrenIfSupported(l.outer)

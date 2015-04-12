@@ -36,7 +36,7 @@ func (t *PanelTab) SetActive(active bool) {
 }
 
 func (t *PanelTab) Paint(c gxui.Canvas) {
-	s := t.Bounds().Size()
+	s := t.Size()
 	var style Style
 	switch {
 	case t.IsMouseDown(gxui.MouseButtonLeft) && t.IsMouseOver():

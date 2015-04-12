@@ -9,5 +9,5 @@ import (
 )
 
 type PaintChilder interface {
-	PaintChild(c gxui.Canvas, child gxui.Control, idx int)
+	PaintChild(c gxui.Canvas, child *gxui.Child, idx int)
 }

@@ -27,7 +27,7 @@ type DropDownList struct {
 	listShowing bool
 	itemSize    math.Size
 	overlay     gxui.BubbleOverlay
-	selected    gxui.Control
+	selected    *gxui.Child
 	onShowList  gxui.Event
 	onHideList  gxui.Event
 }
@@ -44,8 +44,7 @@ func (l *DropDownList) Init(outer DropDownListOuter, theme gxui.Theme) {
 		l.outer.RemoveAll()
 		adapter := l.list.Adapter()
 		if item != nil && adapter != nil {
-			l.selected = adapter.Create(l.theme, adapter.ItemIndex(item))
-			l.AddChild(l.selected)
+			l.selected = l.AddChild(adapter.Create(l.theme, adapter.ItemIndex(item)))
 		} else {
 			l.selected = nil
 		}
@@ -76,7 +75,7 @@ func (l *DropDownList) LayoutChildren() {
 	}
 
 	if l.selected != nil {
-		s := l.outer.Bounds().Size().Contract(l.Padding()).Max(math.ZeroSize)
+		s := l.outer.Size().Contract(l.Padding()).Max(math.ZeroSize)
 		o := l.Padding().LT()
 		l.selected.Layout(s.Rect().Offset(o))
 	}
@@ -84,7 +83,7 @@ func (l *DropDownList) LayoutChildren() {
 
 func (l *DropDownList) DesiredSize(min, max math.Size) math.Size {
 	if l.selected != nil {
-		return l.selected.DesiredSize(min, max).Expand(l.outer.Padding()).Clamp(min, max)
+		return l.selected.Control.DesiredSize(min, max).Expand(l.outer.Padding()).Clamp(min, max)
 	} else {
 		return l.itemSize.Expand(l.outer.Padding()).Clamp(min, max)
 	}
@@ -106,9 +105,9 @@ func (l *DropDownList) ShowList() bool {
 		return false
 	}
 	l.listShowing = true
-	s := l.Bounds().Size()
+	s := l.Size()
 	at := math.Point{X: s.W / 2, Y: s.H}
-	l.overlay.Show(l.list, gxui.TransformCoordinate(at, l, l.overlay))
+	l.overlay.Show(l.list, gxui.TransformCoordinate(at, l.outer, l.overlay))
 	gxui.SetFocus(l.list)
 	if l.onShowList != nil {
 		l.onShowList.Fire()
@@ -211,7 +210,7 @@ func (l *DropDownList) KeyPress(ev gxui.KeyboardEvent) (consume bool) {
 
 // parts.Container overrides
 func (l *DropDownList) Paint(c gxui.Canvas) {
-	r := l.outer.Bounds().Size().Rect()
+	r := l.outer.Size().Rect()
 	l.PaintBackground(c, r)
 	l.Container.Paint(c)
 	l.PaintBorder(c, r)

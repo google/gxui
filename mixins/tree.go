@@ -104,7 +104,7 @@ func (t *Tree) PaintUnexpandedSelection(c gxui.Canvas, r math.Rect) {
 }
 
 // List override
-func (t *Tree) PaintChild(c gxui.Canvas, child gxui.Control, idx int) {
+func (t *Tree) PaintChild(c gxui.Canvas, child *gxui.Child, idx int) {
 	t.List.PaintChild(c, child, idx)
 	if t.selectedItem != nil {
 		item := t.listAdapter.DeepestVisibleAncestor(t.selectedItem)
@@ -112,8 +112,8 @@ func (t *Tree) PaintChild(c gxui.Canvas, child gxui.Control, idx int) {
 			// The selected item is hidden by an unexpanded node.
 			// Highlight the deepest visible node instead.
 			if details, found := t.details[item]; found {
-				if child == details.control {
-					b := child.Bounds().Expand(child.Margin())
+				if child == details.child {
+					b := child.Bounds().Expand(child.Control.Margin())
 					t.outer.PaintUnexpandedSelection(c, b)
 				}
 			}

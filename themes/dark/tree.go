@@ -39,7 +39,7 @@ func CreateTree(theme *Theme) gxui.Tree {
 
 // mixins.Tree overrides
 func (t *Tree) Paint(c gxui.Canvas) {
-	r := t.Bounds().Size().Rect()
+	r := t.Size().Rect()
 
 	t.Tree.Paint(c)
 

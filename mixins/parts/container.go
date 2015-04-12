@@ -15,36 +15,32 @@ import (
 type ContainerOuter interface {
 	gxui.Container
 	outer.Attachable
-	outer.Bounds
 	outer.IsVisibler
 	outer.LayoutChildren
 	outer.Parenter
+	outer.Sized
 }
 
 type Container struct {
 	outer              ContainerOuter
-	children           []gxui.Control
+	children           gxui.Children
 	isMouseEventTarget bool
 	relayoutSuspended  bool
 }
 
 func (c *Container) Init(outer ContainerOuter) {
 	c.outer = outer
-	c.children = []gxui.Control{}
+	c.children = gxui.Children{}
 	outer.OnAttach(func() {
 		for _, v := range c.children {
-			v.Attach()
+			v.Control.Attach()
 		}
 	})
 	outer.OnDetach(func() {
 		for _, v := range c.children {
-			v.Detach()
+			v.Control.Detach()
 		}
 	})
-}
-
-func (c *Container) Children() []gxui.Control {
-	return c.children
 }
 
 func (c *Container) SetMouseEventTarget(mouseEventTarget bool) {
@@ -68,30 +64,18 @@ func (c *Container) SetRelayoutSuspended(enable bool) {
 	c.relayoutSuspended = true
 }
 
+// gxui.Parent compliance
+func (c *Container) Children() gxui.Children {
+	return c.children
+}
+
 // gxui.Container compliance
-func (c *Container) ChildCount() int {
-	return len(c.children)
+func (c *Container) AddChild(control gxui.Control) *gxui.Child {
+	return c.outer.AddChildAt(len(c.children), control)
 }
 
-func (c *Container) ChildIndex(child gxui.Control) int {
-	for i, v := range c.children {
-		if v == child {
-			return i
-		}
-	}
-	return -1
-}
-
-func (c *Container) ChildAt(index int) gxui.Control {
-	return c.children[index]
-}
-
-func (c *Container) AddChild(child gxui.Control) {
-	c.outer.AddChildAt(len(c.children), child)
-}
-
-func (c *Container) AddChildAt(index int, child gxui.Control) {
-	if child.Parent() != nil {
+func (c *Container) AddChildAt(index int, control gxui.Control) *gxui.Child {
+	if control.Parent() != nil {
 		panic("Child already has a parent")
 	}
 	if index < 0 || index > len(c.children) {
@@ -99,34 +83,38 @@ func (c *Container) AddChildAt(index int, child gxui.Control) {
 			index, 0, len(c.children)))
 	}
 
+	child := &gxui.Child{Control: control}
+
 	c.children = append(c.children, nil)
 	copy(c.children[index+1:], c.children[index:])
 	c.children[index] = child
 
-	child.SetParent(c.outer)
+	control.SetParent(c.outer)
 	if c.outer.Attached() {
-		child.Attach()
+		control.Attach()
 	}
 	if !c.relayoutSuspended {
 		c.outer.Relayout()
 	}
+	return child
 }
 
-func (c *Container) RemoveChild(child gxui.Control) {
-	i := c.ChildIndex(child)
-	if i >= 0 {
-		c.outer.RemoveChildAt(i)
-	} else {
-		panic("Child not part of container")
+func (c *Container) RemoveChild(control gxui.Control) {
+	for i := range c.children {
+		if c.children[i].Control == control {
+			c.outer.RemoveChildAt(i)
+			return
+		}
 	}
+	panic("Child not part of container")
 }
 
 func (c *Container) RemoveChildAt(index int) {
 	child := c.children[index]
 	c.children = append(c.children[:index], c.children[index+1:]...)
-	child.SetParent(nil)
+	child.Control.SetParent(nil)
 	if c.outer.Attached() {
-		child.Detach()
+		child.Control.Detach()
 	}
 	if !c.relayoutSuspended {
 		c.outer.Relayout()
@@ -140,11 +128,11 @@ func (c *Container) RemoveAll() {
 }
 
 func (c *Container) ContainsPoint(p math.Point) bool {
-	if !c.outer.IsVisible() || !c.outer.Bounds().Size().Rect().Contains(p) {
+	if !c.outer.IsVisible() || !c.outer.Size().Rect().Contains(p) {
 		return false
 	}
 	for _, v := range c.children {
-		if v.ContainsPoint(p.Sub(v.Bounds().Min)) {
+		if v.Control.ContainsPoint(p.Sub(v.Offset)) {
 			return true
 		}
 	}

@@ -11,8 +11,8 @@ import (
 
 type PaintChildrenOuter interface {
 	gxui.Container
-	outer.Bounds
 	outer.PaintChilder
+	outer.Sized
 }
 
 type PaintChildren struct {
@@ -25,18 +25,17 @@ func (p *PaintChildren) Init(outer PaintChildrenOuter) {
 
 func (p *PaintChildren) Paint(c gxui.Canvas) {
 	for i, v := range p.outer.Children() {
-		if v.IsVisible() {
+		if v.Control.IsVisible() {
 			c.Push()
-			c.AddClip(v.Bounds())
+			c.AddClip(v.Control.Size().Rect().Offset(v.Offset))
 			p.outer.PaintChild(c, v, i)
 			c.Pop()
 		}
 	}
 }
 
-func (p *PaintChildren) PaintChild(c gxui.Canvas, child gxui.Control, idx int) {
-	childCanvas := child.Draw()
-	if childCanvas != nil {
-		c.DrawCanvas(childCanvas, child.Bounds().Min)
+func (p *PaintChildren) PaintChild(c gxui.Canvas, child *gxui.Child, idx int) {
+	if canvas := child.Control.Draw(); canvas != nil {
+		c.DrawCanvas(canvas, child.Offset)
 	}
 }

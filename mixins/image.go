@@ -28,7 +28,7 @@ type Image struct {
 }
 
 func (i *Image) calculateDrawRect() math.Rect {
-	r := i.outer.Bounds().Size().Rect()
+	r := i.outer.Size().Rect()
 	texW, texH := i.texture.Size().WH()
 	aspectSrc := float32(texH) / float32(texW)
 	aspectDst := float32(r.H()) / float32(r.W())
@@ -145,7 +145,7 @@ func (i *Image) DesiredSize(min, max math.Size) math.Size {
 }
 
 func (i *Image) Paint(c gxui.Canvas) {
-	r := i.outer.Bounds().Size().Rect()
+	r := i.outer.Size().Rect()
 	i.PaintBackground(c, r)
 	switch {
 	case i.texture != nil:

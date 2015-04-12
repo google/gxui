@@ -32,7 +32,7 @@ func (t *CodeEditor) Paint(c gxui.Canvas) {
 	t.CodeEditor.Paint(c)
 
 	if t.HasFocus() {
-		r := t.Bounds().Size().Rect()
+		r := t.Size().Rect()
 		c.DrawRoundedRect(r, 3, 3, 3, 3, t.theme.FocusedStyle.Pen, t.theme.FocusedStyle.Brush)
 	}
 }

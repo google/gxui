@@ -64,7 +64,7 @@ func (b *SplitterBar) OnDragEnd(f func(gxui.MouseEvent)) gxui.EventSubscription 
 
 // parts.DrawPaint overrides
 func (b *SplitterBar) Paint(c gxui.Canvas) {
-	r := b.outer.Bounds().Size().Rect()
+	r := b.outer.Size().Rect()
 	c.DrawRect(r, gxui.CreateBrush(b.backgroundColor))
 	if b.foregroundColor != b.backgroundColor {
 		c.DrawRect(r.ContractI(1), gxui.CreateBrush(b.foregroundColor))

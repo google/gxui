@@ -39,7 +39,7 @@ func CreateDropDownList(theme *Theme) gxui.DropDownList {
 func (l *DropDownList) Paint(c gxui.Canvas) {
 	l.DropDownList.Paint(c)
 	if l.HasFocus() || l.ListShowing() {
-		r := l.Bounds().Size().Rect().ContractI(1)
+		r := l.Size().Rect().ContractI(1)
 		c.DrawRoundedRect(r, 3.0, 3.0, 3.0, 3.0, l.theme.FocusedStyle.Pen, l.theme.FocusedStyle.Brush)
 	}
 }

@@ -119,7 +119,7 @@ func (l *Label) VerticalAlignment() gxui.VerticalAlignment {
 
 // parts.DrawPaint overrides
 func (l *Label) Paint(c gxui.Canvas) {
-	r := l.outer.Bounds().Size().Rect()
+	r := l.outer.Size().Rect()
 	t := l.text
 	if !l.multiline {
 		t = strings.Replace(t, "\n", " ", -1)

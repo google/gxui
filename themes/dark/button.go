@@ -53,7 +53,7 @@ func (b *Button) Paint(c gxui.Canvas) {
 		l.SetColor(fontColor)
 	}
 
-	r := b.Bounds().Size().Rect()
+	r := b.Size().Rect()
 
 	c.DrawRoundedRect(r, 2, 2, 2, 2, gxui.TransparentPen, brush)
 

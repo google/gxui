@@ -14,6 +14,11 @@ type Viewport interface {
 	// adjustments made with the SetScale method.
 	SizeDips() math.Size
 
+	// SetSizeDips sets the size of the viewport in device-independent pixels.
+	// The ratio of pixels to DIPs is based on the screen density and scale
+	// adjustments made with the SetScale method.
+	SetSizeDips(math.Size)
+
 	// SizePixels returns the size of the viewport in pixels.
 	SizePixels() math.Size
 

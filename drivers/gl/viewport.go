@@ -343,6 +343,14 @@ func (v *viewport) SizeDips() math.Size {
 	return v.sizeDips
 }
 
+func (v *viewport) SetSizeDips(size math.Size) {
+	v.driver.syncDriver(func() {
+		v.sizeDips = size
+		v.sizeDipsUnscaled = size.ScaleS(v.scaling)
+		v.window.SetSize(v.sizeDipsUnscaled.W, v.sizeDipsUnscaled.H)
+	})
+}
+
 func (v *viewport) SizePixels() math.Size {
 	v.Lock()
 	defer v.Unlock()

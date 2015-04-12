@@ -97,18 +97,17 @@ func (c *FocusController) NextChildFocusable(p Container, after Control, forward
 		}
 
 		if !examineNext {
-			if f == after {
+			if f.Control == after {
 				examineNext = true
 			}
 			continue
 		}
 
-		if focusable := c.Focusable(f); focusable != nil {
+		if focusable := c.Focusable(f.Control); focusable != nil {
 			return focusable
 		}
 
-		container, _ := f.(Container)
-		if container != nil {
+		if container, ok := f.Control.(Container); ok {
 			focusable := c.NextChildFocusable(container, nil, forwards)
 			if focusable != nil {
 				return focusable
