@@ -113,6 +113,16 @@ func (d *driver) Call(f func()) bool {
 	return true
 }
 
+func (d *driver) CallSync(f func()) bool {
+	c := make(chan struct{})
+	if d.Call(func() { f(); close(c) }) {
+		<-c
+		return true
+	} else {
+		return false
+	}
+}
+
 func (d *driver) Terminate() {
 	d.asyncDriver(func() {
 		// Close all viewports. This will notify the application.

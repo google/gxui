@@ -16,6 +16,11 @@ type Driver interface {
 	// case f may not be called.
 	Call(f func()) bool
 
+	// CallSync queues and then blocks for f to be run on the UI go-routine.
+	// Call returns false if the driver has been terminated, in which case f may
+	// not be called.
+	CallSync(f func()) bool
+
 	Terminate()
 	SetClipboard(str string)
 	GetClipboard() (string, error)
