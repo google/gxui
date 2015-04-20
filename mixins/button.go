@@ -94,7 +94,7 @@ func (b *Button) SetChecked(checked bool) {
 
 // InputEventHandler override
 func (b *Button) Click(ev gxui.MouseEvent) (consume bool) {
-	if ev.Button == gxui.MouseButtonLeft {
+	if ev.IsLeftDown() {
 		if b.buttonType == gxui.ToggleButton {
 			b.outer.SetChecked(!b.outer.IsChecked())
 		}

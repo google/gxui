@@ -76,7 +76,7 @@ func (t *Tree) CreateExpandButton(theme gxui.Theme, node *TreeInternalNode) gxui
 	btn := theme.CreateButton()
 	btn.SetMargin(math.Spacing{L: 2, R: 2, T: 1, B: 1})
 	btn.OnClick(func(ev gxui.MouseEvent) {
-		if ev.Button == gxui.MouseButtonLeft {
+		if ev.IsLeftDown() {
 			if node.IsExpanded() {
 				node.Collapse()
 			} else {

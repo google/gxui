@@ -14,16 +14,14 @@ type MouseController struct {
 	window          Window
 	focusController *FocusController
 	lastOver        ControlPointList
-	lastDown        map[MouseButton]ControlPointList
-	lastUpTime      map[MouseButton]time.Time
+	lastDown        ControlPointList
+	lastUpTime      time.Time
 }
 
 func CreateMouseController(w Window, focusController *FocusController) *MouseController {
 	c := &MouseController{
 		window:          w,
 		focusController: focusController,
-		lastDown:        make(map[MouseButton]ControlPointList),
-		lastUpTime:      make(map[MouseButton]time.Time),
 	}
 	w.OnMouseMove(c.mouseMove)
 	w.OnMouseEnter(c.mouseMove)
@@ -76,13 +74,13 @@ func (m *MouseController) mouseDown(ev MouseEvent) {
 		cp.C.MouseDown(e)
 	}
 
-	m.lastDown[ev.Button] = m.lastOver
+	m.lastDown = m.lastOver
 }
 
 func (m *MouseController) mouseUp(ev MouseEvent) {
 	m.updatePosition(ev)
 
-	for _, cp := range m.lastDown[ev.Button] {
+	for _, cp := range m.lastDown {
 		e := ev
 		e.Point = cp.P
 		cp.C.MouseUp(e)
@@ -90,10 +88,10 @@ func (m *MouseController) mouseUp(ev MouseEvent) {
 
 	setFocusCount := m.focusController.SetFocusCount()
 
-	dblClick := time.Since(m.lastUpTime[ev.Button]) < doubleClickTime
+	dblClick := time.Since(m.lastUpTime) < doubleClickTime
 	clickConsumed := false
-	for i := len(m.lastDown[ev.Button]) - 1; i >= 0; i-- {
-		cp := m.lastDown[ev.Button][i]
+	for i := len(m.lastDown) - 1; i >= 0; i-- {
+		cp := m.lastDown[i]
 		if p, found := m.lastOver.Find(cp.C); found {
 			ev.Point = p
 			if (dblClick && cp.C.DoubleClick(ev)) || (!dblClick && cp.C.Click(ev)) {
@@ -114,8 +112,8 @@ func (m *MouseController) mouseUp(ev MouseEvent) {
 
 	focusSet := setFocusCount != m.focusController.SetFocusCount()
 	if !focusSet {
-		for i := len(m.lastDown[ev.Button]) - 1; i >= 0; i-- {
-			cp := m.lastDown[ev.Button][i]
+		for i := len(m.lastDown) - 1; i >= 0; i-- {
+			cp := m.lastDown[i]
 			if m.lastOver.Contains(cp.C) && m.window.SetFocus(cp.C) {
 				focusSet = true
 				break
@@ -127,8 +125,8 @@ func (m *MouseController) mouseUp(ev MouseEvent) {
 		}
 	}
 
-	delete(m.lastDown, ev.Button)
-	m.lastUpTime[ev.Button] = time.Now()
+	m.lastDown = nil
+	m.lastUpTime = time.Now()
 }
 
 func (m *MouseController) mouseScroll(ev MouseEvent) {

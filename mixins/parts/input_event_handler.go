@@ -13,7 +13,7 @@ type InputEventHandlerOuter interface{}
 type InputEventHandler struct {
 	outer         InputEventHandlerOuter
 	isMouseOver   bool
-	isMouseDown   map[gxui.MouseButton]bool
+	isMouseDown   gxui.MouseButton
 	onClick       gxui.Event
 	onDoubleClick gxui.Event
 	onKeyPress    gxui.Event
@@ -122,7 +122,6 @@ func (m *InputEventHandler) getOnKeyRepeat() gxui.Event {
 
 func (m *InputEventHandler) Init(outer InputEventHandlerOuter) {
 	m.outer = outer
-	m.isMouseDown = make(map[gxui.MouseButton]bool)
 }
 
 func (m *InputEventHandler) Click(ev gxui.MouseEvent) (consume bool) {
@@ -165,12 +164,12 @@ func (m *InputEventHandler) MouseExit(ev gxui.MouseEvent) {
 }
 
 func (m *InputEventHandler) MouseDown(ev gxui.MouseEvent) {
-	m.isMouseDown[ev.Button] = true
+	m.isMouseDown = ev.Button
 	m.getOnMouseDown().Fire(ev)
 }
 
 func (m *InputEventHandler) MouseUp(ev gxui.MouseEvent) {
-	m.isMouseDown[ev.Button] = false
+	m.isMouseDown = ev.Button
 	m.getOnMouseUp().Fire(ev)
 }
 
@@ -243,5 +242,5 @@ func (m *InputEventHandler) IsMouseOver() bool {
 }
 
 func (m *InputEventHandler) IsMouseDown(button gxui.MouseButton) bool {
-	return m.isMouseDown[button]
+	return m.isMouseDown&button != 0
 }

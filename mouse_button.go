@@ -4,10 +4,10 @@
 
 package gxui
 
-type MouseButton int
+type MouseButton uint
 
 const (
-	MouseButtonLeft MouseButton = iota
+	MouseButtonLeft MouseButton = 1 << iota
 	MouseButtonMiddle
 	MouseButtonRight
 )
