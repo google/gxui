@@ -41,7 +41,7 @@ type TextBox struct {
 }
 
 func (t *TextBox) lineMouseDown(line TextBoxLine, ev gxui.MouseEvent) {
-	if ev.IsLeftDown() {
+	if ev.Button == gxui.MouseButtonLeft {
 		p := line.RuneIndexAt(ev.Point)
 		t.selectionDragging = true
 		t.selectionDrag = gxui.CreateTextSelection(p, p, false)
@@ -52,7 +52,7 @@ func (t *TextBox) lineMouseDown(line TextBoxLine, ev gxui.MouseEvent) {
 }
 
 func (t *TextBox) lineMouseUp(line TextBoxLine, ev gxui.MouseEvent) {
-	if ev.IsLeftDown() {
+	if ev.Button == gxui.MouseButtonLeft {
 		t.selectionDragging = false
 		if !ev.Modifier.Control() {
 			t.controller.SetSelection(t.selectionDrag)

@@ -4,10 +4,9 @@
 
 package gxui
 
-type MouseButton int
+type MouseState int
 
-const (
-	MouseButtonLeft MouseButton = iota
-	MouseButtonMiddle
-	MouseButtonRight
-)
+func (s MouseState) IsDown(b MouseButton) bool {
+	return s&(1<<uint(b)) != 0
+}
+

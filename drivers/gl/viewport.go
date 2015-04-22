@@ -118,13 +118,6 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 		v.Lock()
 		if v.pendingMouseMoveEvent == nil {
 			v.pendingMouseMoveEvent = &gxui.MouseEvent{}
-			m := 1
-			for _, bt := range []glfw.MouseButton{glfw.MouseButtonLeft, glfw.MouseButtonMiddle, glfw.MouseButtonRight} {
-				if w.GetMouseButton(bt) == glfw.Press {
-					v.pendingMouseMoveEvent.Button |= gxui.MouseButton(m)
-				}
-				m <<= 1
-			}
 			driver.Call(func() {
 				v.Lock()
 				ev := *v.pendingMouseMoveEvent
@@ -134,6 +127,7 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 			})
 		}
 		v.pendingMouseMoveEvent.Point = p
+		v.pendingMouseMoveEvent.State = getMouseState(w)
 		v.Unlock()
 	})
 	wnd.SetCursorEnterCallback(func(w *glfw.Window, entered bool) {
@@ -152,13 +146,6 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 		v.Lock()
 		if v.pendingMouseScrollEvent == nil {
 			v.pendingMouseScrollEvent = &gxui.MouseEvent{}
-			m := 1
-			for _, bt := range []glfw.MouseButton{glfw.MouseButtonLeft, glfw.MouseButtonMiddle, glfw.MouseButtonRight} {
-				if w.GetMouseButton(bt) == glfw.Press {
-					v.pendingMouseMoveEvent.Button |= gxui.MouseButton(m)
-				}
-				m <<= 1
-			}
 			driver.Call(func() {
 				v.Lock()
 				ev := *v.pendingMouseScrollEvent
@@ -177,6 +164,7 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 		v.pendingMouseScrollEvent.Point = p
 		v.scrollAccumX += xoff * platform.ScrollSpeed
 		v.scrollAccumY += yoff * platform.ScrollSpeed
+		v.pendingMouseScrollEvent.State = getMouseState(w)
 		v.Unlock()
 	})
 	wnd.SetMouseButtonCallback(func(w *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
@@ -187,11 +175,11 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 		}
 		switch button {
 		case glfw.MouseButtonLeft:
-			ev.Button |= gxui.MouseButtonLeft
+			ev.Button = gxui.MouseButtonLeft
 		case glfw.MouseButtonMiddle:
-			ev.Button |= gxui.MouseButtonMiddle
+			ev.Button = gxui.MouseButtonMiddle
 		case glfw.MouseButtonRight:
-			ev.Button |= gxui.MouseButtonRight
+			ev.Button = gxui.MouseButtonRight
 		}
 		if action == glfw.Press {
 			v.onMouseDown.Fire(ev)
