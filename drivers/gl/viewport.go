@@ -135,6 +135,7 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 		ev := gxui.MouseEvent{
 			Point: p,
 		}
+		ev.State = getMouseState(w)
 		if entered {
 			v.onMouseEnter.Fire(ev)
 		} else {
@@ -173,14 +174,8 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 			Point:    p,
 			Modifier: translateKeyboardModifier(mod),
 		}
-		switch button {
-		case glfw.MouseButtonLeft:
-			ev.Button = gxui.MouseButtonLeft
-		case glfw.MouseButtonMiddle:
-			ev.Button = gxui.MouseButtonMiddle
-		case glfw.MouseButtonRight:
-			ev.Button = gxui.MouseButtonRight
-		}
+		ev.Button = translateMouseButton(button)
+		ev.State = getMouseState(w)
 		if action == glfw.Press {
 			v.onMouseDown.Fire(ev)
 		} else {
