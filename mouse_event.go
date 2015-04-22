@@ -10,6 +10,7 @@ import (
 
 type MouseEvent struct {
 	Button           MouseButton
+	State            MouseState
 	Point            math.Point // Local to the event receiver
 	WindowPoint      math.Point
 	Window           Window
