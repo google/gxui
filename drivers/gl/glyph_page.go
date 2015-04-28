@@ -15,15 +15,17 @@ import (
 )
 
 const (
-	dumpGlyphPages  = false
-	glyphPageWidth  = 512
-	glyphPageHeight = 512
-	glyphPadding    = 1
+	dumpGlyphPages     = false
+	glyphPageWidth     = 512
+	glyphPageHeight    = 512
+	glyphSizeAlignment = 8
+	glyphPadding       = 1
 )
 
 type glyphPage struct {
 	resolution         resolution
 	glyphMaxSizePixels math.Size
+	size               math.Size
 	image              *image.Alpha
 	offsets            map[rune]math.Point
 	rowHeight          int
@@ -32,11 +34,21 @@ type glyphPage struct {
 	nextPoint          math.Point
 }
 
+func align(v, pot int) int {
+	return (v + pot - 1) & ^(pot - 1)
+}
+
 func createGlyphPage(resolution resolution, glyphMaxSizePixels math.Size) *glyphPage {
+	// Handle exceptionally large glyphs.
+	size := math.Size{W: glyphPageWidth, H: glyphPageHeight}.Max(glyphMaxSizePixels)
+	size.W = align(size.W, glyphSizeAlignment)
+	size.H = align(size.H, glyphSizeAlignment)
+
 	return &glyphPage{
 		resolution:         resolution,
 		glyphMaxSizePixels: glyphMaxSizePixels,
-		image:              image.NewAlpha(image.Rect(0, 0, glyphPageWidth, glyphPageHeight)),
+		size:               size,
+		image:              image.NewAlpha(image.Rect(0, 0, size.W, size.H)),
 		offsets:            make(map[rune]math.Point),
 		rowHeight:          0,
 		rast:               raster.NewRasterizer(glyphMaxSizePixels.W, glyphMaxSizePixels.H),
@@ -54,15 +66,15 @@ func (p *glyphPage) drawContour(ps []truetype.Point, dx, dy raster.Fix32) {
 	// start is the same thing measured in fixed point units and positive Y
 	// going downwards, and offset by (dx, dy)
 	start := raster.Point{
-		X: dx + raster.Fix32(ps[0].X*int32(resolution)>>14),
-		Y: dy - raster.Fix32(ps[0].Y*int32(resolution)>>14),
+		X: dx + raster.Fix32(int64(ps[0].X)*int64(resolution)>>14),
+		Y: dy - raster.Fix32(int64(ps[0].Y)*int64(resolution)>>14),
 	}
 	rast.Start(start)
 	q0, on0 := start, true
 	for _, p := range ps[1:] {
 		q := raster.Point{
-			X: dx + raster.Fix32(p.X*int32(resolution)>>14),
-			Y: dy - raster.Fix32(p.Y*int32(resolution)>>14),
+			X: dx + raster.Fix32(int64(p.X)*int64(resolution)>>14),
+			Y: dy - raster.Fix32(int64(p.Y)*int64(resolution)>>14),
 		}
 		on := p.Flags&0x01 != 0
 		if on {
@@ -112,21 +124,21 @@ func (p *glyphPage) add(rune rune, g *glyph) bool {
 	w, h := g.size(p.resolution).WH()
 	x, y := p.nextPoint.X, p.nextPoint.Y
 
-	if x+w > glyphPageWidth {
+	if x+w > p.size.W {
 		// Row full, start new line
 		x = 0
 		y += p.rowHeight + glyphPadding
 		p.rowHeight = 0
 	}
 
-	if y+h > glyphPageHeight {
+	if y+h > p.size.H {
 		return false // Page full
 	}
 
 	// Build the raster contours
 	p.rast.Clear()
-	fx := -raster.Fix32(g.B.XMin * int32(p.resolution) >> 14)
-	fy := +raster.Fix32(g.B.YMax * int32(p.resolution) >> 14)
+	fx := -raster.Fix32((int64(g.B.XMin) * int64(p.resolution)) >> 14)
+	fy := +raster.Fix32((int64(g.B.YMax) * int64(p.resolution)) >> 14)
 	e0 := 0
 	for _, e1 := range g.End {
 		p.drawContour(g.Point[e0:e1], fx, fy)

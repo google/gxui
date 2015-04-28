@@ -5,11 +5,17 @@
 package gl
 
 import (
+	"fmt"
+
 	"github.com/google/gxui/math"
 )
 
 // 16:16 fixed point ratio of DIPs to pixels
 type resolution uint32
+
+func (r resolution) String() string {
+	return fmt.Sprintf("%f", r.dipsToPixels())
+}
 
 func (r resolution) dipsToPixels() float32 {
 	return float32(r) / 65536.0

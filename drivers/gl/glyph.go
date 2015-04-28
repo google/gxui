@@ -34,19 +34,31 @@ import (
 type glyph truetype.GlyphBuf
 
 func (g *glyph) size(r resolution) math.Size {
-	w := int(((g.B.XMax-g.B.XMin)*int32(r) + 0x3FFFFF) >> 22)
-	h := int(((g.B.YMax-g.B.YMin)*int32(r) + 0x3FFFFF) >> 22)
+	w := int((int64(g.B.XMax-g.B.XMin)*int64(r) + 0x3FFFFF) >> 22)
+	h := int((int64(g.B.YMax-g.B.YMin)*int64(r) + 0x3FFFFF) >> 22)
+	return math.Size{W: w, H: h}
+}
+
+func (g *glyph) sizeDips() math.Size {
+	w := int(((g.B.XMax - g.B.XMin) + 0x1F) >> 6)
+	h := int(((g.B.YMax - g.B.YMin) + 0x1F) >> 6)
 	return math.Size{W: w, H: h}
 }
 
 func (g *glyph) rect(r resolution) math.Rect {
-	x := int((g.B.XMin * int32(r)) >> 22)
-	y := -int((g.B.YMax * int32(r)) >> 22)
+	x := int((int64(g.B.XMin) * int64(r)) >> 22)
+	y := -int((int64(g.B.YMax) * int64(r)) >> 22)
 	return g.size(r).Rect().Offset(math.Point{X: x, Y: y})
 }
 
+func (g *glyph) rectDips() math.Rect {
+	x := int(g.B.XMin >> 6)
+	y := -int(g.B.YMax >> 6)
+	return g.sizeDips().Rect().Offset(math.Point{X: x, Y: y})
+}
+
 func (g *glyph) advance(r resolution) int {
-	return int((g.AdvanceWidth*int32(r) + 0x3FFFFF) >> 22)
+	return int((int64(g.AdvanceWidth)*int64(r) + 0x3FFFFF) >> 22)
 }
 
 func (g *glyph) advanceDips() int {
