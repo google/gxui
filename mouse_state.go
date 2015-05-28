@@ -9,4 +9,3 @@ type MouseState int
 func (s MouseState) IsDown(b MouseButton) bool {
 	return s&(1<<uint(b)) != 0
 }
-
