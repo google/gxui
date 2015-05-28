@@ -8,7 +8,7 @@ import (
 	"github.com/google/gxui"
 	"github.com/google/gxui/math"
 
-	"golang.org/x/mobile/gl"
+	"github.com/goxjs/gl"
 )
 
 const (

@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/goxjs/gl"
 	"golang.org/x/mobile/f32"
-	"golang.org/x/mobile/gl"
 )
 
 type vertexStream struct {

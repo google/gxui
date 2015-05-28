@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"golang.org/x/mobile/gl"
+	"github.com/goxjs/gl"
 )
 
 type indexBuffer struct {

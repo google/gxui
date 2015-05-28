@@ -7,7 +7,7 @@ package gl
 import (
 	"github.com/google/gxui/math"
 
-	"golang.org/x/mobile/gl"
+	"github.com/goxjs/gl"
 )
 
 type context struct {

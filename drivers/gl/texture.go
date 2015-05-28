@@ -8,7 +8,7 @@ import (
 	"image"
 
 	"github.com/google/gxui/math"
-	"golang.org/x/mobile/gl"
+	"github.com/goxjs/gl"
 )
 
 type texture struct {

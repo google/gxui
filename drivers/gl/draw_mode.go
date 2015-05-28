@@ -7,7 +7,7 @@ package gl
 import (
 	"fmt"
 
-	"golang.org/x/mobile/gl"
+	"github.com/goxjs/gl"
 )
 
 type drawMode int

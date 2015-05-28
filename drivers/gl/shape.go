@@ -4,7 +4,7 @@
 
 package gl
 
-import "golang.org/x/mobile/gl"
+import "github.com/goxjs/gl"
 
 type shape struct {
 	refCounted
