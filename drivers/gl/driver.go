@@ -11,9 +11,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/google/gxui"
 	"github.com/google/gxui/math"
+	"github.com/goxjs/gl"
+	"github.com/goxjs/glfw"
 )
 
 // Maximum time allowed for application to process events on termination.
@@ -35,7 +36,7 @@ func StartDriver(appRoutine func(driver gxui.Driver)) {
 		runtime.GOMAXPROCS(2)
 	}
 
-	if err := glfw.Init(); err != nil {
+	if err := glfw.Init(gl.ContextWatcher); err != nil {
 		panic(err)
 	}
 	defer glfw.Terminate()
