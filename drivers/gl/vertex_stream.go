@@ -5,12 +5,11 @@
 package gl
 
 import (
-	"encoding/binary"
 	"fmt"
+	"math"
 	"reflect"
 
 	"github.com/goxjs/gl"
-	"golang.org/x/mobile/f32"
 )
 
 type vertexStream struct {
@@ -38,7 +37,7 @@ func newVertexStream(name string, ty shaderDataType, data32 []float32) *vertexSt
 	}
 
 	// HACK.
-	data := f32.Bytes(binary.LittleEndian, data32...)
+	data := float32Bytes(data32...)
 
 	vs := &vertexStream{
 		name:  name,
@@ -76,4 +75,17 @@ func (c vertexStreamContext) bind() {
 func (c *vertexStreamContext) destroy() {
 	gl.DeleteBuffer(c.buffer)
 	c.buffer = gl.Buffer{}
+}
+
+// float32Bytes returns the byte representation of float32 values in little endian byte order.
+func float32Bytes(values ...float32) []byte {
+	b := make([]byte, 4*len(values))
+	for i, v := range values {
+		u := math.Float32bits(v)
+		b[4*i+0] = byte(u >> 0)
+		b[4*i+1] = byte(u >> 8)
+		b[4*i+2] = byte(u >> 16)
+		b[4*i+3] = byte(u >> 24)
+	}
+	return b
 }
