@@ -81,6 +81,7 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 		panic(err)
 	}
 	wnd.MakeContextCurrent()
+	gl.ContextWatcher.OnMakeCurrent(nil)
 
 	v.context = newContext()
 
@@ -258,6 +259,7 @@ func (v *viewport) render() {
 	}
 
 	v.window.MakeContextCurrent()
+	gl.ContextWatcher.OnMakeCurrent(nil)
 
 	ctx := v.context
 	ctx.beginDraw(v.SizeDips(), v.SizePixels())
@@ -301,6 +303,7 @@ func (v *viewport) SetCanvas(cc gxui.Canvas) {
 	v.driver.asyncDriver(func() {
 		// Only use the canvas of the most recent SetCanvas call.
 		v.window.MakeContextCurrent()
+		gl.ContextWatcher.OnMakeCurrent(nil)
 		if atomic.LoadUint32(&v.redrawCount) == cnt {
 			if v.canvas != nil {
 				v.canvas.release()
@@ -435,6 +438,7 @@ func (v *viewport) Destroy() {
 	v.driver.asyncDriver(func() {
 		if !v.destroyed {
 			v.window.MakeContextCurrent()
+			gl.ContextWatcher.OnMakeCurrent(nil)
 			if v.canvas != nil {
 				v.canvas.Release()
 				v.canvas = nil
