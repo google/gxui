@@ -6,6 +6,7 @@ package gl
 
 import (
 	"fmt"
+	"unicode"
 
 	"github.com/google/gxui"
 	"github.com/google/gxui/math"
@@ -103,7 +104,7 @@ func (f *font) DrawRunes(ctx *context, runes []rune, offsets []math.Point, col g
 	table := f.glyphTable(resolution)
 
 	for i, r := range runes {
-		if r == '\t' {
+		if unicode.IsSpace(r) {
 			continue
 		}
 		glyph := f.glyph(r)
