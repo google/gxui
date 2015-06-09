@@ -19,7 +19,7 @@ Dependencies
 
 In order to build GXUI on linux, you will need the following packages installed:
 
-    sudo apt-get install libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev mesa-common-dev libgles2-mesa-dev libxxf86vm-dev
+    sudo apt-get install libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev mesa-common-dev libgl1-mesa-dev libxxf86vm-dev
 
 ### Common:
 
