@@ -6,34 +6,38 @@ package gl
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 
-	"github.com/go-gl/gl/v2.1/gl"
+	"github.com/goxjs/gl"
 )
 
 type vertexStream struct {
 	refCounted
 	name  string
-	data  interface{}
+	data  []byte
 	ty    shaderDataType
 	count int
 }
 
 type vertexStreamContext struct {
-	buffer uint32
+	buffer gl.Buffer
 }
 
-func newVertexStream(name string, ty shaderDataType, data interface{}) *vertexStream {
-	dataVal := reflect.ValueOf(data)
+func newVertexStream(name string, ty shaderDataType, data32 []float32) *vertexStream {
+	dataVal := reflect.ValueOf(data32)
 	dataLen := dataVal.Len()
 
 	if dataLen%ty.vectorElementCount() != 0 {
 		panic(fmt.Errorf("Incorrect multiple of elements. Got: %d, Requires multiple of %d",
 			dataLen, ty.vectorElementCount()))
 	}
-	if !ty.vectorElementType().isArrayOfType(data) {
+	if !ty.vectorElementType().isArrayOfType(data32) {
 		panic("Data is not of the specified type")
 	}
+
+	// HACK.
+	data := float32Bytes(data32...)
 
 	vs := &vertexStream{
 		name:  name,
@@ -55,15 +59,10 @@ func (s *vertexStream) release() bool {
 }
 
 func (s *vertexStream) newContext() *vertexStreamContext {
-	dataVal := reflect.ValueOf(s.data)
-	dataLen := dataVal.Len()
-	size := dataLen * s.ty.vectorElementType().sizeInBytes()
-
-	var buffer uint32
-	gl.GenBuffers(1, &buffer)
+	buffer := gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, buffer)
-	gl.BufferData(gl.ARRAY_BUFFER, size, gl.Ptr(s.data), gl.STATIC_DRAW)
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.BufferData(gl.ARRAY_BUFFER, s.data, gl.STATIC_DRAW)
+	gl.BindBuffer(gl.ARRAY_BUFFER, gl.Buffer{})
 	checkError()
 
 	return &vertexStreamContext{buffer}
@@ -74,6 +73,19 @@ func (c vertexStreamContext) bind() {
 }
 
 func (c *vertexStreamContext) destroy() {
-	gl.DeleteBuffers(1, &c.buffer)
-	c.buffer = 0
+	gl.DeleteBuffer(c.buffer)
+	c.buffer = gl.Buffer{}
+}
+
+// float32Bytes returns the byte representation of float32 values in little endian byte order.
+func float32Bytes(values ...float32) []byte {
+	b := make([]byte, 4*len(values))
+	for i, v := range values {
+		u := math.Float32bits(v)
+		b[4*i+0] = byte(u >> 0)
+		b[4*i+1] = byte(u >> 8)
+		b[4*i+2] = byte(u >> 16)
+		b[4*i+3] = byte(u >> 24)
+	}
+	return b
 }

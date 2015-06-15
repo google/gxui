@@ -4,7 +4,7 @@
 
 package gl
 
-import "github.com/go-gl/gl/v2.1/gl"
+import "github.com/goxjs/gl"
 
 type shape struct {
 	refCounted
@@ -52,7 +52,7 @@ func newQuadShape() *shape {
 		1.0, 1.0,
 	})
 	vb := newVertexBuffer(pos)
-	ib := newIndexBuffer(ptUint, []uint32{
+	ib := newIndexBuffer(ptUshort, []uint16{
 		0, 1, 2,
 		2, 1, 3,
 	})
@@ -66,7 +66,7 @@ func (s shape) draw(ctx *context, shader *shaderProgram, ub uniformBindings) {
 	if s.ib != nil {
 		ctx.getOrCreateIndexBufferContext(s.ib).render(s.drawMode)
 	} else {
-		gl.DrawArrays(uint32(s.drawMode), 0, int32(s.vb.count))
+		gl.DrawArrays(gl.Enum(s.drawMode), 0, s.vb.count)
 	}
 	shader.unbind(ctx)
 	checkError()

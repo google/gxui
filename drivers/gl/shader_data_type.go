@@ -7,46 +7,28 @@ package gl
 import (
 	"fmt"
 
-	"github.com/go-gl/gl/v2.1/gl"
+	"github.com/goxjs/gl"
 )
 
 type shaderDataType int
 
 const (
-	stFloatMat2x3 shaderDataType = gl.FLOAT_MAT2x3
-	stFloatMat2x4 shaderDataType = gl.FLOAT_MAT2x4
-	stFloatMat2   shaderDataType = gl.FLOAT_MAT2
-	stFloatMat3x2 shaderDataType = gl.FLOAT_MAT3x2
-	stFloatMat3x4 shaderDataType = gl.FLOAT_MAT3x4
-	stFloatMat3   shaderDataType = gl.FLOAT_MAT3
-	stFloatMat4x2 shaderDataType = gl.FLOAT_MAT4x2
-	stFloatMat4x3 shaderDataType = gl.FLOAT_MAT4x3
-	stFloatMat4   shaderDataType = gl.FLOAT_MAT4
-	stFloatVec1   shaderDataType = gl.FLOAT
-	stFloatVec2   shaderDataType = gl.FLOAT_VEC2
-	stFloatVec3   shaderDataType = gl.FLOAT_VEC3
-	stFloatVec4   shaderDataType = gl.FLOAT_VEC4
-	stSampler2d   shaderDataType = gl.SAMPLER_2D
+	stFloatMat2 shaderDataType = gl.FLOAT_MAT2
+	stFloatMat3 shaderDataType = gl.FLOAT_MAT3
+	stFloatMat4 shaderDataType = gl.FLOAT_MAT4
+	stFloatVec1 shaderDataType = gl.FLOAT
+	stFloatVec2 shaderDataType = gl.FLOAT_VEC2
+	stFloatVec3 shaderDataType = gl.FLOAT_VEC3
+	stFloatVec4 shaderDataType = gl.FLOAT_VEC4
+	stSampler2d shaderDataType = gl.SAMPLER_2D
 )
 
 func (s shaderDataType) String() string {
 	switch s {
-	case stFloatMat2x3:
-		return "mat2x3"
-	case stFloatMat2x4:
-		return "mat2x4"
 	case stFloatMat2:
 		return "mat2"
-	case stFloatMat3x2:
-		return "mat3x2"
-	case stFloatMat3x4:
-		return "mat3x4"
 	case stFloatMat3:
 		return "mat3"
-	case stFloatMat4x2:
-		return "mat4x2"
-	case stFloatMat4x3:
-		return "mat4x3"
 	case stFloatMat4:
 		return "mat4"
 	case stFloatVec1:
@@ -70,22 +52,10 @@ func (s shaderDataType) sizeInBytes() int {
 
 func (s shaderDataType) vectorElementCount() int {
 	switch s {
-	case stFloatMat2x3:
-		return 2 * 3
-	case stFloatMat2x4:
-		return 2 * 4
 	case stFloatMat2:
 		return 2 * 2
-	case stFloatMat3x2:
-		return 3 * 2
-	case stFloatMat3x4:
-		return 3 * 4
 	case stFloatMat3:
 		return 3 * 3
-	case stFloatMat4x2:
-		return 4 * 2
-	case stFloatMat4x3:
-		return 4 * 3
 	case stFloatMat4:
 		return 4 * 4
 	case stFloatVec1:
@@ -105,21 +75,9 @@ func (s shaderDataType) vectorElementCount() int {
 
 func (s shaderDataType) vectorElementType() primitiveType {
 	switch s {
-	case stFloatMat2x3:
-		return ptFloat
-	case stFloatMat2x4:
-		return ptFloat
 	case stFloatMat2:
 		return ptFloat
-	case stFloatMat3x2:
-		return ptFloat
-	case stFloatMat3x4:
-		return ptFloat
 	case stFloatMat3:
-		return ptFloat
-	case stFloatMat4x2:
-		return ptFloat
-	case stFloatMat4x3:
 		return ptFloat
 	case stFloatMat4:
 		return ptFloat

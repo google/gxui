@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/go-gl/gl/v2.1/gl"
+	"github.com/goxjs/gl"
 )
 
 type primitiveType int

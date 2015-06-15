@@ -23,7 +23,7 @@ func dump(c interface{}, depth int) string {
 	s := ""
 	switch t := c.(type) {
 	case Control:
-		s += fmt.Sprintf("(%p) %T Size: %+v Margin: %+v \n", t, t, t.Size(), t.Margin())
+		s += fmt.Sprintf("(%p) %T Size: %+v Margin: %+v \n", &t, t, t.Size(), t.Margin())
 	default:
 		s += fmt.Sprintf("%T\n", t)
 	}

@@ -121,7 +121,7 @@ func WindowToChild(coord math.Point, to Control) math.Point {
 		child := p.Children().Find(c)
 		if child == nil {
 			Dump(p)
-			panic(fmt.Errorf("Control's parent (%p %T) did not contain control (%p %T).", p, p, c, c))
+			panic(fmt.Errorf("Control's parent (%p %T) did not contain control (%p %T).", &p, p, &c, c))
 		}
 		coord = coord.Sub(child.Offset)
 		if _, ok := p.(Window); ok {
@@ -141,7 +141,7 @@ func ChildToParent(coord math.Point, from Control, to Parent) math.Point {
 		child := p.Children().Find(c)
 		if child == nil {
 			Dump(p)
-			panic(fmt.Errorf("Control's parent (%p %T) did not contain control (%p %T).", p, p, c, c))
+			panic(fmt.Errorf("Control's parent (%p %T) did not contain control (%p %T).", &p, p, &c, c))
 		}
 		coord = coord.Add(child.Offset)
 		if p == to {
@@ -153,7 +153,7 @@ func ChildToParent(coord math.Point, from Control, to Parent) math.Point {
 		} else {
 			Dump(p)
 			panic(fmt.Errorf("ChildToParent (%p %T) -> (%p %T) reached non-control parent (%p %T).",
-				from, from, to, to, p, p))
+				&from, from, &to, to, &p, p))
 		}
 	}
 }

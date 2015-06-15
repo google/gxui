@@ -5,10 +5,10 @@
 package gl
 
 import (
-	"github.com/google/gxui/math"
 	"image"
 
-	"github.com/go-gl/gl/v2.1/gl"
+	"github.com/google/gxui/math"
+	"github.com/goxjs/gl"
 )
 
 type texture struct {
@@ -54,8 +54,8 @@ func (t *texture) Release() {
 }
 
 func (t *texture) newContext() *textureContext {
-	var fmt uint32
-	var data interface{}
+	var fmt gl.Enum
+	var data []byte
 	var pma bool
 
 	switch ty := t.image.(type) {
@@ -66,9 +66,6 @@ func (t *texture) newContext() *textureContext {
 	case *image.NRGBA:
 		fmt = gl.RGBA
 		data = ty.Pix
-	case *image.Gray:
-		fmt = gl.RED
-		data = ty.Pix
 	case *image.Alpha:
 		fmt = gl.ALPHA
 		data = ty.Pix
@@ -76,14 +73,13 @@ func (t *texture) newContext() *textureContext {
 		panic("Unsupported image type")
 	}
 
-	var texture uint32
-	gl.GenTextures(1, &texture)
+	texture := gl.CreateTexture()
 	gl.BindTexture(gl.TEXTURE_2D, texture)
 	w, h := t.SizePixels().WH()
-	gl.TexImage2D(gl.TEXTURE_2D, 0, int32(fmt), int32(w), int32(h), 0, fmt, gl.UNSIGNED_BYTE, gl.Ptr(data))
+	gl.TexImage2D(gl.TEXTURE_2D, 0, w, h, fmt, gl.UNSIGNED_BYTE, data)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	gl.BindTexture(gl.TEXTURE_2D, 0)
+	gl.BindTexture(gl.TEXTURE_2D, gl.Texture{})
 	checkError()
 
 	return &textureContext{
@@ -95,13 +91,13 @@ func (t *texture) newContext() *textureContext {
 }
 
 type textureContext struct {
-	texture    uint32
+	texture    gl.Texture
 	sizePixels math.Size
 	flipY      bool
 	pma        bool
 }
 
 func (c *textureContext) destroy() {
-	gl.DeleteTextures(1, &c.texture)
-	c.texture = 0
+	gl.DeleteTexture(c.texture)
+	c.texture = gl.Texture{}
 }

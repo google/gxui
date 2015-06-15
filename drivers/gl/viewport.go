@@ -5,16 +5,15 @@
 package gl
 
 import (
-	"fmt"
 	"sync"
 	"sync/atomic"
 	"unicode"
 
-	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl/platform"
 	"github.com/google/gxui/math"
+	"github.com/goxjs/gl"
 )
 
 const viewportDebugEnabled = false
@@ -82,9 +81,7 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 		panic(err)
 	}
 	wnd.MakeContextCurrent()
-	if err := gl.Init(); err != nil {
-		panic(fmt.Errorf("Failed to initialize gl: %v", err))
-	}
+	gl.ContextWatcher.OnMakeCurrent(nil)
 
 	v.context = newContext()
 
@@ -109,7 +106,7 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 		v.Lock()
 		v.sizePixels = math.Size{W: w, H: h}
 		v.Unlock()
-		gl.Viewport(0, 0, int32(w), int32(h))
+		gl.Viewport(0, 0, w, h)
 		gl.ClearColor(kClearColorR, kClearColorG, kClearColorB, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 	})
@@ -226,7 +223,7 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	gl.Enable(gl.BLEND)
 	gl.Enable(gl.SCISSOR_TEST)
-	gl.Viewport(0, 0, int32(fw), int32(fh))
+	gl.Viewport(0, 0, fw, fh)
 	gl.Scissor(0, 0, int32(fw), int32(fh))
 	gl.ClearColor(kClearColorR, kClearColorG, kClearColorB, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
@@ -262,6 +259,7 @@ func (v *viewport) render() {
 	}
 
 	v.window.MakeContextCurrent()
+	gl.ContextWatcher.OnMakeCurrent(nil)
 
 	ctx := v.context
 	ctx.beginDraw(v.SizeDips(), v.SizePixels())
@@ -305,6 +303,7 @@ func (v *viewport) SetCanvas(cc gxui.Canvas) {
 	v.driver.asyncDriver(func() {
 		// Only use the canvas of the most recent SetCanvas call.
 		v.window.MakeContextCurrent()
+		gl.ContextWatcher.OnMakeCurrent(nil)
 		if atomic.LoadUint32(&v.redrawCount) == cnt {
 			if v.canvas != nil {
 				v.canvas.release()
@@ -439,6 +438,7 @@ func (v *viewport) Destroy() {
 	v.driver.asyncDriver(func() {
 		if !v.destroyed {
 			v.window.MakeContextCurrent()
+			gl.ContextWatcher.OnMakeCurrent(nil)
 			if v.canvas != nil {
 				v.canvas.Release()
 				v.canvas = nil

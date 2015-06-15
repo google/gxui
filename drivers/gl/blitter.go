@@ -8,7 +8,7 @@ import (
 	"github.com/google/gxui"
 	"github.com/google/gxui/math"
 
-	"github.com/go-gl/gl/v2.1/gl"
+	"github.com/goxjs/gl"
 )
 
 const (
@@ -20,12 +20,16 @@ const (
   uniform mat3 mPos;
   uniform mat3 mUV;
   void main() {
-  	vec3 pos3 = vec3(aPosition, 1.0);
+    vec3 pos3 = vec3(aPosition, 1.0);
     gl_Position = vec4(mPos * pos3, 1.0);
     vTexcoords = (mUV * pos3).xy;
   }`
 
 	fsCopySrc = `
+  #ifdef GL_ES
+    precision mediump float;
+  #endif
+
   uniform sampler2D source;
   varying vec2 vTexcoords;
   void main() {
@@ -36,11 +40,15 @@ const (
   attribute vec2 aPosition;
   uniform mat3 mPos;
   void main() {
-  	vec3 pos3 = vec3(aPosition, 1.0);
+    vec3 pos3 = vec3(aPosition, 1.0);
     gl_Position = vec4((mPos * pos3).xy, 0.0, 1.0);
   }`
 
 	fsColorSrc = `
+  #ifdef GL_ES
+    precision mediump float;
+  #endif
+
   uniform vec4 Color;
   void main() {
     gl_FragColor = Color;
@@ -67,6 +75,10 @@ const (
   }`
 
 	fsFontSrc = `
+  #ifdef GL_ES
+    precision mediump float;
+  #endif
+
   uniform sampler2D source;
   varying vec2 vSrc;
   varying vec4 vCol;
@@ -83,7 +95,7 @@ type glyphBatch struct {
 	SrcRects  []float32
 	Colors    []float32
 	ClipRects []float32
-	Indices   []uint32
+	Indices   []uint16
 	GlyphPage *textureContext
 }
 
@@ -163,7 +175,7 @@ func (b *blitter) blitGlyph(ctx *context, tc *textureContext, c gxui.Color, srcR
 		b.commitGlyphs(ctx)
 		b.glyphBatch.GlyphPage = tc
 	}
-	i := uint32(len(b.glyphBatch.DstRects)) / 2
+	i := uint16(len(b.glyphBatch.DstRects)) / 2
 	clip := []float32{
 		float32(ds.ClipPixels.Min.X),
 		float32(ds.ClipPixels.Min.Y),
@@ -219,12 +231,13 @@ func (b *blitter) blitShape(ctx *context, shape shape, color gxui.Color, ds *dra
 	})
 
 	if debugWireframePolygons {
-		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+		// glPolygonMode is not available in OpenGL ES/WebGL (since its implementation is very inefficient; a shame because it's useful for debugging).
+		//gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 		shape.draw(ctx, b.colorShader, uniformBindings{
 			"mPos":  mPos,
 			"Color": gxui.Blue,
 		})
-		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
+		//gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 	}
 	b.stats.drawCallCount++
 }
@@ -275,7 +288,7 @@ func (b *blitter) commitGlyphs(ctx *context) {
 		newVertexStream("aClp", stFloatVec4, b.glyphBatch.ClipRects),
 		newVertexStream("aCol", stFloatVec4, b.glyphBatch.Colors),
 	)
-	ib := newIndexBuffer(ptUint, b.glyphBatch.Indices)
+	ib := newIndexBuffer(ptUshort, b.glyphBatch.Indices)
 	s := newShape(vb, ib, dmTriangles)
 	gl.Disable(gl.SCISSOR_TEST)
 	s.draw(ctx, b.fontShader, uniformBindings{
