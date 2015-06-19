@@ -7,7 +7,7 @@ package gl
 import (
 	"github.com/google/gxui"
 
-	"github.com/go-gl/glfw/v3.1/glfw"
+	"github.com/goxjs/glfw"
 )
 
 func translateKeyboardKey(in glfw.Key) gxui.KeyboardKey {

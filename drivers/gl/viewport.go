@@ -9,11 +9,11 @@ import (
 	"sync/atomic"
 	"unicode"
 
-	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl/platform"
 	"github.com/google/gxui/math"
 	"github.com/goxjs/gl"
+	"github.com/goxjs/glfw"
 )
 
 const viewportDebugEnabled = false
@@ -80,8 +80,9 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 	if err != nil {
 		panic(err)
 	}
+	width, height = wnd.GetSize() // At this time, width and height serve as a "hint" for glfw.CreateWindow, so get actual values from window.
+
 	wnd.MakeContextCurrent()
-	gl.ContextWatcher.OnMakeCurrent(nil)
 
 	v.context = newContext()
 
@@ -259,7 +260,6 @@ func (v *viewport) render() {
 	}
 
 	v.window.MakeContextCurrent()
-	gl.ContextWatcher.OnMakeCurrent(nil)
 
 	ctx := v.context
 	ctx.beginDraw(v.SizeDips(), v.SizePixels())
@@ -303,7 +303,6 @@ func (v *viewport) SetCanvas(cc gxui.Canvas) {
 	v.driver.asyncDriver(func() {
 		// Only use the canvas of the most recent SetCanvas call.
 		v.window.MakeContextCurrent()
-		gl.ContextWatcher.OnMakeCurrent(nil)
 		if atomic.LoadUint32(&v.redrawCount) == cnt {
 			if v.canvas != nil {
 				v.canvas.release()
@@ -438,7 +437,6 @@ func (v *viewport) Destroy() {
 	v.driver.asyncDriver(func() {
 		if !v.destroyed {
 			v.window.MakeContextCurrent()
-			gl.ContextWatcher.OnMakeCurrent(nil)
 			if v.canvas != nil {
 				v.canvas.Release()
 				v.canvas = nil
