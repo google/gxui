@@ -7,6 +7,7 @@ package parts
 import (
 	"fmt"
 
+	"github.com/google/gxui"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/mixins/outer"
 )
@@ -18,14 +19,16 @@ type LayoutableOuter interface {
 
 type Layoutable struct {
 	outer             LayoutableOuter
+	driver            gxui.Driver
 	margin            math.Spacing
 	size              math.Size
 	relayoutRequested bool
 	inLayoutChildren  bool // True when calling LayoutChildren
 }
 
-func (l *Layoutable) Init(outer LayoutableOuter) {
+func (l *Layoutable) Init(outer LayoutableOuter, theme gxui.Theme) {
 	l.outer = outer
+	l.driver = theme.Driver()
 }
 
 func (l *Layoutable) SetMargin(m math.Spacing) {
@@ -63,6 +66,7 @@ func (l *Layoutable) SetSize(size math.Size) {
 }
 
 func (l *Layoutable) Relayout() {
+	l.driver.AssertUIGoroutine()
 	if l.inLayoutChildren {
 		panic("Cannot call Relayout() while in LayoutChildren")
 	}

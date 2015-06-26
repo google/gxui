@@ -23,7 +23,7 @@ type DrawPaintOuter interface {
 
 type DrawPaint struct {
 	outer           DrawPaintOuter
-	theme           gxui.Theme
+	driver          gxui.Driver
 	canvas          gxui.Canvas
 	dirty           bool
 	redrawRequested bool
@@ -37,7 +37,7 @@ func verifyDetach(o DrawPaintOuter) {
 
 func (d *DrawPaint) Init(outer DrawPaintOuter, theme gxui.Theme) {
 	d.outer = outer
-	d.theme = theme
+	d.driver = theme.Driver()
 	outer.OnDetach(func() {
 		if d.canvas != nil {
 			d.canvas.Release()
@@ -51,6 +51,7 @@ func (d *DrawPaint) Init(outer DrawPaintOuter, theme gxui.Theme) {
 }
 
 func (d *DrawPaint) Redraw() {
+	d.driver.AssertUIGoroutine()
 	if !d.redrawRequested {
 		if p := d.outer.Parent(); p != nil {
 			d.redrawRequested = true
@@ -72,7 +73,7 @@ func (d *DrawPaint) Draw() gxui.Canvas {
 		if d.canvas != nil {
 			d.canvas.Release()
 		}
-		d.canvas = d.theme.Driver().CreateCanvas(s)
+		d.canvas = d.driver.CreateCanvas(s)
 		d.redrawRequested = false
 		d.outer.Paint(d.canvas)
 		d.canvas.Complete()

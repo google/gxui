@@ -30,7 +30,7 @@ type Control struct {
 func (c *Control) Init(outer ControlOuter, theme gxui.Theme) {
 	c.Attachable.Init(outer)
 	c.DrawPaint.Init(outer, theme)
-	c.Layoutable.Init(outer)
+	c.Layoutable.Init(outer, theme)
 	c.InputEventHandler.Init(outer)
 	c.Parentable.Init(outer)
 	c.Visible.Init(outer)

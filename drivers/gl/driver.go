@@ -29,6 +29,9 @@ type driver struct {
 	pendingApp    chan func()
 	terminated    int32 // non-zero represents driver terminations
 	viewports     *list.List
+
+	pcs  []uintptr // reusable scratch-buffer for use by runtime.Callers.
+	uiPC uintptr   // the program-counter of the applicationLoop function.
 }
 
 func StartDriver(appRoutine func(driver gxui.Driver)) {
@@ -45,8 +48,10 @@ func StartDriver(appRoutine func(driver gxui.Driver)) {
 		pendingDriver: make(chan func(), 256),
 		pendingApp:    make(chan func(), 256),
 		viewports:     list.New(),
+		pcs:           make([]uintptr, 256),
 	}
 
+	driver.pendingApp <- driver.discoverUIGoRoutine
 	driver.pendingApp <- func() { appRoutine(driver) }
 	go driver.applicationLoop()
 	driver.driverLoop()
