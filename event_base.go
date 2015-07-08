@@ -69,6 +69,17 @@ func (e *EventBase) String() string {
 	return s + ">"
 }
 
+func assignable(to, from reflect.Type) bool {
+	if from == nil {
+		switch to.Kind() {
+		case reflect.Chan, reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice, reflect.Func:
+			return true
+		}
+		return false
+	}
+	return from.AssignableTo(to)
+}
+
 func (e *EventBase) VerifySignature(argTys []reflect.Type, isVariadic bool) {
 	paramTypes := e.paramTypes
 	if isVariadic {
@@ -80,13 +91,13 @@ func (e *EventBase) VerifySignature(argTys []reflect.Type, isVariadic bool) {
 			varIdx := len(paramTypes) - 1
 			if i >= varIdx {
 				paramTy := paramTypes[varIdx].Elem()
-				if !argTy.AssignableTo(paramTy) {
+				if !assignable(paramTy, argTy) {
 					panic(fmt.Errorf("%v.Fire(%v) Variadic argument %v for was of the wrong type. Got: %v, Expected: %v",
 						e.String(), argTys, i-varIdx, argTy, paramTy))
 				}
 			} else {
 				paramTy := paramTypes[i]
-				if !argTy.AssignableTo(paramTy) {
+				if !assignable(paramTy, argTy) {
 					panic(fmt.Errorf("%v.Fire(%v) Argument %v for was of the wrong type. Got: %v, Expected: %v",
 						e.String(), argTys, i, argTy, paramTy))
 				}
@@ -99,7 +110,7 @@ func (e *EventBase) VerifySignature(argTys []reflect.Type, isVariadic bool) {
 		}
 		for i, argTy := range argTys {
 			paramTy := paramTypes[i]
-			if !argTy.AssignableTo(paramTy) {
+			if !assignable(paramTy, argTy) {
 				panic(fmt.Errorf("%v.Fire(%v) Argument %v for was of the wrong type. Got: %v, Expected: %v",
 					e.String(), argTys, i, argTy, paramTy))
 			}
@@ -118,6 +129,9 @@ func (e *EventBase) VerifyArguments(args []interface{}) {
 func (e *EventBase) InvokeListeners(args []interface{}) {
 	argVals := make([]reflect.Value, len(args))
 	for i, arg := range args {
+		if arg == nil {
+			arg = reflect.New(e.paramTypes[i])
+		}
 		argVals[i] = reflect.ValueOf(arg)
 	}
 
