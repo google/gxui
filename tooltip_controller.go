@@ -73,21 +73,36 @@ func (c *ToolTipController) AddToolTip(control Control, delaySeconds float32, cr
 		creator: creator,
 	}
 	duration := time.Duration(delaySeconds * float32(time.Second))
-	tracker.onEnterES = control.OnMouseEnter(func(ev MouseEvent) {
-		tracker.lastPosition = ev.Point
-		c.beginTimer(tracker, duration)
-	})
-	tracker.onExitES = control.OnMouseExit(func(ev MouseEvent) {
+	bind := func() {
+		tracker.onEnterES = control.OnMouseEnter(func(ev MouseEvent) {
+			tracker.lastPosition = ev.Point
+			c.beginTimer(tracker, duration)
+		})
+		tracker.onExitES = control.OnMouseExit(func(ev MouseEvent) {
+			if c.timer != nil {
+				c.timer.Stop()
+				c.timer = nil
+			}
+			c.hideToolTipForTracker(tracker)
+		})
+		tracker.onMoveES = control.OnMouseMove(func(ev MouseEvent) {
+			tracker.lastPosition = ev.Point
+			c.beginTimer(tracker, duration)
+		})
+	}
+	control.OnAttach(bind)
+	control.OnDetach(func() {
 		if c.timer != nil {
 			c.timer.Stop()
 			c.timer = nil
 		}
-		c.hideToolTipForTracker(tracker)
+		tracker.onEnterES.Unlisten()
+		tracker.onExitES.Unlisten()
+		tracker.onMoveES.Unlisten()
 	})
-	tracker.onMoveES = control.OnMouseMove(func(ev MouseEvent) {
-		tracker.lastPosition = ev.Point
-		c.beginTimer(tracker, duration)
-	})
+	if control.Attached() {
+		bind()
+	}
 }
 
 func (c *ToolTipController) ShowToolTip(toolTip Control, at math.Point) {
