@@ -39,6 +39,25 @@ func TestEventExactArgs(t *testing.T) {
 	test.AssertEquals(t, true, fired)
 }
 
+func TestEventNilArgs(t *testing.T) {
+	e := CreateEvent(func(chan int, func(), interface{}, map[int]int, *int, []int) {})
+
+	fired := false
+	e.Listen(func(c chan int, f func(), i interface{}, m map[int]int, p *int, s []int) {
+		test.AssertEquals(t, true, nil == c)
+		test.AssertEquals(t, true, nil == f)
+		test.AssertEquals(t, true, nil == i)
+		test.AssertEquals(t, true, nil == m)
+		test.AssertEquals(t, true, nil == p)
+		test.AssertEquals(t, true, nil == s)
+		fired = true
+	})
+	test.AssertEquals(t, false, fired)
+
+	e.Fire(nil, nil, nil, nil, nil, nil)
+	test.AssertEquals(t, true, fired)
+}
+
 func TestEventMixedVariadic(t *testing.T) {
 	e := CreateEvent(func(int, int, ...int) {})
 

@@ -130,9 +130,10 @@ func (e *EventBase) InvokeListeners(args []interface{}) {
 	argVals := make([]reflect.Value, len(args))
 	for i, arg := range args {
 		if arg == nil {
-			arg = reflect.New(e.paramTypes[i])
+			argVals[i] = reflect.New(e.paramTypes[i]).Elem()
+		} else {
+			argVals[i] = reflect.ValueOf(arg)
 		}
-		argVals[i] = reflect.ValueOf(arg)
 	}
 
 	for _, l := range e.listeners {
