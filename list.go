@@ -40,7 +40,8 @@ type ListAdapter interface {
 	// The AdapterItem returned must be equality-unique across all indices.
 	ItemAt(index int) AdapterItem
 
-	// ItemIndex returns the index of item.
+	// ItemIndex returns the index of item, or -1 if the adapter does not contain
+	// item.
 	ItemIndex(item AdapterItem) int
 
 	// Create returns a Control visualizing the item at the specified index.

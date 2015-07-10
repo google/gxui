@@ -9,124 +9,95 @@ import (
 	"github.com/google/gxui/math"
 )
 
-type CreateExpandButton func(theme gxui.Theme, node *TreeInternalNode) gxui.Button
+// Interface used to visualize tree nodes in as a list.
+type TreeControlCreator interface {
+	// Create returns a Control that contains control (returned by the backing
+	// TreeNode) and visualizes the expanded state of node.
+	Create(theme gxui.Theme, control gxui.Control, node *TreeToListNode) gxui.Control
 
+	// Size returns the size that each of the controls returned by Create will
+	// be displayed at for the given theme.
+	// treeControlSize is the size returned the backing TreeNode.
+	Size(theme gxui.Theme, treeControlSize math.Size) math.Size
+}
+
+// TreeToListAdapter converts a TreeAdapter to a ListAdapter so that the
+// tree can be visualized with a List.
 type TreeToListAdapter struct {
+	TreeToListNode
 	gxui.AdapterBase
-	createExpandButton CreateExpandButton
-	adapter            gxui.TreeAdapter
-	root               *TreeInternalNode
+	adapter gxui.TreeAdapter
+	creator TreeControlCreator
 }
 
-func CreateTreeToListAdapter(adapter gxui.TreeAdapter, ceb CreateExpandButton) *TreeToListAdapter {
-	outer := &TreeToListAdapter{
-		createExpandButton: ceb,
-		adapter:            adapter,
-		root:               CreateTreeInternalRoot(adapter),
-	}
-	adapter.OnDataReplaced(func() {
-		outer.root = CreateTreeInternalRoot(adapter)
-		outer.DataReplaced()
+// CreateTreeToListAdapter wraps the provided TreeAdapter with an adapter
+// conforming to the ListAdapter interface.
+func CreateTreeToListAdapter(treeAdapter gxui.TreeAdapter, creator TreeControlCreator) *TreeToListAdapter {
+	listAdapter := &TreeToListAdapter{}
+	listAdapter.adapter = treeAdapter
+	listAdapter.container = treeAdapter
+	listAdapter.creator = creator
+	treeAdapter.OnDataReplaced(func() {
+		listAdapter.reset()
+		listAdapter.DataReplaced()
 	})
-	adapter.OnDataChanged(outer.DataChanged)
-
-	return outer
+	treeAdapter.OnDataChanged(func() {
+		listAdapter.update()
+		listAdapter.DataChanged()
+	})
+	listAdapter.reset()
+	return listAdapter
 }
 
-// Contains returns true if the TreeAdapter contains the specified item,
-// regardless of whether the item is part of the expanded tree or not.
-func (a TreeToListAdapter) Contains(item gxui.AdapterItem) bool {
-	node := gxui.TreeNode(a.adapter)
-	for node != nil {
-		idx := node.ItemIndex(item)
-		if idx < 0 {
-			return false
-		}
-		if node.ItemAt(idx) == item {
-			return true
-		}
-		node = node.NodeAt(idx)
-	}
-	return false
-}
-
-func (a TreeToListAdapter) Collapse(item gxui.AdapterItem) gxui.AdapterItem {
-	n, i, _ := a.root.FindByItem(item)
-	if n.Child(i).Collapse() {
-		return n.Child(i).Item()
-	}
-	if n != a.root && n.Collapse() {
-		return n.Item()
-	}
-	return item
-}
-
-func (a TreeToListAdapter) Expand(item gxui.AdapterItem) bool {
-	if n, i, _ := a.root.FindByItem(item); n != nil {
-		return n.Child(i).Expand()
-	} else {
-		return false
+func (a *TreeToListAdapter) adjustDescendants(delta int) {
+	if delta != 0 {
+		a.descendants += delta
+		a.DataChanged()
 	}
 }
 
-func (a TreeToListAdapter) ExpandAllParents(item gxui.AdapterItem) {
-	changed := false
-	n := a.DeepestVisibleAncestor(item)
-	for n != nil && n != item {
-		if a.Expand(n) {
-			changed = true
-			n = a.DeepestVisibleAncestor(item)
+// reset clears the current state of the tree.
+func (a *TreeToListAdapter) reset() {
+	a.descendants = a.adapter.Count()
+	a.children = make([]*TreeToListNode, a.descendants)
+	for i := range a.children {
+		node := a.adapter.NodeAt(i)
+		item := node.Item()
+		a.children[i] = &TreeToListNode{container: node, item: item, parent: a}
+	}
+}
+
+// Count returns the total number of expanded nodes in the tree.
+func (a *TreeToListAdapter) Count() int {
+	return a.descendants
+}
+
+// Create returns a Control visualizing the item at the specified index in the
+// list of all the expanded nodes treated as as a flattened list.
+func (a *TreeToListAdapter) Create(theme gxui.Theme, index int) gxui.Control {
+	n := a.NodeAt(index)
+	c := n.container.(gxui.TreeNode).Create(theme)
+	return a.creator.Create(theme, c, n)
+}
+
+// Size returns the size that each of the item's controls will be displayed
+// at for the given theme.
+func (a *TreeToListAdapter) Size(theme gxui.Theme) math.Size {
+	return a.creator.Size(theme, a.adapter.Size(theme))
+}
+
+// DeepestNode returns the deepest expanded node to represent item.
+// If the item is not found in the adapter, then nil is returned.
+func (a *TreeToListAdapter) DeepestNode(item gxui.AdapterItem) *TreeToListNode {
+	n := &a.TreeToListNode
+	for {
+		if i := n.DirectItemIndex(item); i >= 0 {
+			n = n.children[i]
 		} else {
-			break // Already expanded, nothing more to do.
+			return nil
+		}
+		if item == n.item || !n.IsExpanded() {
+			return n
 		}
 	}
-	if changed {
-		a.DataChanged()
-	}
-}
-
-func (a TreeToListAdapter) DeepestVisibleAncestor(item gxui.AdapterItem) gxui.AdapterItem {
-	if n, i, _ := a.root.FindByItem(item); n != nil {
-		child := n.Child(i)
-		return child.Item()
-	} else {
-		return nil
-	}
-}
-
-// Adapter compliance
-func (a TreeToListAdapter) Count() int {
-	return a.root.descendants
-}
-
-func (a TreeToListAdapter) ItemAt(index int) gxui.AdapterItem {
-	return a.root.ItemAt(index)
-}
-
-func (a TreeToListAdapter) ItemIndex(item gxui.AdapterItem) int {
-	return a.root.ItemIndex(item)
-}
-
-func (a TreeToListAdapter) Size(theme gxui.Theme) math.Size {
-	return a.adapter.Size(theme)
-}
-
-func (a TreeToListAdapter) Create(theme gxui.Theme, index int) gxui.Control {
-	n, i, d := a.root.FindByIndex(index)
-	child := n.Child(i)
-	toggle := a.createExpandButton(theme, child)
-	toggle.SetVisible(!child.IsLeaf())
-
-	child.OnExpandedChanged(func(e bool) {
-		a.DataChanged()
-	})
-
-	control := n.node.Create(theme, i)
-
-	layout := theme.CreateLinearLayout()
-	layout.SetPadding(math.Spacing{L: d * 16})
-	layout.SetDirection(gxui.LeftToRight)
-	layout.AddChild(toggle)
-	layout.AddChild(control)
-	return layout
 }

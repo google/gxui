@@ -109,18 +109,17 @@ func directoryAt(path string) directory {
 	return directory
 }
 
+// Count implements gxui.TreeNodeContainer.
 func (d directory) Count() int {
 	return len(d.subdirs)
 }
 
+// NodeAt implements gxui.TreeNodeContainer.
 func (d directory) NodeAt(index int) gxui.TreeNode {
 	return directoryAt(d.subdirs[index])
 }
 
-func (d directory) ItemAt(index int) gxui.AdapterItem {
-	return d.subdirs[index]
-}
-
+// ItemIndex implements gxui.TreeNodeContainer.
 func (d directory) ItemIndex(item gxui.AdapterItem) int {
 	path := item.(string)
 	if !strings.HasSuffix(path, string(filepath.Separator)) {
@@ -135,10 +134,17 @@ func (d directory) ItemIndex(item gxui.AdapterItem) int {
 	return -1
 }
 
-func (d directory) Create(theme gxui.Theme, index int) gxui.Control {
-	path := d.subdirs[index]
-	_, name := filepath.Split(path)
+// Item implements gxui.TreeNode.
+func (d directory) Item() gxui.AdapterItem {
+	return d.path
+}
 
+// Create implements gxui.TreeNode.
+func (d directory) Create(theme gxui.Theme) gxui.Control {
+	_, name := filepath.Split(d.path)
+	if name == "" {
+		name = d.path
+	}
 	l := theme.CreateLabel()
 	l.SetText(name)
 	l.SetColor(directoryColor)
