@@ -8,6 +8,8 @@ type Theme interface {
 	Driver() Driver
 	DefaultFont() Font
 	SetDefaultFont(Font)
+	DefaultMonospaceFont() Font
+	SetDefaultMonospaceFont(Font)
 	CreateBubbleOverlay() BubbleOverlay
 	CreateButton() Button
 	CreateCodeEditor() CodeEditor

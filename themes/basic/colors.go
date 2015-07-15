@@ -2,15 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package dark
+package basic
 
 import (
 	"github.com/google/gxui"
-	"github.com/google/gxui/mixins"
 )
 
-func CreateScrollLayout(theme *Theme) gxui.ScrollLayout {
-	l := &mixins.ScrollLayout{}
-	l.Init(l, theme)
-	return l
-}
+var Blue30 = gxui.Color{R: 0.0, G: 0.0, B: 0.3, A: 1.0}
