@@ -39,7 +39,7 @@ func (c *Container) Init(outer ContainerOuter, theme gxui.Theme) {
 	c.Container.Init(outer)
 	c.DrawPaint.Init(outer, theme)
 	c.InputEventHandler.Init(outer)
-	c.Layoutable.Init(outer)
+	c.Layoutable.Init(outer, theme)
 	c.Paddable.Init(outer)
 	c.PaintChildren.Init(outer)
 	c.Parentable.Init(outer)

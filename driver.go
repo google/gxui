@@ -39,4 +39,9 @@ type Driver interface {
 
 	CreateCanvas(math.Size) Canvas
 	CreateTexture(img image.Image, pixelsPerDip float32) Texture
+
+	// Debug function used to verify that the caller is executing on the UI
+	// go-routine. If the caller is not on the UI go-routine then the function
+	// panics.
+	AssertUIGoroutine()
 }
