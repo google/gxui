@@ -33,6 +33,7 @@ func CreateTree(theme *Theme) gxui.Tree {
 	t.SetPadding(math.Spacing{L: 3, T: 3, R: 3, B: 3})
 	t.SetBorderPen(gxui.TransparentPen)
 	t.theme = theme
+	t.SetControlCreator(treeControlCreator{})
 
 	return t
 }
@@ -53,9 +54,20 @@ func (t *Tree) PaintMouseOverBackground(c gxui.Canvas, r math.Rect) {
 	c.DrawRoundedRect(r, 2.0, 2.0, 2.0, 2.0, gxui.TransparentPen, gxui.CreateBrush(gxui.Gray15))
 }
 
-func (t *Tree) CreateExpandButton(theme gxui.Theme, node *mixins.TreeInternalNode) gxui.Button {
+// mixins.List overrides
+func (l *Tree) PaintSelection(c gxui.Canvas, r math.Rect) {
+	s := l.theme.HighlightStyle
+	c.DrawRoundedRect(r, 2.0, 2.0, 2.0, 2.0, s.Pen, s.Brush)
+}
+
+type treeControlCreator struct{}
+
+func (treeControlCreator) Create(theme gxui.Theme, control gxui.Control, node *mixins.TreeToListNode) gxui.Control {
 	img := theme.CreateImage()
 	imgSize := math.Size{W: 10, H: 10}
+
+	ll := theme.CreateLinearLayout()
+	ll.SetDirection(gxui.LeftToRight)
 
 	btn := theme.CreateButton()
 	btn.SetBackgroundBrush(gxui.TransparentBrush)
@@ -63,39 +75,40 @@ func (t *Tree) CreateExpandButton(theme gxui.Theme, node *mixins.TreeInternalNod
 	btn.SetMargin(math.Spacing{L: 1, R: 1, T: 1, B: 1})
 	btn.OnClick(func(ev gxui.MouseEvent) {
 		if ev.Button == gxui.MouseButtonLeft {
-			if node.IsExpanded() {
-				node.Collapse()
-			} else {
-				node.Expand()
-			}
+			node.ToggleExpanded()
 		}
 	})
 	btn.AddChild(img)
 
-	updateStyle := func() {
+	update := func() {
+		expanded := node.IsExpanded()
 		canvas := theme.Driver().CreateCanvas(imgSize)
+		btn.SetVisible(!node.IsLeaf())
 		switch {
-		case !btn.IsMouseDown(gxui.MouseButtonLeft) && node.IsExpanded():
+		case !btn.IsMouseDown(gxui.MouseButtonLeft) && expanded:
 			canvas.DrawPolygon(expandedPoly, gxui.TransparentPen, gxui.CreateBrush(gxui.Gray70))
-		case !btn.IsMouseDown(gxui.MouseButtonLeft) && !node.IsExpanded():
+		case !btn.IsMouseDown(gxui.MouseButtonLeft) && !expanded:
 			canvas.DrawPolygon(collapsedPoly, gxui.TransparentPen, gxui.CreateBrush(gxui.Gray70))
-		case node.IsExpanded():
+		case expanded:
 			canvas.DrawPolygon(expandedPoly, gxui.TransparentPen, gxui.CreateBrush(gxui.Gray30))
-		case !node.IsExpanded():
+		case !expanded:
 			canvas.DrawPolygon(collapsedPoly, gxui.TransparentPen, gxui.CreateBrush(gxui.Gray30))
 		}
 		canvas.Complete()
 		img.SetCanvas(canvas)
 	}
-	btn.OnMouseDown(func(gxui.MouseEvent) { updateStyle() })
-	btn.OnMouseUp(func(gxui.MouseEvent) { updateStyle() })
-	node.OnExpandedChanged(func(e bool) { updateStyle() })
-	updateStyle()
-	return btn
+	btn.OnMouseDown(func(gxui.MouseEvent) { update() })
+	btn.OnMouseUp(func(gxui.MouseEvent) { update() })
+	update()
+
+	gxui.WhileAttached(btn, node.OnChange, update)
+
+	ll.AddChild(btn)
+	ll.AddChild(control)
+	ll.SetPadding(math.Spacing{L: 16 * node.Depth()})
+	return ll
 }
 
-// mixins.List overrides
-func (l *Tree) PaintSelection(c gxui.Canvas, r math.Rect) {
-	s := l.theme.HighlightStyle
-	c.DrawRoundedRect(r, 2.0, 2.0, 2.0, 2.0, s.Pen, s.Brush)
+func (treeControlCreator) Size(theme gxui.Theme, treeControlSize math.Size) math.Size {
+	return treeControlSize
 }

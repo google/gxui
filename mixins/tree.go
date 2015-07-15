@@ -12,7 +12,6 @@ import (
 
 type TreeOuter interface {
 	ListOuter
-	CreateExpandButton(theme gxui.Theme, node *TreeInternalNode) gxui.Button
 	PaintUnexpandedSelection(c gxui.Canvas, r math.Rect)
 }
 
@@ -22,15 +21,25 @@ type Tree struct {
 	outer       TreeOuter
 	treeAdapter gxui.TreeAdapter
 	listAdapter *TreeToListAdapter
+	creator     TreeControlCreator
 }
 
 func (t *Tree) Init(outer TreeOuter, theme gxui.Theme) {
 	t.List.Init(outer, theme)
 	t.Focusable.Init(outer)
 	t.outer = outer
+	t.creator = defaultTreeControlCreator{}
 
 	// Interface compliance test
 	_ = gxui.Tree(t)
+}
+
+func (t *Tree) SetControlCreator(c TreeControlCreator) {
+	t.creator = c
+	if t.treeAdapter != nil {
+		t.listAdapter = CreateTreeToListAdapter(t.treeAdapter, t.creator)
+		t.DataReplaced()
+	}
 }
 
 // gxui.Tree complaince
@@ -40,7 +49,7 @@ func (t *Tree) SetAdapter(adapter gxui.TreeAdapter) {
 	}
 	if adapter != nil {
 		t.treeAdapter = adapter
-		t.listAdapter = CreateTreeToListAdapter(adapter, t.outer.CreateExpandButton)
+		t.listAdapter = CreateTreeToListAdapter(adapter, t.creator)
 		t.List.SetAdapter(t.listAdapter)
 	} else {
 		t.listAdapter = nil
@@ -54,49 +63,29 @@ func (t *Tree) Adapter() gxui.TreeAdapter {
 }
 
 func (t *Tree) Show(item gxui.AdapterItem) {
-	t.listAdapter.ExpandAllParents(item)
+	// Expand the tree to show item
+	node := &t.listAdapter.TreeToListNode
+	for {
+		idx := node.DirectItemIndex(item)
+		if idx < 0 {
+			break
+		}
+		node = node.children[idx]
+		node.Expand()
+	}
 	t.List.ScrollTo(item)
 }
 
 func (t *Tree) ContainsItem(item gxui.AdapterItem) bool {
-	return t.listAdapter != nil && t.listAdapter.Contains(item)
+	return t.listAdapter != nil && t.listAdapter.DirectItemIndex(item) >= 0
 }
 
 func (t *Tree) ExpandAll() {
-	t.listAdapter.root.ExpandAll()
-	t.DataChanged()
+	t.listAdapter.ExpandAll()
 }
 
 func (t *Tree) CollapseAll() {
-	t.listAdapter.root.CollapseAll()
-	t.DataChanged()
-}
-
-func (t *Tree) CreateExpandButton(theme gxui.Theme, node *TreeInternalNode) gxui.Button {
-	btn := theme.CreateButton()
-	btn.SetMargin(math.Spacing{L: 2, R: 2, T: 1, B: 1})
-	btn.OnClick(func(ev gxui.MouseEvent) {
-		if ev.Button == gxui.MouseButtonLeft {
-			if node.IsExpanded() {
-				node.Collapse()
-			} else {
-				node.Expand()
-			}
-		}
-	})
-	node.OnExpandedChanged(func(e bool) {
-		if e {
-			btn.SetText("-")
-		} else {
-			btn.SetText("+")
-		}
-	})
-	if node.IsExpanded() {
-		btn.SetText("-")
-	} else {
-		btn.SetText("+")
-	}
-	return btn
+	t.listAdapter.CollapseAll()
 }
 
 func (t *Tree) PaintUnexpandedSelection(c gxui.Canvas, r math.Rect) {
@@ -107,7 +96,7 @@ func (t *Tree) PaintUnexpandedSelection(c gxui.Canvas, r math.Rect) {
 func (t *Tree) PaintChild(c gxui.Canvas, child *gxui.Child, idx int) {
 	t.List.PaintChild(c, child, idx)
 	if t.selectedItem != nil {
-		item := t.listAdapter.DeepestVisibleAncestor(t.selectedItem)
+		item := t.listAdapter.DeepestNode(t.selectedItem).Item()
 		if item != t.selectedItem {
 			// The selected item is hidden by an unexpanded node.
 			// Highlight the deepest visible node instead.
@@ -124,17 +113,59 @@ func (t *Tree) PaintChild(c gxui.Canvas, child *gxui.Child, idx int) {
 // InputEventHandler override
 func (t *Tree) KeyPress(ev gxui.KeyboardEvent) (consume bool) {
 	item := t.Selected()
+	node := t.listAdapter.DeepestNode(item)
 	switch ev.Key {
 	case gxui.KeyLeft:
-		newItem := t.listAdapter.Collapse(item)
-		if newItem != item {
-			t.Select(newItem)
+		consume = node.Collapse()
+		if p := node.Parent(); p != nil {
+			t.Select(p.Item())
+			consume = true
+		}
+		if consume {
 			return true
 		}
 	case gxui.KeyRight:
-		if t.listAdapter.Expand(item) {
+		if node.Expand() {
 			return true
 		}
 	}
 	return t.List.KeyPress(ev)
+}
+
+type defaultTreeControlCreator struct{}
+
+func (defaultTreeControlCreator) Create(theme gxui.Theme, control gxui.Control, node *TreeToListNode) gxui.Control {
+	ll := theme.CreateLinearLayout()
+	ll.SetDirection(gxui.LeftToRight)
+
+	btn := theme.CreateButton()
+	btn.SetBackgroundBrush(gxui.TransparentBrush)
+	btn.SetBorderPen(gxui.CreatePen(1, gxui.Gray30))
+	btn.SetMargin(math.Spacing{L: 2, R: 2, T: 1, B: 1})
+	btn.OnClick(func(ev gxui.MouseEvent) {
+		if ev.Button == gxui.MouseButtonLeft {
+			node.ToggleExpanded()
+		}
+	})
+
+	update := func() {
+		btn.SetVisible(!node.IsLeaf())
+		if node.IsExpanded() {
+			btn.SetText("-")
+		} else {
+			btn.SetText("+")
+		}
+	}
+	update()
+
+	gxui.WhileAttached(btn, node.OnChange, update)
+
+	ll.AddChild(btn)
+	ll.AddChild(control)
+	ll.SetPadding(math.Spacing{L: 16 * node.Depth()})
+	return ll
+}
+
+func (defaultTreeControlCreator) Size(theme gxui.Theme, treeControlSize math.Size) math.Size {
+	return treeControlSize
 }
