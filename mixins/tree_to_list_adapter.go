@@ -34,6 +34,7 @@ type TreeToListAdapter struct {
 // conforming to the ListAdapter interface.
 func CreateTreeToListAdapter(treeAdapter gxui.TreeAdapter, creator TreeControlCreator) *TreeToListAdapter {
 	listAdapter := &TreeToListAdapter{}
+	listAdapter.depth = -1 // The adapter is not a node, just a container.
 	listAdapter.adapter = treeAdapter
 	listAdapter.container = treeAdapter
 	listAdapter.creator = creator
