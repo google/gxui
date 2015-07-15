@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package dark
+package basic
 
 import (
 	"github.com/google/gxui"
 	"github.com/google/gxui/mixins"
 )
 
-func CreateImage(theme *Theme) gxui.Image {
-	i := &mixins.Image{}
-	i.Init(i, theme)
-	return i
+func CreateScrollLayout(theme *Theme) gxui.ScrollLayout {
+	l := &mixins.ScrollLayout{}
+	l.Init(l, theme)
+	return l
 }

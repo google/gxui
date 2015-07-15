@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package dark
+package basic
 
 import (
 	"github.com/google/gxui"
@@ -18,7 +18,7 @@ type CodeEditor struct {
 func CreateCodeEditor(theme *Theme) gxui.CodeEditor {
 	t := &CodeEditor{}
 	t.theme = theme
-	t.Init(t, theme.driver, theme, theme.defaultMonospaceFont)
+	t.Init(t, theme.Driver(), theme, theme.DefaultMonospaceFont())
 	t.SetTextColor(theme.TextBoxDefaultStyle.FontColor)
 	t.SetMargin(math.Spacing{L: 3, T: 3, R: 3, B: 3})
 	t.SetPadding(math.Spacing{L: 3, T: 3, R: 3, B: 3})
