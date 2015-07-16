@@ -116,13 +116,11 @@ func (t *Tree) KeyPress(ev gxui.KeyboardEvent) (consume bool) {
 	node := t.listAdapter.DeepestNode(item)
 	switch ev.Key {
 	case gxui.KeyLeft:
-		consume = node.Collapse()
-		if p := node.Parent(); p != nil {
-			t.Select(p.Item())
-			consume = true
-		}
-		if consume {
+		if node.Collapse() {
 			return true
+		}
+		if p := node.Parent(); p != nil {
+			return t.Select(p.Item())
 		}
 	case gxui.KeyRight:
 		if node.Expand() {
