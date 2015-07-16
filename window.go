@@ -8,7 +8,11 @@ type Window interface {
 	Container
 
 	Viewport() Viewport
+	// Title returns the title of the window.
+	// This is usually the text displayed at the top of the window.
 	Title() string
+
+	// SetTitle changes the title of the window.
 	SetTitle(string)
 
 	// Scale returns the display scaling for this window.
@@ -25,11 +29,17 @@ type Window interface {
 	// SetFullscreen makes the window either full-screen or windowed.
 	SetFullscreen(bool)
 
+	// Show makes the window visible.
 	Show()
+
+	// Hide makes the window invisible.
 	Hide()
+
+	// Close destroys the window.
+	// Once the window is closed, no further calls should be made to it.
 	Close()
 
-	// Focus returns the child Focusable control.
+	// Focus returns the control currently with focus.
 	Focus() Focusable
 
 	// SetFocus gives the specified control Focus, returning true on success or
