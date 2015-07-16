@@ -9,7 +9,6 @@ import (
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/samples/flags"
-	"github.com/google/gxui/themes/dark"
 )
 
 // item is used as an gxui.AdapterItem to identifiy each of the nodes.
@@ -163,7 +162,7 @@ func addSpecies(animals *node) map[string]item {
 }
 
 func appMain(driver gxui.Driver) {
-	theme := dark.CreateTheme(driver)
+	theme := flags.CreateTheme(driver)
 
 	layout := theme.CreateLinearLayout()
 	layout.SetDirection(gxui.TopToBottom)

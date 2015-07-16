@@ -39,6 +39,16 @@ And they will be built into ```GOPATH/bin```.
 
 If you add ```GOPATH/bin``` to your PATH, you can simply type the name of a sample to run it. For example: ```image_viewer```.
 
+Web
+---
+
+gxui code is cross platform and can be compiled using GopherJS to JavaScript, allowing it to run in browsers with WebGL support. To do so, you'll need the [GopherJS compiler](https://github.com/gopherjs/gopherjs) and some additional dependencies:
+
+    go get -u github.com/gopherjs/gopherjs
+    go get -u -d -tags=js github.com/google/gxui/...
+    
+Afterwards, you can try the samples by running `gopherjs serve` command and opening <http://localhost:8080/github.com/google/gxui/samples/> in a browser.
+
 Fonts
 ---
 Many of the samples require a font to render text. The dark theme (and currently the only theme) uses `Roboto`.

@@ -1,7 +1,6 @@
 language: go
 go:
   - 1.4
-  - tip
 before_install:
   - sudo apt-get update
   - sudo apt-get install -qq libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev mesa-common-dev libgl1-mesa-dev libxxf86vm-dev

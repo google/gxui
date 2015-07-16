@@ -15,7 +15,6 @@ import (
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/samples/file_dlg/roots"
 	"github.com/google/gxui/samples/flags"
-	"github.com/google/gxui/themes/dark"
 )
 
 var (
@@ -171,7 +170,7 @@ func (a directoryAdapter) Create(theme gxui.Theme, index int) gxui.Control {
 }
 
 func appMain(driver gxui.Driver) {
-	theme := dark.CreateTheme(driver)
+	theme := flags.CreateTheme(driver)
 
 	window := theme.CreateWindow(800, 600, "Open file...")
 	window.SetScale(flags.DefaultScaleFactor)
