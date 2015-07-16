@@ -5,27 +5,14 @@
 package main
 
 import (
-	"flag"
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
-	"github.com/google/gxui/themes/dark"
-	"github.com/google/gxui/themes/light"
-)
-
-var (
-	flagTheme          = flag.String("theme", "dark", "Theme to use {dark|light}.")
-	defaultScaleFactor = flag.Float64("scaling", 1.0, "Adjusts the scaling of UI rendering")
+	"github.com/google/gxui/samples/flags"
 )
 
 func appMain(driver gxui.Driver) {
-	var theme gxui.Theme
-	if *flagTheme == "light" {
-		theme = light.CreateTheme(driver)
-	} else {
-		theme = dark.CreateTheme(driver)
-	}
-
+	theme := flags.CreateTheme(driver)
 	layout := theme.CreateLinearLayout()
 	layout.SetSizeMode(gxui.Fill)
 
@@ -91,13 +78,12 @@ func appMain(driver gxui.Driver) {
 	update()
 
 	window := theme.CreateWindow(800, 600, "Linear layout")
-	window.SetScale(float32(*defaultScaleFactor))
+	window.SetScale(flags.DefaultScaleFactor)
 	window.AddChild(layout)
 	window.OnClose(driver.Terminate)
 	window.SetPadding(math.Spacing{L: 10, T: 10, R: 10, B: 10})
 }
 
 func main() {
-	flag.Parse()
 	gl.StartDriver(appMain)
 }

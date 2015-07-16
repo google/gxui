@@ -16,7 +16,6 @@ import (
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/samples/flags"
-	"github.com/google/gxui/themes/dark"
 )
 
 func appMain(driver gxui.Driver) {
@@ -39,7 +38,7 @@ func appMain(driver gxui.Driver) {
 		os.Exit(1)
 	}
 
-	theme := dark.CreateTheme(driver)
+	theme := flags.CreateTheme(driver)
 	img := theme.CreateImage()
 
 	mx := source.Bounds().Max
