@@ -85,6 +85,7 @@ func (n *node) Create(theme gxui.Theme) gxui.Control {
 		layout.RemoveAll()
 		layout.AddChild(textbox)
 		layout.AddChild(addButton)
+		gxui.SetFocus(textbox)
 	}
 
 	commit := func() {
