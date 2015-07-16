@@ -8,7 +8,6 @@ import (
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/samples/flags"
-	"github.com/google/gxui/themes/dark"
 )
 
 // Create a PanelHolder with a 3 panels
@@ -27,7 +26,7 @@ func panelHolder(name string, theme gxui.Theme) gxui.PanelHolder {
 }
 
 func appMain(driver gxui.Driver) {
-	theme := dark.CreateTheme(driver)
+	theme := flags.CreateTheme(driver)
 
 	// ┌───────┐║┌───────┐
 	// │       │║│       │

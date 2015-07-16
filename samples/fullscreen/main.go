@@ -9,11 +9,10 @@ import (
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/samples/flags"
-	"github.com/google/gxui/themes/dark"
 )
 
 func appMain(driver gxui.Driver) {
-	theme := dark.CreateTheme(driver)
+	theme := flags.CreateTheme(driver)
 
 	window := theme.CreateWindow(200, 150, "Window")
 	window.OnClose(driver.Terminate)

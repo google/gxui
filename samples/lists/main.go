@@ -11,7 +11,6 @@ import (
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/samples/flags"
-	"github.com/google/gxui/themes/dark"
 )
 
 // Number picker uses the gxui.DefaultAdapter for driving a list
@@ -149,7 +148,7 @@ func colorPicker(theme gxui.Theme) gxui.Control {
 }
 
 func appMain(driver gxui.Driver) {
-	theme := dark.CreateTheme(driver)
+	theme := flags.CreateTheme(driver)
 
 	overlay := theme.CreateBubbleOverlay()
 

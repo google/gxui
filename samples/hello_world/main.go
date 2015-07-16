@@ -11,11 +11,11 @@ import (
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/gxfont"
 	"github.com/google/gxui/math"
-	"github.com/google/gxui/themes/dark"
+	"github.com/google/gxui/samples/flags"
 )
 
 func appMain(driver gxui.Driver) {
-	theme := dark.CreateTheme(driver)
+	theme := flags.CreateTheme(driver)
 
 	font, err := driver.CreateFont(gxfont.Default, 75)
 	if err != nil {

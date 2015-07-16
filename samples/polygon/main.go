@@ -9,7 +9,6 @@ import (
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/samples/flags"
-	"github.com/google/gxui/themes/dark"
 )
 
 func drawStar(canvas gxui.Canvas, center math.Point, radius, rotation float32, points int) {
@@ -59,7 +58,7 @@ func drawMoon(canvas gxui.Canvas, center math.Point, radius float32) {
 }
 
 func appMain(driver gxui.Driver) {
-	theme := dark.CreateTheme(driver)
+	theme := flags.CreateTheme(driver)
 	window := theme.CreateWindow(800, 600, "Polygon")
 	window.SetScale(flags.DefaultScaleFactor)
 
