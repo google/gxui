@@ -7,7 +7,6 @@ package gxui
 type Window interface {
 	Container
 
-	Viewport() Viewport
 	// Title returns the title of the window.
 	// This is usually the text displayed at the top of the window.
 	Title() string
