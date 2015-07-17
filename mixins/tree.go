@@ -63,21 +63,12 @@ func (t *Tree) Adapter() gxui.TreeAdapter {
 }
 
 func (t *Tree) Show(item gxui.AdapterItem) {
-	// Expand the tree to show item
-	node := &t.listAdapter.TreeToListNode
-	for {
-		idx := node.DirectItemIndex(item)
-		if idx < 0 {
-			break
-		}
-		node = node.children[idx]
-		node.Expand()
-	}
+	t.listAdapter.ExpandItem(item)
 	t.List.ScrollTo(item)
 }
 
 func (t *Tree) ContainsItem(item gxui.AdapterItem) bool {
-	return t.listAdapter != nil && t.listAdapter.DirectItemIndex(item) >= 0
+	return t.listAdapter != nil && t.listAdapter.Contains(item)
 }
 
 func (t *Tree) ExpandAll() {

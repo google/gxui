@@ -53,9 +53,9 @@ func a(c ...*testTreeNode) (list_adapter *TreeToListAdapter, tree_adapter *testT
 }
 
 func test(t *testing.T, name string, adapter *TreeToListAdapter, expected ...gxui.AdapterItem) {
-	if len(expected) != adapter.descendants {
-		t.Errorf("%s: Number of descendants was not as expected.\nExpected: %v\nGot:      %v",
-			name, len(expected), adapter.descendants)
+	if len(expected) != adapter.Count() {
+		t.Errorf("%s: Count was not as expected.\nExpected: %v\nGot:      %v",
+			name, len(expected), adapter.Count())
 	}
 	for expected_index, expected_item := range expected {
 		got_item := adapter.ItemAt(expected_index)
@@ -98,7 +98,7 @@ func TestTreeToListNodeDeep(t *testing.T) {
 		gxui.AdapterItem(100),
 	)
 
-	list_adapter.Children()[0].Expand()
+	list_adapter.node.children[0].Expand()
 	test(t, "single expanded", list_adapter,
 		gxui.AdapterItem(100), // (0) 100
 		gxui.AdapterItem(110), // (1)  ╠══ 110
@@ -121,7 +121,7 @@ func TestTreeToListNodeDeep(t *testing.T) {
 		gxui.AdapterItem(142), // (9)       ╚══ 142
 	)
 
-	list_adapter.NodeAt(2).Collapse()
+	list_adapter.node.NodeAt(2).Collapse()
 	test(t, "one collapsed", list_adapter,
 		gxui.AdapterItem(100), // (0) 100
 		gxui.AdapterItem(110), // (1)  ╠══ 110

@@ -19,19 +19,17 @@ type TreeToListNode struct {
 	container   gxui.TreeNodeContainer // The wrapped TreeNode.
 	descendants int                    // Total number of descendants.
 	children    []*TreeToListNode      // The child nodes if expanded, or nil if collapsed.
-	parent      treeToListNodeParent   // The parent of this node
-	depth       int                    // The depth of this node
+	parent      treeToListNodeParent   // The parent of this node.
+	depth       int                    // The depth of this node.
 	onChange    gxui.Event             // event()
 }
 
 func (n *TreeToListNode) adjustDescendants(delta int) {
 	n.descendants += delta
-	if n.parent != nil {
-		n.parent.adjustDescendants(delta)
-	}
+	n.parent.adjustDescendants(delta)
 }
 
-func (n *TreeToListNode) update() {
+func (n *TreeToListNode) update(nAsParent treeToListNodeParent) {
 	if n.IsExpanded() {
 		// Build a map of item -> child for the current state.
 		m := make(map[gxui.AdapterItem]*TreeToListNode, len(n.children))
@@ -47,11 +45,11 @@ func (n *TreeToListNode) update() {
 			node := n.container.NodeAt(i)
 			item := node.Item()
 			if p, ok := m[item]; ok {
-				p.update()
+				p.update(p)
 				n.children[i] = p
 				n.descendants += p.descendants + 1
 			} else {
-				n.children[i] = &TreeToListNode{container: node, item: item, parent: n, depth: depth}
+				n.children[i] = &TreeToListNode{container: node, item: item, parent: nAsParent, depth: depth}
 				n.descendants++
 			}
 		}
@@ -84,6 +82,9 @@ func (n *TreeToListNode) IsLeaf() bool {
 // Expand attempts to expand the node, returning true if the node expands.
 // If the node is already expanded or is a leaf then Expand returns false.
 func (n *TreeToListNode) Expand() bool {
+	if n.parent == nil {
+		panic("Expand cannot be called for root nodes")
+	}
 	if n.IsExpanded() || n.IsLeaf() {
 		return false
 	}
@@ -105,7 +106,10 @@ func (n *TreeToListNode) Expand() bool {
 // Collapse attempts to collapse the node, returning true if the node collapses.
 // If the node is already collapsed then Collapse returns false.
 func (n *TreeToListNode) Collapse() bool {
-	if !n.IsExpanded() || n.IsLeaf() || n.parent == nil {
+	if n.parent == nil {
+		panic("Collapse cannot be called for root nodes")
+	}
+	if !n.IsExpanded() || n.IsLeaf() {
 		return false
 	}
 	n.parent.adjustDescendants(-n.descendants)
@@ -194,7 +198,6 @@ func (n *TreeToListNode) ItemAt(idx int) gxui.AdapterItem {
 	return n.NodeAt(idx).item
 }
 
-// ItemIndex implements the ListAdapter interface.
 // ItemIndex returns the index of item in the list of all the expanded nodes
 // treated as a flattened list.
 // Index 0 represents the first child of n, index 1 may represent the the second
