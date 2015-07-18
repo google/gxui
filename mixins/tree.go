@@ -87,14 +87,15 @@ func (t *Tree) PaintUnexpandedSelection(c gxui.Canvas, r math.Rect) {
 func (t *Tree) PaintChild(c gxui.Canvas, child *gxui.Child, idx int) {
 	t.List.PaintChild(c, child, idx)
 	if t.selectedItem != nil {
-		item := t.listAdapter.DeepestNode(t.selectedItem).Item()
-		if item != t.selectedItem {
-			// The selected item is hidden by an unexpanded node.
-			// Highlight the deepest visible node instead.
-			if details, found := t.details[item]; found {
-				if child == details.child {
-					b := child.Bounds().Expand(child.Control.Margin())
-					t.outer.PaintUnexpandedSelection(c, b)
+		if deepest := t.listAdapter.DeepestNode(t.selectedItem); deepest != nil {
+			if item := deepest.Item(); item != t.selectedItem {
+				// The selected item is hidden by an unexpanded node.
+				// Highlight the deepest visible node instead.
+				if details, found := t.details[item]; found {
+					if child == details.child {
+						b := child.Bounds().Expand(child.Control.Margin())
+						t.outer.PaintUnexpandedSelection(c, b)
+					}
 				}
 			}
 		}

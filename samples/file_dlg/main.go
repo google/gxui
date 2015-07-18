@@ -233,14 +233,15 @@ func appMain(driver gxui.Driver) {
 	// When the user double-clicks a directory in the file list, select it in the
 	// directories tree view.
 	files.OnDoubleClick(func(gxui.MouseEvent) {
-		path := files.Selected().(string)
-		if fi, err := os.Stat(path); err == nil && fi.IsDir() {
-			if directories.Select(path) {
-				directories.Show(path)
+		if path, ok := files.Selected().(string); ok {
+			if fi, err := os.Stat(path); err == nil && fi.IsDir() {
+				if directories.Select(path) {
+					directories.Show(path)
+				}
+			} else {
+				fmt.Printf("File '%s' selected!\n", path)
+				window.Close()
 			}
-		} else {
-			fmt.Printf("File '%s' selected!\n", path)
-			window.Close()
 		}
 	})
 
