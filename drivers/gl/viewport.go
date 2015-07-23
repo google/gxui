@@ -34,7 +34,7 @@ type viewport struct {
 	sizeDipsUnscaled        math.Size
 	sizeDips                math.Size
 	sizePixels              math.Size
-	posX, posY              int
+	position                math.Point
 	title                   string
 	pendingMouseMoveEvent   *gxui.MouseEvent
 	pendingMouseScrollEvent *gxui.MouseEvent
@@ -99,7 +99,7 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 	})
 	wnd.SetPosCallback(func(w *glfw.Window, x, y int) {
 		v.Lock()
-		v.posX, v.posY = x, y
+		v.position = math.NewPoint(x, y)
 		v.Unlock()
 	})
 	wnd.SetSizeCallback(func(_ *glfw.Window, w, h int) {
@@ -225,6 +225,7 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 	})
 
 	fw, fh := wnd.GetFramebufferSize()
+	posX, posY := wnd.GetPos()
 
 	// Pre-multiplied alpha blending
 	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
@@ -254,8 +255,7 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 	v.sizeDipsUnscaled = math.Size{W: width, H: height}
 	v.sizeDips = v.sizeDipsUnscaled.ScaleS(1 / v.scaling)
 	v.sizePixels = math.Size{W: fw, H: fh}
-	v.posX, v.posY = wnd.GetPos()
-
+	v.position = math.Point{X: posX, Y: posY}
 	return v
 }
 
@@ -375,18 +375,18 @@ func (v *viewport) SetTitle(title string) {
 	})
 }
 
-func (v *viewport) Pos() (int, int) {
+func (v *viewport) Position() math.Point {
 	v.Lock()
 	defer v.Unlock()
-	return v.posX, v.posY
+	return v.position
 }
 
-func (v *viewport) SetPos(x, y int) {
+func (v *viewport) SetPosition(pos math.Point) {
 	v.Lock()
-	v.posX, v.posY = x, y
+	v.position = pos
 	v.Unlock()
 	v.driver.asyncDriver(func() {
-		v.window.SetPos(x, y)
+		v.window.SetPos(pos.X, pos.Y)
 	})
 }
 

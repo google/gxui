@@ -4,6 +4,10 @@
 
 package gxui
 
+import (
+	"github.com/google/gxui/math"
+)
+
 type Window interface {
 	Container
 
@@ -22,11 +26,11 @@ type Window interface {
 	// A scale of 1 is unscaled, 2 is twice the regular scaling.
 	SetScale(float32)
 
-	// Pos returns position of the window.
-	Pos() (int, int)
+	// Position returns position of the window.
+	Position() math.Point
 
-	// SetPos changes position of the window.
-	SetPos(int, int)
+	// SetPosition changes position of the window.
+	SetPosition(math.Point)
 
 	// Fullscreen returns true if the window is currently full-screen.
 	Fullscreen() bool

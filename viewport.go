@@ -40,11 +40,11 @@ type Viewport interface {
 	// SetTitle changes the title of the window.
 	SetTitle(string)
 
-	// Pos returns position of the window.
-	Pos() (int, int)
+	// Position returns position of the window.
+	Position() math.Point
 
-	// SetPos changes position of the window.
-	SetPos(int, int)
+	// SetPosition changes position of the window.
+	SetPosition(math.Point)
 
 	// Show makes the window visible.
 	Show()
