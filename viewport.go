@@ -46,7 +46,6 @@ type Viewport interface {
 	// SetPos changes position of the window.
 	SetPos(int, int)
 
-
 	// Show makes the window visible.
 	Show()
 
