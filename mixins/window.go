@@ -189,6 +189,14 @@ func (w *Window) SetScale(scale float32) {
 	w.viewport.SetScale(scale)
 }
 
+func (w *Window) Pos() (int, int) {
+	return w.viewport.Pos()
+}
+
+func (w *Window) SetPos(x, y int) {
+	w.viewport.SetPos(x, y)
+}
+
 func (w *Window) Fullscreen() bool {
 	return w.viewport.Fullscreen()
 }

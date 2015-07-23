@@ -40,6 +40,13 @@ type Viewport interface {
 	// SetTitle changes the title of the window.
 	SetTitle(string)
 
+	// Pos returns position of the window.
+	Pos() (int, int)
+
+	// SetPos changes position of the window.
+	SetPos(int, int)
+
+
 	// Show makes the window visible.
 	Show()
 

@@ -22,6 +22,12 @@ type Window interface {
 	// A scale of 1 is unscaled, 2 is twice the regular scaling.
 	SetScale(float32)
 
+	// Pos returns position of the window.
+	Pos() (int, int)
+
+	// SetPos changes position of the window.
+	SetPos(int, int)
+
 	// Fullscreen returns true if the window is currently full-screen.
 	Fullscreen() bool
 

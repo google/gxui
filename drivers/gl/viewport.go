@@ -34,6 +34,7 @@ type viewport struct {
 	sizeDipsUnscaled        math.Size
 	sizeDips                math.Size
 	sizePixels              math.Size
+	posX, posY              int
 	title                   string
 	pendingMouseMoveEvent   *gxui.MouseEvent
 	pendingMouseScrollEvent *gxui.MouseEvent
@@ -95,6 +96,11 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 	}
 	wnd.SetCloseCallback(func(*glfw.Window) {
 		v.Close()
+	})
+	wnd.SetPosCallback(func(w *glfw.Window, x, y int) {
+		v.Lock()
+		v.posX, v.posY = x, y
+		v.Unlock()
 	})
 	wnd.SetSizeCallback(func(_ *glfw.Window, w, h int) {
 		v.Lock()
@@ -248,6 +254,7 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 	v.sizeDipsUnscaled = math.Size{W: width, H: height}
 	v.sizeDips = v.sizeDipsUnscaled.ScaleS(1 / v.scaling)
 	v.sizePixels = math.Size{W: fw, H: fh}
+	v.posX, v.posY = wnd.GetPos()
 
 	return v
 }
@@ -365,6 +372,21 @@ func (v *viewport) SetTitle(title string) {
 	v.Unlock()
 	v.driver.asyncDriver(func() {
 		v.window.SetTitle(title)
+	})
+}
+
+func (v *viewport) Pos() (int, int) {
+	v.Lock()
+	defer v.Unlock()
+	return v.posX, v.posY
+}
+
+func (v *viewport) SetPos(x, y int) {
+	v.Lock()
+	v.posX, v.posY = x, y
+	v.Unlock()
+	v.driver.asyncDriver(func() {
+		v.window.SetPos(x, y)
 	})
 }
 
