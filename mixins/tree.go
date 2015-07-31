@@ -104,19 +104,23 @@ func (t *Tree) PaintChild(c gxui.Canvas, child *gxui.Child, idx int) {
 
 // InputEventHandler override
 func (t *Tree) KeyPress(ev gxui.KeyboardEvent) (consume bool) {
-	item := t.Selected()
-	node := t.listAdapter.DeepestNode(item)
 	switch ev.Key {
 	case gxui.KeyLeft:
-		if node.Collapse() {
-			return true
-		}
-		if p := node.Parent(); p != nil {
-			return t.Select(p.Item())
+		if item := t.Selected(); item != nil {
+			node := t.listAdapter.DeepestNode(item)
+			if node.Collapse() {
+				return true
+			}
+			if p := node.Parent(); p != nil {
+				return t.Select(p.Item())
+			}
 		}
 	case gxui.KeyRight:
-		if node.Expand() {
-			return true
+		if item := t.Selected(); item != nil {
+			node := t.listAdapter.DeepestNode(item)
+			if node.Expand() {
+				return true
+			}
 		}
 	}
 	return t.List.KeyPress(ev)
