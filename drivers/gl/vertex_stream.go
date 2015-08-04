@@ -13,15 +13,10 @@ import (
 )
 
 type vertexStream struct {
-	refCounted
 	name  string
 	data  []byte
 	ty    shaderDataType
 	count int
-}
-
-type vertexStreamContext struct {
-	buffer gl.Buffer
 }
 
 func newVertexStream(name string, ty shaderDataType, data32 []float32) *vertexStream {
@@ -45,17 +40,7 @@ func newVertexStream(name string, ty shaderDataType, data32 []float32) *vertexSt
 		ty:    ty,
 		count: dataLen / ty.vectorElementCount(),
 	}
-	vs.init()
-	globalStats.vertexStreamCount.inc()
 	return vs
-}
-
-func (s *vertexStream) release() bool {
-	if !s.refCounted.release() {
-		return false
-	}
-	globalStats.vertexStreamCount.dec()
-	return true
 }
 
 func (s *vertexStream) newContext() *vertexStreamContext {
@@ -65,14 +50,21 @@ func (s *vertexStream) newContext() *vertexStreamContext {
 	gl.BindBuffer(gl.ARRAY_BUFFER, gl.Buffer{})
 	checkError()
 
-	return &vertexStreamContext{buffer}
+	globalStats.vertexStreamContextCount.inc()
+	return &vertexStreamContext{buffer: buffer}
 }
 
-func (c vertexStreamContext) bind() {
+type vertexStreamContext struct {
+	contextResource
+	buffer gl.Buffer
+}
+
+func (c *vertexStreamContext) bind() {
 	gl.BindBuffer(gl.ARRAY_BUFFER, c.buffer)
 }
 
 func (c *vertexStreamContext) destroy() {
+	globalStats.vertexStreamContextCount.dec()
 	gl.DeleteBuffer(c.buffer)
 	c.buffer = gl.Buffer{}
 }

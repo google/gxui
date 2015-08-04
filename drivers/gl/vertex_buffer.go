@@ -7,7 +7,6 @@ package gl
 import "fmt"
 
 type vertexBuffer struct {
-	refCounted
 	streams map[string]*vertexStream
 	count   int
 }
@@ -16,7 +15,6 @@ func newVertexBuffer(streams ...*vertexStream) *vertexBuffer {
 	vb := &vertexBuffer{
 		streams: map[string]*vertexStream{},
 	}
-	vb.init()
 	for i, s := range streams {
 		if i == 0 {
 			vb.count = s.count
@@ -28,17 +26,5 @@ func newVertexBuffer(streams ...*vertexStream) *vertexBuffer {
 		}
 		vb.streams[s.name] = s
 	}
-	globalStats.vertexBufferCount.inc()
 	return vb
-}
-
-func (vb *vertexBuffer) release() bool {
-	if !vb.refCounted.release() {
-		return false
-	}
-	for _, s := range vb.streams {
-		s.release()
-	}
-	globalStats.vertexBufferCount.dec()
-	return true
 }

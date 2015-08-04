@@ -10,6 +10,12 @@ import (
 	"github.com/goxjs/gl"
 )
 
+// contextResource is used as an anonymous field by types that are constructed
+// per context.
+type contextResource struct {
+	lastContextUse int // used for mark-and-sweeping the resource.
+}
+
 type context struct {
 	blitter              *blitter
 	resolution           resolution
@@ -19,6 +25,7 @@ type context struct {
 	indexBufferContexts  map[*indexBuffer]*indexBufferContext
 	sizeDips, sizePixels math.Size
 	clip                 math.Rect
+	frame                int
 }
 
 func newContext() *context {
@@ -52,29 +59,6 @@ func (c *context) destroy() {
 }
 
 func (c *context) beginDraw(sizeDips, sizePixels math.Size) {
-	// Reap any dead textures
-	for texture, tc := range c.textureContexts {
-		if !texture.alive() {
-			delete(c.textureContexts, texture)
-			tc.destroy()
-			c.stats.textureCount--
-		}
-	}
-	for stream, sc := range c.vertexStreamContexts {
-		if !stream.alive() {
-			delete(c.vertexStreamContexts, stream)
-			sc.destroy()
-			c.stats.vertexStreamCount--
-		}
-	}
-	for buffer, ic := range c.indexBufferContexts {
-		if !buffer.alive() {
-			delete(c.indexBufferContexts, buffer)
-			ic.destroy()
-			c.stats.indexBufferCount--
-		}
-	}
-
 	dipsToPixels := float32(sizePixels.W) / float32(sizeDips.W)
 
 	c.sizeDips = sizeDips
@@ -86,8 +70,32 @@ func (c *context) beginDraw(sizeDips, sizePixels math.Size) {
 }
 
 func (c *context) endDraw() {
+	// Reap any unused resources
+	for texture, tc := range c.textureContexts {
+		if tc.lastContextUse != c.frame {
+			delete(c.textureContexts, texture)
+			tc.destroy()
+			c.stats.textureCount--
+		}
+	}
+	for stream, sc := range c.vertexStreamContexts {
+		if sc.lastContextUse != c.frame {
+			delete(c.vertexStreamContexts, stream)
+			sc.destroy()
+			c.stats.vertexStreamCount--
+		}
+	}
+	for buffer, ic := range c.indexBufferContexts {
+		if ic.lastContextUse != c.frame {
+			delete(c.indexBufferContexts, buffer)
+			ic.destroy()
+			c.stats.indexBufferCount--
+		}
+	}
+
 	c.stats.timer("Frame").stop()
 	c.stats.frameCount++
+	c.frame++
 }
 
 func (c *context) getOrCreateTextureContext(t *texture) *textureContext {
@@ -97,6 +105,7 @@ func (c *context) getOrCreateTextureContext(t *texture) *textureContext {
 		c.textureContexts[t] = tc
 		c.stats.textureCount++
 	}
+	tc.lastContextUse = c.frame
 	return tc
 }
 
@@ -107,6 +116,7 @@ func (c *context) getOrCreateVertexStreamContext(vs *vertexStream) *vertexStream
 		c.vertexStreamContexts[vs] = vc
 		c.stats.vertexStreamCount++
 	}
+	vc.lastContextUse = c.frame
 	return vc
 }
 
@@ -117,6 +127,7 @@ func (c *context) getOrCreateIndexBufferContext(ib *indexBuffer) *indexBufferCon
 		c.indexBufferContexts[ib] = ic
 		c.stats.indexBufferCount++
 	}
+	ic.lastContextUse = c.frame
 	return ic
 }
 

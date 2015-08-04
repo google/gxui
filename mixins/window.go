@@ -136,7 +136,6 @@ func (w *Window) Draw() gxui.Canvas {
 		w.outer.Paint(c)
 		c.Complete()
 		w.viewport.SetCanvas(c)
-		c.Release()
 		return c
 	} else {
 		return nil

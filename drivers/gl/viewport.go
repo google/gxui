@@ -304,22 +304,14 @@ func (v *viewport) drawFrameUpdate(ctx *context) {
 func (v *viewport) SetCanvas(cc gxui.Canvas) {
 	cnt := atomic.AddUint32(&v.redrawCount, 1)
 	c := cc.(*canvas)
-	if c != nil {
-		c.addRef()
-	}
 	v.driver.asyncDriver(func() {
 		// Only use the canvas of the most recent SetCanvas call.
 		v.window.MakeContextCurrent()
 		if atomic.LoadUint32(&v.redrawCount) == cnt {
-			if v.canvas != nil {
-				v.canvas.release()
-			}
 			v.canvas = c
 			if v.canvas != nil {
 				v.render()
 			}
-		} else if c != nil {
-			c.release()
 		}
 	})
 }
@@ -459,10 +451,7 @@ func (v *viewport) Destroy() {
 	v.driver.asyncDriver(func() {
 		if !v.destroyed {
 			v.window.MakeContextCurrent()
-			if v.canvas != nil {
-				v.canvas.Release()
-				v.canvas = nil
-			}
+			v.canvas = nil
 			v.context.destroy()
 			v.window.Destroy()
 			v.onDestroy.Fire()

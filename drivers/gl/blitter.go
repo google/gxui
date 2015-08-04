@@ -119,7 +119,6 @@ func newBlitter(ctx *context, stats *contextStats) *blitter {
 }
 
 func (b *blitter) destroy(ctx *context) {
-	b.quad.release()
 	b.copyShader.destroy(ctx)
 	b.colorShader.destroy(ctx)
 	b.fontShader.destroy(ctx)
@@ -297,7 +296,6 @@ func (b *blitter) commitGlyphs(ctx *context) {
 		"mSrc":   mSrc,
 	})
 	gl.Enable(gl.SCISSOR_TEST)
-	s.release()
 	b.glyphBatch.GlyphPage = nil
 	b.glyphBatch.DstRects = b.glyphBatch.DstRects[:0]
 	b.glyphBatch.SrcRects = b.glyphBatch.SrcRects[:0]

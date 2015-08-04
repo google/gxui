@@ -12,15 +12,8 @@ import (
 )
 
 type indexBuffer struct {
-	refCounted
 	data []byte
 	ty   primitiveType
-}
-
-type indexBufferContext struct {
-	buffer gl.Buffer
-	ty     primitiveType
-	length int
 }
 
 func newIndexBuffer(ty primitiveType, data16 []uint16) *indexBuffer {
@@ -44,17 +37,7 @@ func newIndexBuffer(ty primitiveType, data16 []uint16) *indexBuffer {
 		data: data,
 		ty:   ty,
 	}
-	ib.init()
-	globalStats.indexBufferCount.inc()
 	return ib
-}
-
-func (b *indexBuffer) release() bool {
-	if !b.refCounted.release() {
-		return false
-	}
-	globalStats.indexBufferCount.dec()
-	return true
 }
 
 func (b *indexBuffer) newContext() *indexBufferContext {
@@ -67,6 +50,7 @@ func (b *indexBuffer) newContext() *indexBufferContext {
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.Buffer{})
 	checkError()
 
+	globalStats.indexBufferContextCount.inc()
 	return &indexBufferContext{
 		buffer: buffer,
 		ty:     b.ty,
@@ -74,7 +58,15 @@ func (b *indexBuffer) newContext() *indexBufferContext {
 	}
 }
 
+type indexBufferContext struct {
+	contextResource
+	buffer gl.Buffer
+	ty     primitiveType
+	length int
+}
+
 func (c *indexBufferContext) destroy() {
+	globalStats.indexBufferContextCount.dec()
 	gl.DeleteBuffer(c.buffer)
 	c.buffer = gl.Buffer{}
 }

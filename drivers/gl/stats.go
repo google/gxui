@@ -11,35 +11,63 @@ import (
 	"time"
 )
 
-const historySize = 100
+const (
+	printGlobalStats = false
+	historySize      = 100
+)
 
-type count int32
+func init() {
+	if printGlobalStats {
+		go func() {
+			for {
+				time.Sleep(time.Second)
+				println(globalStats.get())
+			}
+		}()
+	}
+}
+
+type count struct {
+	value int32
+	incs  int32
+	decs  int32
+}
 
 func (c *count) inc() {
-	atomic.AddInt32((*int32)(c), 1)
+	atomic.AddInt32(&c.value, 1)
+	atomic.AddInt32(&c.incs, 1)
 }
 
 func (c *count) dec() {
-	if atomic.AddInt32((*int32)(c), -1) < 0 {
+	atomic.AddInt32(&c.decs, 1)
+	if atomic.AddInt32(&c.value, -1) < 0 {
 		panic("Count has gone negative")
 	}
 }
 
-type globalDriverStats struct {
-	canvasCount       count
-	shapeCount        count
-	vertexBufferCount count
-	vertexStreamCount count
-	indexBufferCount  count
+func (c *count) resetDeltas() {
+	atomic.StoreInt32(&c.incs, 0)
+	atomic.StoreInt32(&c.decs, 0)
 }
 
-func (s globalDriverStats) String() string {
+func (c count) String() string {
+	return fmt.Sprintf("%d [+%d/-%d]", c.value, c.incs, c.decs)
+}
+
+type globalDriverStats struct {
+	vertexStreamContextCount count
+	indexBufferContextCount  count
+	textureContextCount      count
+}
+
+func (s *globalDriverStats) get() string {
 	buffer := &bytes.Buffer{}
-	fmt.Fprintf(buffer, "Canvas count: %d\n", s.canvasCount)
-	fmt.Fprintf(buffer, "Shape count: %d\n", s.shapeCount)
-	fmt.Fprintf(buffer, "Vertex buffer count: %d\n", s.vertexBufferCount)
-	fmt.Fprintf(buffer, "Vertex stream count: %d\n", s.vertexStreamCount)
-	fmt.Fprintf(buffer, "Index buffer count: %d\n", s.indexBufferCount)
+	fmt.Fprintf(buffer, "Vertex stream context count: %v\n", s.vertexStreamContextCount)
+	fmt.Fprintf(buffer, "Index buffer context count: %v\n", s.indexBufferContextCount)
+	fmt.Fprintf(buffer, "Texture context count: %v\n", s.textureContextCount)
+	s.vertexStreamContextCount.resetDeltas()
+	s.indexBufferContextCount.resetDeltas()
+	s.textureContextCount.resetDeltas()
 	return buffer.String()
 }
 
@@ -86,16 +114,13 @@ func (t timer) Format(f fmt.State, c rune) {
 }
 
 type contextStats struct {
-	textureCount              int
-	framebufferUsedCount      int
-	framebufferFreeCount      int
-	framebufferBytesAllocated int
-	vertexStreamCount         int
-	indexBufferCount          int
-	shaderProgramCount        int
-	frameCount                int
-	drawCallCount             int
-	timers                    []timer
+	textureCount       int
+	vertexStreamCount  int
+	indexBufferCount   int
+	shaderProgramCount int
+	frameCount         int
+	drawCallCount      int
+	timers             []timer
 }
 
 func (s *contextStats) timer(name string) *timer {
@@ -117,9 +142,6 @@ func (s contextStats) String() string {
 	fmt.Fprintf(buffer, "Draw calls per frame: %d\n", s.drawCallCount)
 	fmt.Fprintf(buffer, "Frame count: %d\n", s.frameCount)
 	fmt.Fprintf(buffer, "Textures: %d\n", s.textureCount)
-	fmt.Fprintf(buffer, "Framebuffers Used: %d\n", s.framebufferUsedCount)
-	fmt.Fprintf(buffer, "Framebuffers Free: %d\n", s.framebufferFreeCount)
-	fmt.Fprintf(buffer, "Framebuffer bytes allocated: %d\n", s.framebufferBytesAllocated)
 	fmt.Fprintf(buffer, "Vertex stream count: %d\n", s.vertexStreamCount)
 	fmt.Fprintf(buffer, "Index buffer count: %d\n", s.indexBufferCount)
 	fmt.Fprintf(buffer, "Shader program count: %d\n", s.shaderProgramCount)

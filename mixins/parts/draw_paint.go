@@ -38,12 +38,6 @@ func verifyDetach(o DrawPaintOuter) {
 func (d *DrawPaint) Init(outer DrawPaintOuter, theme gxui.Theme) {
 	d.outer = outer
 	d.driver = theme.Driver()
-	outer.OnDetach(func() {
-		if d.canvas != nil {
-			d.canvas.Release()
-			d.canvas = nil
-		}
-	})
 
 	if debugVerifyDetachOnGC {
 		runtime.SetFinalizer(d.outer, verifyDetach)
@@ -70,9 +64,6 @@ func (d *DrawPaint) Draw() gxui.Canvas {
 		return nil // No area to draw in
 	}
 	if d.canvas == nil || d.canvas.Size() != s || d.redrawRequested {
-		if d.canvas != nil {
-			d.canvas.Release()
-		}
 		d.canvas = d.driver.CreateCanvas(s)
 		d.redrawRequested = false
 		d.outer.Paint(d.canvas)

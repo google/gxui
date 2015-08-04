@@ -7,7 +7,6 @@ package gl
 import "github.com/goxjs/gl"
 
 type shape struct {
-	refCounted
 	vb       *vertexBuffer
 	ib       *indexBuffer
 	drawMode drawMode
@@ -23,25 +22,7 @@ func newShape(vb *vertexBuffer, ib *indexBuffer, drawMode drawMode) *shape {
 		ib:       ib,
 		drawMode: drawMode,
 	}
-	s.init()
-	globalStats.shapeCount.inc()
 	return s
-}
-
-func (s *shape) release() bool {
-	if !s.refCounted.release() {
-		return false
-	}
-	if s.vb != nil {
-		s.vb.release()
-		s.vb = nil
-	}
-	if s.ib != nil {
-		s.ib.release()
-		s.ib = nil
-	}
-	globalStats.shapeCount.dec()
-	return true
 }
 
 func newQuadShape() *shape {
@@ -60,8 +41,6 @@ func newQuadShape() *shape {
 }
 
 func (s shape) draw(ctx *context, shader *shaderProgram, ub uniformBindings) {
-	s.assertAlive("draw")
-
 	shader.bind(ctx, s.vb, ub)
 	if s.ib != nil {
 		ctx.getOrCreateIndexBufferContext(s.ib).render(s.drawMode)

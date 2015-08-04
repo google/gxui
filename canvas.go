@@ -23,5 +23,4 @@ type Canvas interface {
 	DrawPolygon(Polygon, Pen, Brush)
 	DrawRect(math.Rect, Brush)
 	DrawRoundedRect(rect math.Rect, tl, tr, bl, br float32, p Pen, b Brush)
-	Release()
 }

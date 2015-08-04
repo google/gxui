@@ -5,8 +5,9 @@
 package gxui
 
 import (
-	"github.com/google/gxui/math"
 	"image"
+
+	"github.com/google/gxui/math"
 )
 
 type Texture interface {
@@ -15,6 +16,4 @@ type Texture interface {
 	SizePixels() math.Size
 	FlipY() bool
 	SetFlipY(bool)
-	//AddRef()
-	Release()
 }

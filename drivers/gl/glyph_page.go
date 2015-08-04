@@ -5,10 +5,11 @@
 package gl
 
 import (
-	"github.com/google/gxui/math"
 	"image"
 	"image/png"
 	"os"
+
+	"github.com/google/gxui/math"
 
 	"code.google.com/p/freetype-go/freetype/raster"
 	"code.google.com/p/freetype-go/freetype/truetype"
@@ -158,11 +159,7 @@ func (p *glyphPage) add(rune rune, g *glyph) bool {
 	if h > p.rowHeight {
 		p.rowHeight = h
 	}
-
-	if p.tex != nil {
-		p.tex.Release()
-		p.tex = nil
-	}
+	p.tex = nil
 
 	return true
 }

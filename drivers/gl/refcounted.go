@@ -4,6 +4,7 @@
 
 package gl
 
+/*
 import (
 	"fmt"
 	"runtime"
@@ -72,3 +73,4 @@ func (r *refCounted) assertAlive(funcName string) {
 		}
 	}
 }
+*/

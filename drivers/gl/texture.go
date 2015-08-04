@@ -12,7 +12,6 @@ import (
 )
 
 type texture struct {
-	refCounted
 	image        image.Image
 	pixelsPerDip float32
 	flipY        bool
@@ -23,7 +22,6 @@ func newTexture(img image.Image, pixelsPerDip float32) *texture {
 		image:        img,
 		pixelsPerDip: pixelsPerDip,
 	}
-	t.init()
 	return t
 }
 
@@ -47,10 +45,6 @@ func (t *texture) FlipY() bool {
 
 func (t *texture) SetFlipY(flipY bool) {
 	t.flipY = flipY
-}
-
-func (t *texture) Release() {
-	t.release()
 }
 
 func (t *texture) newContext() *textureContext {
@@ -82,6 +76,7 @@ func (t *texture) newContext() *textureContext {
 	gl.BindTexture(gl.TEXTURE_2D, gl.Texture{})
 	checkError()
 
+	globalStats.textureContextCount.inc()
 	return &textureContext{
 		texture:    texture,
 		sizePixels: t.Size(),
@@ -91,6 +86,7 @@ func (t *texture) newContext() *textureContext {
 }
 
 type textureContext struct {
+	contextResource
 	texture    gl.Texture
 	sizePixels math.Size
 	flipY      bool
@@ -98,6 +94,7 @@ type textureContext struct {
 }
 
 func (c *textureContext) destroy() {
+	globalStats.textureContextCount.dec()
 	gl.DeleteTexture(c.texture)
 	c.texture = gl.Texture{}
 }

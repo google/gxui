@@ -41,7 +41,6 @@ func CreateProgressBar(theme *Theme) gxui.ProgressBar {
 
 	b.OnDetach(func() {
 		if b.chevrons != nil {
-			b.chevrons.Release()
 			b.chevrons = nil
 			b.ticker.Stop()
 			b.ticker = nil
@@ -62,10 +61,7 @@ func (b *ProgressBar) animationTick() {
 func (b *ProgressBar) SetSize(size math.Size) {
 	b.ProgressBar.SetSize(size)
 
-	if b.chevrons != nil {
-		b.chevrons.Release()
-		b.chevrons = nil
-	}
+	b.chevrons = nil
 	if size.Area() > 0 {
 		b.chevrons = b.theme.Driver().CreateCanvas(size)
 		b.chevronWidth = size.H / 2

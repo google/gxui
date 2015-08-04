@@ -32,15 +32,8 @@ type drawState struct {
 	OriginPixels math.Point
 }
 
-type resource interface {
-	addRef()
-	release() bool
-}
-
 type canvas struct {
-	refCounted
 	sizeDips          math.Size
-	resources         []resource
 	ops               []canvasOp
 	built             bool
 	buildingPushCount int
@@ -53,13 +46,10 @@ func newCanvas(sizeDips math.Size) *canvas {
 	c := &canvas{
 		sizeDips: sizeDips,
 	}
-	c.init()
-	globalStats.canvasCount.inc()
 	return c
 }
 
 func (c *canvas) draw(ctx *context, dss *drawStateStack) {
-	c.assertAlive("draw")
 	ds := dss.head()
 	ctx.apply(ds)
 
@@ -69,29 +59,10 @@ func (c *canvas) draw(ctx *context, dss *drawStateStack) {
 }
 
 func (c *canvas) appendOp(name string, op canvasOp) {
-	c.assertAlive(name)
 	if c.built {
 		panic(fmt.Errorf("%s() called after Complete()", name))
 	}
 	c.ops = append(c.ops, op)
-}
-
-func (c *canvas) appendResource(r resource) {
-	r.addRef()
-	c.resources = append(c.resources, r)
-}
-
-func (c *canvas) release() bool {
-	if !c.refCounted.release() {
-		return false
-	}
-	for _, r := range c.resources {
-		r.release()
-	}
-	c.ops = nil
-	c.resources = nil
-	globalStats.canvasCount.dec()
-	return true
 }
 
 // gxui.Canvas compliance
@@ -164,7 +135,6 @@ func (c *canvas) DrawCanvas(cc gxui.Canvas, offsetDips math.Point) {
 		dss.pop()
 		ctx.apply(dss.head())
 	})
-	c.appendResource(childCanvas)
 }
 
 func (c *canvas) DrawRunes(f gxui.Font, r []rune, p []math.Point, col gxui.Color) {
@@ -186,10 +156,6 @@ func (c *canvas) DrawLines(lines gxui.Polygon, pen gxui.Pen) {
 			ctx.blitter.blitShape(ctx, *edge, pen.Color, ds)
 		}
 	})
-	if edge != nil {
-		c.appendResource(edge)
-		edge.release()
-	}
 }
 
 func (c *canvas) DrawPolygon(poly gxui.Polygon, pen gxui.Pen, brush gxui.Brush) {
@@ -203,14 +169,6 @@ func (c *canvas) DrawPolygon(poly gxui.Polygon, pen gxui.Pen, brush gxui.Brush) 
 			ctx.blitter.blitShape(ctx, *edge, pen.Color, ds)
 		}
 	})
-	if fill != nil {
-		c.appendResource(fill)
-		fill.release()
-	}
-	if edge != nil {
-		c.appendResource(edge)
-		edge.release()
-	}
 }
 
 func (c *canvas) DrawRect(r math.Rect, brush gxui.Brush) {
@@ -242,9 +200,4 @@ func (c *canvas) DrawTexture(t gxui.Texture, r math.Rect) {
 		tc := ctx.getOrCreateTextureContext(t.(*texture))
 		ctx.blitter.blit(ctx, tc, tc.sizePixels.Rect(), ctx.resolution.rectDipsToPixels(r), dss.head())
 	})
-	c.appendResource(t.(*texture))
-}
-
-func (c *canvas) Release() {
-	c.release()
 }
