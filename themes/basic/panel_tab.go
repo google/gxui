@@ -46,7 +46,9 @@ func (t *PanelTab) Paint(c gxui.Canvas) {
 	default:
 		style = t.theme.TabDefaultStyle
 	}
-	t.Label().SetColor(style.FontColor)
+	if l := t.Label(); l != nil {
+		l.SetColor(style.FontColor)
+	}
 
 	c.DrawRoundedRect(s.Rect(), 5.0, 5.0, 0.0, 0.0, style.Pen, style.Brush)
 
