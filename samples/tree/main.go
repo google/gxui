@@ -170,7 +170,7 @@ func appMain(driver gxui.Driver) {
 	adapter := &adapter{}
 
 	// hook up node changed function to the adapter OnDataChanged event.
-	adapter.changed = adapter.DataChanged
+	adapter.changed = func() { adapter.DataChanged(false) }
 
 	// add all the species to the 'Animals' root node.
 	items := addSpecies(adapter.add("Animals"))

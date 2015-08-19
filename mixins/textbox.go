@@ -5,10 +5,11 @@
 package mixins
 
 import (
+	"strings"
+
 	"github.com/google/gxui"
 	"github.com/google/gxui/math"
 	"github.com/google/gxui/mixins/parts"
-	"strings"
 )
 
 type TextBoxLine interface {
@@ -77,7 +78,7 @@ func (t *TextBox) Init(outer TextBoxOuter, driver gxui.Driver, theme gxui.Theme,
 	t.OnLostFocus(func() { t.onRedrawLines.Fire() })
 	t.controller.OnTextChanged(func([]gxui.TextBoxEdit) {
 		t.onRedrawLines.Fire()
-		t.List.DataChanged()
+		t.List.DataChanged(false)
 	})
 	t.controller.OnSelectionChanged(func() {
 		t.onRedrawLines.Fire()

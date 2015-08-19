@@ -280,19 +280,21 @@ func (l *List) SizeChanged() {
 	l.outer.Relayout()
 }
 
-func (l *List) DataChanged() {
+func (l *List) DataChanged(recreateControls bool) {
+	if recreateControls {
+		for item, details := range l.details {
+			details.onClickSubscription.Unlisten()
+			l.RemoveChild(details.child.Control)
+			delete(l.details, item)
+		}
+	}
 	l.itemCount = l.adapter.Count()
 	l.SizeChanged()
 }
 
 func (l *List) DataReplaced() {
 	l.selectedItem = nil
-	for item, details := range l.details {
-		details.onClickSubscription.Unlisten()
-		l.RemoveChild(details.child.Control)
-		delete(l.details, item)
-	}
-	l.DataChanged()
+	l.DataChanged(true)
 }
 
 func (l *List) Paint(c gxui.Canvas) {

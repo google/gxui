@@ -45,6 +45,7 @@ func (n *TreeToListNode) update(nAsParent treeToListNodeParent) {
 			node := n.container.NodeAt(i)
 			item := node.Item()
 			if p, ok := m[item]; ok {
+				p.container = node
 				p.update(p)
 				n.children[i] = p
 				n.descendants += p.descendants + 1

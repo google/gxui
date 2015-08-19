@@ -47,7 +47,7 @@ type filesAdapter struct {
 // SetFiles assigns the specified list of absolute-path files to this adapter.
 func (a *filesAdapter) SetFiles(files []string) {
 	a.files = files
-	a.DataChanged()
+	a.DataChanged(false)
 }
 
 func (a *filesAdapter) Count() int {

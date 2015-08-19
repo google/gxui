@@ -160,7 +160,7 @@ func (l *DropDownList) SetAdapter(adapter gxui.ListAdapter) {
 	if l.list.Adapter() != adapter {
 		l.list.SetAdapter(adapter)
 		if adapter != nil {
-			adapter.OnDataChanged(l.DataReplaced)
+			adapter.OnDataChanged(func(bool) { l.DataReplaced() })
 			adapter.OnDataReplaced(l.DataReplaced)
 		}
 		// TODO: Unlisten
