@@ -77,6 +77,10 @@ func (t *Theme) CreateDropDownList() gxui.DropDownList {
 	return CreateDropDownList(t)
 }
 
+func (t *Theme) CreateGridLayout() gxui.GridLayout {
+	return CreateGridLayout(t)
+}
+
 func (t *Theme) CreateImage() gxui.Image {
 	return CreateImage(t)
 }

@@ -14,6 +14,7 @@ type Theme interface {
 	CreateButton() Button
 	CreateCodeEditor() CodeEditor
 	CreateDropDownList() DropDownList
+	CreateGridLayout() GridLayout
 	CreateImage() Image
 	CreateLabel() Label
 	CreateLinearLayout() LinearLayout
