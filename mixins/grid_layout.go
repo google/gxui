@@ -6,6 +6,10 @@ import (
   "github.com/google/gxui/mixins/base"
 )
 
+type Cell struct {
+  x, y, w, h int
+}
+
 type GridLayoutOuter interface {
   base.ContainerOuter
 }
@@ -15,6 +19,7 @@ type GridLayout struct {
 
   outer GridLayoutOuter
 
+  grid []Cell
   rows int
   columns int
 }
@@ -35,18 +40,17 @@ func (l *GridLayout) LayoutChildren() {
   cw, ch := s.W / l.columns, s.H / l.rows
 
   var cr math.Rect
-  for row := 0; row < l.rows; row++ {
-    for column := 0; column < l.columns; column++ {
-      c := children[row*l.columns+column]
 
-      cm := c.Control.Margin()
+  for i, cell := range l.grid {
+    c := children[i]
+    cm := c.Control.Margin()
 
-      w, h := column*cw, row*ch
+    x, y := cell.x * cw, cell.y * ch
+    w, h := x + cell.w * cw, y + cell.h * ch
 
-      cr = math.CreateRect(w+cm.L, h+cm.T, w+cw-cm.R, h+ch-cm.B)
+    cr = math.CreateRect(x+cm.L, y+cm.T, w-cm.R, h-cm.B)
 
-      c.Layout(cr.Offset(o).Canon())
-    }
+    c.Layout(cr.Offset(o).Canon())
   }
 }
 
@@ -54,11 +58,23 @@ func (l *GridLayout) DesiredSize(min, max math.Size) math.Size {
 	return max
 }
 
-func (l *GridLayout) SetGrid(columns, rows int, children ...gxui.Control) {
+func (l *GridLayout) SetGrid(columns, rows int) {
   l.columns = columns
   l.rows = rows
+}
 
-  for _, c := range children {
-    l.Container.AddChild(c)
-  }
+func (l *GridLayout) SetChildAt(x, y, w, h int, child gxui.Control) *gxui.Child {
+  l.grid = append(l.grid, Cell{x, y, w, h})
+  return l.Container.AddChild(child)
+}
+
+func (l *GridLayout) RemoveChild(child gxui.Control) {
+  for i, c := range l.Container.Children() {
+		if c.Control == child {
+      l.grid = append(l.grid[:i], l.grid[i+1:]...)
+			l.Container.RemoveChildAt(i)
+      return
+		}
+	}
+  panic("Child not part of container")
 }

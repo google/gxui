@@ -5,5 +5,6 @@ type GridLayout interface {
 
   Container
 
-  SetGrid(rows, columns int, control ...Control)
+  SetGrid(rows, columns int)
+  SetChildAt(x, y, w, h int, child Control) *Child
 }
