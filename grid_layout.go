@@ -1,10 +1,10 @@
 package gxui
 
 type GridLayout interface {
-  Control
+	Control
 
-  Container
+	Container
 
-  SetGrid(rows, columns int)
-  SetChildAt(x, y, w, h int, child Control) *Child
+	SetGrid(rows, columns int)
+	SetChildAt(x, y, w, h int, child Control) *Child
 }
