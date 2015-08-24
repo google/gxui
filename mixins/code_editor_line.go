@@ -46,7 +46,7 @@ func (t *CodeEditorLine) PaintBackgroundSpans(c gxui.Canvas, info CodeEditorLine
 	offsets := info.GlyphOffsets
 	remaining := interval.IntDataList{info.LineSpan}
 	for _, l := range t.ce.layers {
-		if l.BackgroundColor() != nil {
+		if l != nil && l.BackgroundColor() != nil {
 			color := *l.BackgroundColor()
 			for _, span := range l.Spans().Overlaps(info.LineSpan) {
 				interval.Visit(&remaining, span, func(vs, ve uint64, _ int) {
@@ -65,7 +65,7 @@ func (t *CodeEditorLine) PaintGlyphs(c gxui.Canvas, info CodeEditorLinePaintInfo
 	runes, offsets, font := info.Runes, info.GlyphOffsets, info.Font
 	remaining := interval.IntDataList{info.LineSpan}
 	for _, l := range t.ce.layers {
-		if l.Color() != nil {
+		if l != nil && l.Color() != nil {
 			color := *l.Color()
 			for _, span := range l.Spans().Overlaps(info.LineSpan) {
 				interval.Visit(&remaining, span, func(vs, ve uint64, _ int) {
@@ -87,7 +87,7 @@ func (t *CodeEditorLine) PaintBorders(c gxui.Canvas, info CodeEditorLinePaintInf
 	start, _ := info.LineSpan.Span()
 	offsets := info.GlyphOffsets
 	for _, l := range t.ce.layers {
-		if l.BorderColor() != nil {
+		if l != nil && l.BorderColor() != nil {
 			color := *l.BorderColor()
 			interval.Visit(l.Spans(), info.LineSpan, func(vs, ve uint64, _ int) {
 				s, e := vs-start, ve-start
