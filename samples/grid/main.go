@@ -49,6 +49,6 @@ func appMain(driver gxui.Driver) {
 	window.OnClose(driver.Terminate)
 }
 
-func Run() {
+func main() {
 	gl.StartDriver(appMain)
 }
