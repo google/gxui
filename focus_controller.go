@@ -77,7 +77,7 @@ func (c *FocusController) NextFocusable(after Control, forwards bool) Focusable 
 	return c.NextChildFocusable(c.window, nil, forwards)
 }
 
-func (c *FocusController) NextChildFocusable(p Container, after Control, forwards bool) Focusable {
+func (c *FocusController) NextChildFocusable(p Parent, after Control, forwards bool) Focusable {
 	examineNext := after == nil
 	children := p.Children()
 

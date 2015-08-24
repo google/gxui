@@ -12,17 +12,17 @@ type ParentableOuter interface{}
 
 type Parentable struct {
 	outer  ParentableOuter
-	parent gxui.Container
+	parent gxui.Parent
 }
 
 func (p *Parentable) Init(outer ParentableOuter) {
 	p.outer = outer
 }
 
-func (p *Parentable) Parent() gxui.Container {
+func (p *Parentable) Parent() gxui.Parent {
 	return p.parent
 }
 
-func (p *Parentable) SetParent(parent gxui.Container) {
+func (p *Parentable) SetParent(parent gxui.Parent) {
 	p.parent = parent
 }

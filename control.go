@@ -22,11 +22,11 @@ type Control interface {
 	Draw() Canvas
 
 	// Parent returns the parent of the control.
-	Parent() Container
+	Parent() Parent
 
 	// SetParent sets the parent of the control.
 	// SetParent should only be called by the new parent of the control.
-	SetParent(Container)
+	SetParent(Parent)
 
 	// Attached returns true if the control is directly or indirectly attached
 	// to a window.
