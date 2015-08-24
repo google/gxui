@@ -18,12 +18,12 @@ type Child struct {
 
 type Parent interface {
 	Children() Children
+	Relayout()
+	Redraw()
 }
 
 type Container interface {
 	Parent
-	Relayout()
-	Redraw()
 	AddChild(child Control) *Child
 	AddChildAt(index int, child Control) *Child
 	RemoveChild(child Control)

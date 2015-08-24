@@ -164,7 +164,7 @@ func (w *Window) SetSize(size math.Size) {
 	w.viewport.SetSizeDips(size)
 }
 
-func (w *Window) Parent() gxui.Container {
+func (w *Window) Parent() gxui.Parent {
 	return nil
 }
 
