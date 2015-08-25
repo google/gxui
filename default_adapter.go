@@ -58,7 +58,7 @@ func (a *DefaultAdapter) SetSizeAsLargest(theme Theme) {
 
 func (a *DefaultAdapter) SetStyleLabel(f func(Theme, Label)) {
 	a.styleLabel = f
-	a.DataChanged()
+	a.DataChanged(true)
 }
 
 func (a *DefaultAdapter) Count() int {
@@ -102,7 +102,7 @@ func (a *DefaultAdapter) Size(theme Theme) math.Size {
 
 func (a *DefaultAdapter) SetSize(s math.Size) {
 	a.size = s
-	a.DataChanged()
+	a.DataChanged(true)
 }
 
 func (a *DefaultAdapter) Create(theme Theme, index int) Control {

@@ -81,8 +81,11 @@ type TreeAdapter interface {
 	Size(Theme) math.Size
 
 	// OnDataChanged registers f to be called when there is a partial change in
-	// the items of the adapter.
-	OnDataChanged(f func()) EventSubscription
+	// the items of the adapter. Scroll positions and selections should be
+	// preserved if possible.
+	// If recreateControls is true then each of the visible controls should be
+	// recreated by re-calling Create().
+	OnDataChanged(f func(recreateControls bool)) EventSubscription
 
 	// OnDataReplaced registers f to be called when there is a complete
 	// replacement of items in the adapter.

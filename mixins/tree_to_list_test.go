@@ -143,7 +143,7 @@ func TestTreeToListNodeDeep(t *testing.T) {
 		gxui.AdapterItem(142), // (6)       ╚══ 142
 	)
 
-	tree_adapter.DataChanged()
+	tree_adapter.DataChanged(false)
 	test(t, "data-changed", list_adapter,
 		gxui.AdapterItem(100), // (0) 100
 		gxui.AdapterItem(110), // (1)  ╠══ 110

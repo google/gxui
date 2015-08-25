@@ -42,9 +42,9 @@ func CreateTreeToListAdapter(treeAdapter gxui.TreeAdapter, creator TreeControlCr
 		listAdapter.reset()
 		listAdapter.DataReplaced()
 	})
-	treeAdapter.OnDataChanged(func() {
+	treeAdapter.OnDataChanged(func(recreateControls bool) {
 		listAdapter.node.update(listAdapter)
-		listAdapter.DataChanged()
+		listAdapter.DataChanged(recreateControls)
 	})
 	listAdapter.reset()
 	return listAdapter
@@ -53,7 +53,7 @@ func CreateTreeToListAdapter(treeAdapter gxui.TreeAdapter, creator TreeControlCr
 func (a *TreeToListAdapter) adjustDescendants(delta int) {
 	if delta != 0 {
 		a.node.descendants += delta
-		a.DataChanged()
+		a.DataChanged(false)
 	}
 }
 

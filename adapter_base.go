@@ -8,9 +8,9 @@ type AdapterBase struct {
 	onDataChanged, onDataReplaced Event
 }
 
-func (a *AdapterBase) DataChanged() {
+func (a *AdapterBase) DataChanged(recreateControls bool) {
 	if a.onDataChanged != nil {
-		a.onDataChanged.Fire()
+		a.onDataChanged.Fire(recreateControls)
 	}
 }
 
@@ -20,9 +20,9 @@ func (a *AdapterBase) DataReplaced() {
 	}
 }
 
-func (a *AdapterBase) OnDataChanged(f func()) EventSubscription {
+func (a *AdapterBase) OnDataChanged(f func(recreateControls bool)) EventSubscription {
 	if a.onDataChanged == nil {
-		a.onDataChanged = CreateEvent(func() {})
+		a.onDataChanged = CreateEvent(func(bool) {})
 	}
 	return a.onDataChanged.Listen(f)
 }
