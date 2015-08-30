@@ -1,6 +1,6 @@
 package gxui
 
-type GridLayout interface {
+type TableLayout interface {
 	Control
 
 	Parent

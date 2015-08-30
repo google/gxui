@@ -5,8 +5,8 @@ import (
 	"github.com/google/gxui/mixins"
 )
 
-func CreateGridLayout(theme *Theme) gxui.GridLayout {
-  l := &mixins.GridLayout{}
+func CreateTableLayout(theme *Theme) gxui.TableLayout {
+  l := &mixins.TableLayout{}
   l.Init(l, theme)
   return l
 }

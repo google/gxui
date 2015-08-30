@@ -36,16 +36,16 @@ func appMain(driver gxui.Driver) {
 	cell1x2.SetHorizontalAlignment(gxui.AlignCenter)
 	cell1x2.AddChild(label3)
 
-	grid := theme.CreateGridLayout()
-	grid.SetGrid(3, 2) // rows, columns
+	table := theme.CreateTableLayout()
+	table.SetGrid(3, 2) // rows, columns
 
 	// row, column, horizontal span, vertical span
-	grid.SetChildAt(0, 0, 1, 1, cell1x1)
-	grid.SetChildAt(0, 1, 2, 1, cell2x1)
-	grid.SetChildAt(2, 0, 1, 2, cell1x2)
+	table.SetChildAt(0, 0, 1, 1, cell1x1)
+	table.SetChildAt(0, 1, 2, 1, cell2x1)
+	table.SetChildAt(2, 0, 1, 2, cell1x2)
 
-	window := theme.CreateWindow(800, 600, "Grid")
-	window.AddChild(grid)
+	window := theme.CreateWindow(800, 600, "Table")
+	window.AddChild(table)
 	window.OnClose(driver.Terminate)
 }
 
