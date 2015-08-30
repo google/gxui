@@ -6,13 +6,13 @@ package gl
 
 import (
 	"image"
+	"image/draw"
 	"image/png"
 	"os"
 
 	"github.com/google/gxui/math"
-
-	"code.google.com/p/freetype-go/freetype/raster"
-	"code.google.com/p/freetype-go/freetype/truetype"
+	fnt "golang.org/x/exp/shiny/font"
+	"golang.org/x/image/math/fixed"
 )
 
 const (
@@ -24,85 +24,42 @@ const (
 )
 
 type glyphPage struct {
-	resolution         resolution
-	glyphMaxSizePixels math.Size
-	size               math.Size
-	image              *image.Alpha
-	offsets            map[rune]math.Point
-	rowHeight          int
-	rast               *raster.Rasterizer
-	tex                *texture
-	nextPoint          math.Point
+	image     *image.Alpha
+	size      math.Size // in pixels
+	offsets   map[rune]math.Point
+	rowHeight int
+	tex       *texture
+	nextPoint math.Point
+}
+
+func point26_6toPoint(p fixed.Point26_6) math.Point {
+	return math.Point{X: int(p.X) >> 6, Y: int(p.Y) >> 6}
+}
+
+func rectangle26_6toRect(p fixed.Rectangle26_6) math.Rect {
+	return math.Rect{Min: point26_6toPoint(p.Min), Max: point26_6toPoint(p.Max)}
 }
 
 func align(v, pot int) int {
 	return (v + pot - 1) & ^(pot - 1)
 }
 
-func createGlyphPage(resolution resolution, glyphMaxSizePixels math.Size) *glyphPage {
-	// Handle exceptionally large glyphs.
-	size := math.Size{W: glyphPageWidth, H: glyphPageHeight}.Max(glyphMaxSizePixels)
+func newGlyphPage(face fnt.Face, r rune) *glyphPage {
+	// Start the page big enough to hold the initial rune.
+	b, _, _ := face.GlyphBounds(r)
+	bounds := rectangle26_6toRect(b)
+	size := math.Size{W: glyphPageWidth, H: glyphPageHeight}.Max(bounds.Size())
 	size.W = align(size.W, glyphSizeAlignment)
 	size.H = align(size.H, glyphSizeAlignment)
 
-	return &glyphPage{
-		resolution:         resolution,
-		glyphMaxSizePixels: glyphMaxSizePixels,
-		size:               size,
-		image:              image.NewAlpha(image.Rect(0, 0, size.W, size.H)),
-		offsets:            make(map[rune]math.Point),
-		rowHeight:          0,
-		rast:               raster.NewRasterizer(glyphMaxSizePixels.W, glyphMaxSizePixels.H),
+	page := &glyphPage{
+		image:     image.NewAlpha(image.Rect(0, 0, size.W, size.H)),
+		size:      size,
+		offsets:   make(map[rune]math.Point),
+		rowHeight: 0,
 	}
-}
-
-// drawContour draws the given closed contour with the given offset.
-func (p *glyphPage) drawContour(ps []truetype.Point, dx, dy raster.Fix32) {
-	if len(ps) == 0 {
-		return
-	}
-	rast := p.rast
-	resolution := p.resolution
-	// ps[0] is a truetype.Point measured in FUnits and positive Y going upwards.
-	// start is the same thing measured in fixed point units and positive Y
-	// going downwards, and offset by (dx, dy)
-	start := raster.Point{
-		X: dx + raster.Fix32(int64(ps[0].X)*int64(resolution)>>14),
-		Y: dy - raster.Fix32(int64(ps[0].Y)*int64(resolution)>>14),
-	}
-	rast.Start(start)
-	q0, on0 := start, true
-	for _, p := range ps[1:] {
-		q := raster.Point{
-			X: dx + raster.Fix32(int64(p.X)*int64(resolution)>>14),
-			Y: dy - raster.Fix32(int64(p.Y)*int64(resolution)>>14),
-		}
-		on := p.Flags&0x01 != 0
-		if on {
-			if on0 {
-				rast.Add1(q)
-			} else {
-				rast.Add2(q0, q)
-			}
-		} else {
-			if on0 {
-				// No-op.
-			} else {
-				mid := raster.Point{
-					X: (q0.X + q.X) / 2,
-					Y: (q0.Y + q.Y) / 2,
-				}
-				rast.Add2(q0, mid)
-			}
-		}
-		q0, on0 = q, on
-	}
-	// Close the curve.
-	if on0 {
-		rast.Add1(start)
-	} else {
-		rast.Add2(q0, start)
-	}
+	page.add(face, r)
+	return page
 }
 
 func (p *glyphPage) commit() {
@@ -117,12 +74,15 @@ func (p *glyphPage) commit() {
 	}
 }
 
-func (p *glyphPage) add(rune rune, g *glyph) bool {
-	if _, found := p.offsets[rune]; found {
+func (p *glyphPage) add(face fnt.Face, r rune) bool {
+	if _, found := p.offsets[r]; found {
 		panic("Glyph already added to glyph page")
 	}
 
-	w, h := g.size(p.resolution).WH()
+	b, _, _ := face.GlyphBounds(r)
+	bounds := rectangle26_6toRect(b)
+
+	w, h := bounds.Size().WH()
 	x, y := p.nextPoint.X, p.nextPoint.Y
 
 	if x+w > p.size.W {
@@ -136,25 +96,10 @@ func (p *glyphPage) add(rune rune, g *glyph) bool {
 		return false // Page full
 	}
 
-	// Build the raster contours
-	p.rast.Clear()
-	fx := -raster.Fix32((int64(g.B.XMin) * int64(p.resolution)) >> 14)
-	fy := +raster.Fix32((int64(g.B.YMax) * int64(p.resolution)) >> 14)
-	e0 := 0
-	for _, e1 := range g.End {
-		p.drawContour(g.Point[e0:e1], fx, fy)
-		e0 = e1
-	}
+	_, _, mask, maskp, _ := face.Glyph(fixed.Point26_6{}, r)
+	draw.Draw(p.image, image.Rect(x, y, x+w, y+h), mask, maskp, draw.Src)
 
-	// Perform the rasterization
-	a := &image.Alpha{
-		Pix:    p.image.Pix[x+y*p.image.Stride:],
-		Stride: p.image.Stride,
-		Rect:   image.Rect(0, 0, w, h),
-	}
-	p.rast.Rasterize(raster.NewAlphaSrcPainter(a))
-
-	p.offsets[rune] = math.Point{X: x, Y: y}
+	p.offsets[r] = math.Point{X: x, Y: y}
 	p.nextPoint = math.Point{X: x + w + glyphPadding, Y: y}
 	if h > p.rowHeight {
 		p.rowHeight = h

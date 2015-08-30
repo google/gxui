@@ -4,31 +4,30 @@
 
 package gl
 
-import (
-	"github.com/google/gxui/math"
-)
+import fnt "golang.org/x/exp/shiny/font"
 
 type glyphTable struct {
+	face  fnt.Face
 	index map[rune]int
 	pages []*glyphPage
 }
 
-func createGlyphTable(resolution resolution, glyphMaxSizeDips math.Size) *glyphTable {
-	glyphMaxSizePixels := resolution.sizeDipsToPixels(glyphMaxSizeDips)
-	return &glyphTable{
-		index: make(map[rune]int),
-		pages: []*glyphPage{createGlyphPage(resolution, glyphMaxSizePixels)},
-	}
+func newGlyphTable(face fnt.Face) *glyphTable {
+	return &glyphTable{face: face, index: make(map[rune]int)}
 }
 
 func (t *glyphTable) get(r rune, g *glyph) *glyphPage {
 	if i, found := t.index[r]; found {
 		return t.pages[i]
 	}
-	if page := t.pages[len(t.pages)-1]; !page.add(r, g) {
-		page = createGlyphPage(page.resolution, page.glyphMaxSizePixels)
-		page.add(r, g)
-		t.pages = append(t.pages, page)
+	if len(t.pages) == 0 {
+		t.pages = append(t.pages, newGlyphPage(t.face, r))
+	} else {
+		page := t.pages[len(t.pages)-1]
+		if !page.add(t.face, r) {
+			page = newGlyphPage(t.face, r)
+			t.pages = append(t.pages, page)
+		}
 	}
 	index := len(t.pages) - 1
 	t.index[r] = index

@@ -8,15 +8,16 @@ import (
 	"fmt"
 	"unicode"
 
+	"github.com/golang/freetype/truetype"
 	"github.com/google/gxui"
 	"github.com/google/gxui/math"
-
-	"code.google.com/p/freetype-go/freetype/truetype"
+	fnt "golang.org/x/exp/shiny/font"
+	"golang.org/x/image/math/fixed"
 )
 
 type font struct {
 	size             int
-	scale            int32
+	scale            fixed.Int26_6
 	glyphMaxSizeDips math.Size
 	ascentDips       int
 	ttf              *truetype.Font
@@ -30,18 +31,14 @@ func newFont(data []byte, size int) (*font, error) {
 		return nil, err
 	}
 
-	scale := int32(size << 6)
-	bounds := ttf.Bounds(scale)
-	glyphMaxSizeDips := math.Size{
-		W: int(bounds.XMax-bounds.XMin) >> 6,
-		H: int(bounds.YMax-bounds.YMin) >> 6,
-	}
-	ascentDips := int(bounds.YMax >> 6)
+	scale := fixed.Int26_6(size << 6)
+	bounds := rectangle26_6toRect(ttf.Bounds(scale))
+	ascentDips := bounds.Max.Y
 
 	return &font{
 		size:             size,
 		scale:            scale,
-		glyphMaxSizeDips: glyphMaxSizeDips,
+		glyphMaxSizeDips: bounds.Size(),
 		ascentDips:       ascentDips,
 		ttf:              ttf,
 		resolutions:      make(map[resolution]*glyphTable),
@@ -54,21 +51,29 @@ func (f *font) glyph(r rune) *glyph {
 		return g
 	}
 	idx := f.ttf.Index(r)
-	gb := truetype.NewGlyphBuf()
-	err := gb.Load(f.ttf, f.scale, idx, truetype.Hinting(truetype.FullHinting))
+	gb := &truetype.GlyphBuf{}
+	err := gb.Load(f.ttf, f.scale, idx, fnt.HintingFull)
 	if err != nil {
 		panic(err)
 	}
 
-	g := glyph(*gb)
-	f.glyphs[r] = &g
-	return &g
+	g := &glyph{AdvanceWidth: gb.AdvanceWidth, Bounds: gb.Bounds}
+	f.glyphs[r] = g
+	return g
 }
 
 func (f *font) glyphTable(resolution resolution) *glyphTable {
 	t, found := f.resolutions[resolution]
 	if !found {
-		t = createGlyphTable(resolution, f.glyphMaxSizeDips)
+		opt := truetype.Options{
+			Size:              float64(f.size),
+			DPI:               float64(resolution.intDipsToPixels(72)),
+			Hinting:           fnt.HintingFull,
+			GlyphCacheEntries: 1,
+			SubPixelsX:        1,
+			SubPixelsY:        1,
+		}
+		t = newGlyphTable(truetype.NewFace(f.ttf, &opt))
 		f.resolutions[resolution] = t
 	}
 	return t
