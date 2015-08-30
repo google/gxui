@@ -113,6 +113,10 @@ func (t *Theme) CreateSplitterLayout() gxui.SplitterLayout {
 	return CreateSplitterLayout(t)
 }
 
+func (t *Theme) CreateTableLayout() gxui.TableLayout {
+	return CreateTableLayout(t)
+}
+
 func (t *Theme) CreateTextBox() gxui.TextBox {
 	return CreateTextBox(t)
 }

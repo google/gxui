@@ -23,6 +23,7 @@ type Theme interface {
 	CreateScrollBar() ScrollBar
 	CreateScrollLayout() ScrollLayout
 	CreateSplitterLayout() SplitterLayout
+	CreateTableLayout() TableLayout
 	CreateTextBox() TextBox
 	CreateTree() Tree
 	CreateWindow(width, height int, title string) Window
