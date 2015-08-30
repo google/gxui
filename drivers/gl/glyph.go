@@ -6,8 +6,7 @@ package gl
 
 import (
 	"github.com/google/gxui/math"
-
-	"code.google.com/p/freetype-go/freetype/truetype"
+	"golang.org/x/image/math/fixed"
 )
 
 //            ╾──────w──────╼
@@ -31,29 +30,34 @@ import (
 //
 // y-axis is flipped from freetype's.
 // See: http://www.freetype.org/freetype2/docs/glyphs/glyphs-3.html#section-4
-type glyph truetype.GlyphBuf
+type glyph struct {
+	// AdvanceWidth is the glyph's advance width.
+	AdvanceWidth fixed.Int26_6
+	// Bounds is the glyph's bounding box.
+	Bounds fixed.Rectangle26_6
+}
 
 func (g *glyph) size(r resolution) math.Size {
-	w := int((int64(g.B.XMax-g.B.XMin)*int64(r) + 0x3FFFFF) >> 22)
-	h := int((int64(g.B.YMax-g.B.YMin)*int64(r) + 0x3FFFFF) >> 22)
+	w := int((int64(g.Bounds.Max.X-g.Bounds.Min.X)*int64(r) + 0x3FFFFF) >> 22)
+	h := int((int64(g.Bounds.Max.Y-g.Bounds.Min.Y)*int64(r) + 0x3FFFFF) >> 22)
 	return math.Size{W: w, H: h}
 }
 
 func (g *glyph) sizeDips() math.Size {
-	w := int(((g.B.XMax - g.B.XMin) + 0x1F) >> 6)
-	h := int(((g.B.YMax - g.B.YMin) + 0x1F) >> 6)
+	w := int(((g.Bounds.Max.X - g.Bounds.Min.X) + 0x1F) >> 6)
+	h := int(((g.Bounds.Max.Y - g.Bounds.Min.Y) + 0x1F) >> 6)
 	return math.Size{W: w, H: h}
 }
 
 func (g *glyph) rect(r resolution) math.Rect {
-	x := int((int64(g.B.XMin) * int64(r)) >> 22)
-	y := -int((int64(g.B.YMax) * int64(r)) >> 22)
+	x := int((int64(g.Bounds.Min.X) * int64(r)) >> 22)
+	y := -int((int64(g.Bounds.Max.Y) * int64(r)) >> 22)
 	return g.size(r).Rect().Offset(math.Point{X: x, Y: y})
 }
 
 func (g *glyph) rectDips() math.Rect {
-	x := int(g.B.XMin >> 6)
-	y := -int(g.B.YMax >> 6)
+	x := int(g.Bounds.Min.X >> 6)
+	y := -int(g.Bounds.Max.Y >> 6)
 	return g.sizeDips().Rect().Offset(math.Point{X: x, Y: y})
 }
 
