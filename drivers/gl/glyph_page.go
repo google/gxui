@@ -96,7 +96,7 @@ func (p *glyphPage) add(face fnt.Face, r rune) bool {
 		return false // Page full
 	}
 
-	_, _, mask, maskp, _ := face.Glyph(fixed.Point26_6{}, r)
+	_, mask, maskp, _, _ := face.Glyph(fixed.Point26_6{}, r)
 	draw.Draw(p.image, image.Rect(x, y, x+w, y+h), mask, maskp, draw.Src)
 
 	p.offsets[r] = math.Point{X: x, Y: y}
