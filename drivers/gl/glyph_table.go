@@ -16,7 +16,7 @@ func newGlyphTable(face fnt.Face) *glyphTable {
 	return &glyphTable{face: face, index: make(map[rune]int)}
 }
 
-func (t *glyphTable) get(r rune, g *glyph) *glyphPage {
+func (t *glyphTable) get(r rune) *glyphPage {
 	if i, found := t.index[r]; found {
 		return t.pages[i]
 	}

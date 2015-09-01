@@ -22,7 +22,7 @@ type font struct {
 	ascentDips       int
 	ttf              *truetype.Font
 	resolutions      map[resolution]*glyphTable
-	glyphs           map[rune]*glyph
+	glyphAdvanceDips map[rune]int
 }
 
 func newFont(data []byte, size int) (*font, error) {
@@ -42,12 +42,12 @@ func newFont(data []byte, size int) (*font, error) {
 		ascentDips:       ascentDips,
 		ttf:              ttf,
 		resolutions:      make(map[resolution]*glyphTable),
-		glyphs:           make(map[rune]*glyph),
+		glyphAdvanceDips: make(map[rune]int),
 	}, nil
 }
 
-func (f *font) glyph(r rune) *glyph {
-	if g, found := f.glyphs[r]; found {
+func (f *font) advanceDips(r rune) int {
+	if g, found := f.glyphAdvanceDips[r]; found {
 		return g
 	}
 	idx := f.ttf.Index(r)
@@ -57,9 +57,7 @@ func (f *font) glyph(r rune) *glyph {
 		panic(err)
 	}
 
-	g := &glyph{AdvanceWidth: gb.AdvanceWidth, Bounds: gb.Bounds}
-	f.glyphs[r] = g
-	return g
+	return int((gb.AdvanceWidth + 0x3f) >> 6)
 }
 
 func (f *font) glyphTable(resolution resolution) *glyphTable {
@@ -112,11 +110,11 @@ func (f *font) DrawRunes(ctx *context, runes []rune, offsets []math.Point, col g
 		if unicode.IsSpace(r) {
 			continue
 		}
-		glyph := f.glyph(r)
-		page := table.get(r, glyph)
+		page := table.get(r)
 		texture := page.texture()
-		srcRect := glyph.size(resolution).Rect().Offset(page.offset(r))
-		dstRect := glyph.rect(resolution).Offset(resolution.pointDipsToPixels(offsets[i]))
+		entry := page.get(r)
+		srcRect := entry.bounds.Offset(entry.offset)
+		dstRect := entry.bounds.Offset(resolution.pointDipsToPixels(offsets[i]))
 		tc := ctx.getOrCreateTextureContext(texture)
 		ctx.blitter.blitGlyph(ctx, tc, col, srcRect, dstRect, ds)
 	}
@@ -135,7 +133,7 @@ func (f *font) Measure(fl *gxui.TextBlock) math.Size {
 			offset.Y += f.glyphMaxSizeDips.H
 			continue
 		}
-		offset.X += f.glyph(r).advanceDips()
+		offset.X += f.advanceDips(r)
 		size = size.Max(math.Size{W: offset.X, H: offset.Y + f.glyphMaxSizeDips.H})
 	}
 	return size
@@ -153,7 +151,7 @@ func (f *font) Layout(fl *gxui.TextBlock) (offsets []math.Point) {
 		}
 
 		offsets[i] = offset
-		offset.X += f.glyph(r).advanceDips()
+		offset.X += f.advanceDips(r)
 		sizeDips = sizeDips.Max(math.Size{W: offset.X, H: offset.Y + f.glyphMaxSizeDips.H})
 	}
 
@@ -169,7 +167,7 @@ func (f *font) LoadGlyphs(first, last rune) {
 		first, last = last, first
 	}
 	for r := first; r < last; r++ {
-		f.glyph(r)
+		f.advanceDips(r)
 	}
 }
 

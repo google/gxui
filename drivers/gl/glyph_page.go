@@ -23,10 +23,15 @@ const (
 	glyphPadding       = 1
 )
 
+type glyphEntry struct {
+	offset math.Point
+	bounds math.Rect
+}
+
 type glyphPage struct {
 	image     *image.Alpha
 	size      math.Size // in pixels
-	offsets   map[rune]math.Point
+	entries   map[rune]glyphEntry
 	rowHeight int
 	tex       *texture
 	nextPoint math.Point
@@ -55,7 +60,7 @@ func newGlyphPage(face fnt.Face, r rune) *glyphPage {
 	page := &glyphPage{
 		image:     image.NewAlpha(image.Rect(0, 0, size.W, size.H)),
 		size:      size,
-		offsets:   make(map[rune]math.Point),
+		entries:   make(map[rune]glyphEntry),
 		rowHeight: 0,
 	}
 	page.add(face, r)
@@ -75,12 +80,12 @@ func (p *glyphPage) commit() {
 }
 
 func (p *glyphPage) add(face fnt.Face, r rune) bool {
-	if _, found := p.offsets[r]; found {
+	if _, found := p.entries[r]; found {
 		panic("Glyph already added to glyph page")
 	}
 
-	b, _, _ := face.GlyphBounds(r)
-	bounds := rectangle26_6toRect(b)
+	b, mask, maskp, _, _ := face.Glyph(fixed.Point26_6{}, r)
+	bounds := math.CreateRect(b.Min.X, b.Min.Y, b.Max.X, b.Max.Y)
 
 	w, h := bounds.Size().WH()
 	x, y := p.nextPoint.X, p.nextPoint.Y
@@ -96,10 +101,12 @@ func (p *glyphPage) add(face fnt.Face, r rune) bool {
 		return false // Page full
 	}
 
-	_, mask, maskp, _, _ := face.Glyph(fixed.Point26_6{}, r)
 	draw.Draw(p.image, image.Rect(x, y, x+w, y+h), mask, maskp, draw.Src)
 
-	p.offsets[r] = math.Point{X: x, Y: y}
+	p.entries[r] = glyphEntry{
+		offset: math.Point{X: x, Y: y}.Sub(bounds.Min),
+		bounds: bounds,
+	}
 	p.nextPoint = math.Point{X: x + w + glyphPadding, Y: y}
 	if h > p.rowHeight {
 		p.rowHeight = h
@@ -116,6 +123,6 @@ func (p *glyphPage) texture() *texture {
 	return p.tex
 }
 
-func (p *glyphPage) offset(rune rune) math.Point {
-	return p.offsets[rune]
+func (p *glyphPage) get(rune rune) glyphEntry {
+	return p.entries[rune]
 }
