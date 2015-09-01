@@ -11,7 +11,7 @@ import (
 	"os"
 
 	"github.com/google/gxui/math"
-	fnt "golang.org/x/exp/shiny/font"
+	fnt "golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
 

@@ -4,7 +4,7 @@
 
 package gl
 
-import fnt "golang.org/x/exp/shiny/font"
+import fnt "golang.org/x/image/font"
 
 type glyphTable struct {
 	face  fnt.Face
