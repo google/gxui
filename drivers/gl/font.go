@@ -57,7 +57,9 @@ func (f *font) advanceDips(r rune) int {
 		panic(err)
 	}
 
-	return int((gb.AdvanceWidth + 0x3f) >> 6)
+	advance := int((gb.AdvanceWidth + 0x3f) >> 6)
+	f.glyphAdvanceDips[r] = advance
+	return advance
 }
 
 func (f *font) glyphTable(resolution resolution) *glyphTable {
