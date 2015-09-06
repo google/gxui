@@ -18,9 +18,9 @@ import (
 
 const viewportDebugEnabled = false
 
-const kClearColorR = 0.5
-const kClearColorG = 0.5
-const kClearColorB = 0.5
+const clearColorR = 0.5
+const clearColorG = 0.5
+const clearColorB = 0.5
 
 type viewport struct {
 	sync.Mutex
@@ -114,7 +114,7 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 		v.sizePixels = math.Size{W: w, H: h}
 		v.Unlock()
 		gl.Viewport(0, 0, w, h)
-		gl.ClearColor(kClearColorR, kClearColorG, kClearColorB, 1.0)
+		gl.ClearColor(clearColorR, clearColorG, clearColorB, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 	})
 	wnd.SetCursorPosCallback(func(w *glfw.Window, x, y float64) {
@@ -233,7 +233,7 @@ func newViewport(driver *driver, width, height int, title string, fullscreen boo
 	gl.Enable(gl.SCISSOR_TEST)
 	gl.Viewport(0, 0, fw, fh)
 	gl.Scissor(0, 0, int32(fw), int32(fh))
-	gl.ClearColor(kClearColorR, kClearColorG, kClearColorB, 1.0)
+	gl.ClearColor(clearColorR, clearColorG, clearColorB, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 	wnd.SwapBuffers()
 
