@@ -212,7 +212,6 @@ func openPolyToShape(p gxui.Polygon, penWidth float32) *shape {
 		return newShape(newVertexBuffer(
 			newVertexStream("aPosition", stFloatVec2, vsEdgePos),
 		), nil, dmTriangleStrip)
-	} else {
-		return nil
 	}
+	return nil
 }

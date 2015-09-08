@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package gl contains an OpenGL implementation of the gxui.Driver interface.
 package gl
 
 import (
@@ -34,6 +35,7 @@ type driver struct {
 	uiPC uintptr   // the program-counter of the applicationLoop function.
 }
 
+// StartDriver starts the gl driver with the given appRoutine.
 func StartDriver(appRoutine func(driver gxui.Driver)) {
 	if runtime.GOMAXPROCS(-1) < 2 {
 		runtime.GOMAXPROCS(2)
@@ -124,9 +126,8 @@ func (d *driver) CallSync(f func()) bool {
 	if d.Call(func() { f(); close(c) }) {
 		<-c
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
 func (d *driver) Terminate() {
