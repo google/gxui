@@ -37,7 +37,7 @@ func appMain(driver gxui.Driver) {
 	cell1x2.AddChild(label3)
 
 	table := theme.CreateTableLayout()
-	table.SetGrid(3, 2) // rows, columns
+	table.SetGrid(3, 2) // columns, rows
 
 	// row, column, horizontal span, vertical span
 	table.SetChildAt(0, 0, 1, 1, cell1x1)
