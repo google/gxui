@@ -3,12 +3,18 @@ GXUI - A Go cross platform UI library.
 
 [![Join the chat at https://gitter.im/google/gxui](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/google/gxui?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/google/gxui.svg?branch=master)](https://travis-ci.org/google/gxui) [![GoDoc](https://godoc.org/github.com/google/gxui?status.svg)](https://godoc.org/github.com/google/gxui)
 
+
+Notice:
+---
+
+Unfortunately due to a shortage of hours in a day, GXUI is no longer maintained.
+
+If you're looking for a GUI library for your next Go project, [check out these alternatives](https://github.com/avelino/awesome-go#gui).
+
 Disclaimer
 ---
-All code in this package **is experimental and will have frequent breaking
-changes**. Please feel free to play, but please don't be upset when the API has significant reworkings.
 
-The code is currently undocumented, and is certainly **not idiomatic Go**. It will be heavily refactored over the coming months.
+The code is mostly undocumented, and is certainly **not idiomatic Go**.
 
 This is not an official Google product (experimental or otherwise), it is just code that happens to be owned by Google.
 
